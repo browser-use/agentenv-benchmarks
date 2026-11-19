@@ -867,3 +867,60 @@ def test_a_browser_whose_start_failed_and_stop_failed_is_left_to_the_exit_hook(m
     steps._stop_leftovers()
     assert calls.count("PATCH") == cloud.STOP_ATTEMPTS and [b.id for b in cloud.UNSTOPPED] == [BROWSER_ID]
     assert patched == [f"{cloud.API}/browsers/{BROWSER_ID}"]
+
+
+def test_a_browser_whose_start_failed_and_whose_stop_was_cancelled_is_left_to_the_exit_hook(monkeypatch):
+    async def api(method, path, body=None, timeout=60):
+        if method == "POST":
+            return {"id": BROWSER_ID, "cdpUrl": ""}  # no cdpUrl: the start fails after the browser exists
+        await asyncio.sleep(60)  # the stop hangs, and the run is cancelled meanwhile
+
+    monkeypatch.setattr(cloud, "request", api)
+    monkeypatch.setattr(cloud, "UNSTOPPED", [])
+
+    async def cancelled_during_the_stop():
+        starting = asyncio.ensure_future(cloud.CloudBrowser.start())
+        await asyncio.sleep(0.1)
+        starting.cancel()
+        await asyncio.gather(starting, return_exceptions=True)
+
+    asyncio.run(cancelled_during_the_stop())
+    assert [browser.id for browser in cloud.UNSTOPPED] == [BROWSER_ID]
+
+
+def test_a_browser_create_waits_minutes_for_its_answer_and_a_stop_does_not(monkeypatch):
+    """A create answered after the client gave up makes a browser whose id nobody has, billing until its timeout."""
+    read_timeouts = {}
+
+    def reply(request):
+        read_timeouts[request.method] = request.extensions["timeout"]["read"]
+        if request.method == "POST":
+            return httpx.Response(200, json={"id": BROWSER_ID, "cdpUrl": f"https://{BROWSER_ID}.cdp.browser-use.com"})
+        if request.url.path == "/json/version":
+            return httpx.Response(200, json={"webSocketDebuggerUrl": WS})
+        return httpx.Response(200, json={})
+
+    real = httpx.AsyncClient
+    monkeypatch.setattr(cloud.httpx, "AsyncClient", lambda **kw: real(transport=httpx.MockTransport(reply), **kw))
+    monkeypatch.setenv(cloud.KEY_NAME, "k")
+
+    async def start_and_stop():
+        await (await cloud.CloudBrowser.start()).stop()
+
+    asyncio.run(start_and_stop())
+    assert read_timeouts["POST"] >= 300 and read_timeouts["PATCH"] == cloud.STOP_REQUEST_S
+
+
+def test_the_log_filter_leaves_requests_to_other_hosts_as_they_are():
+    """It is process-wide: a bundle run beside BU Bench keeps its own log lines."""
+    import logging
+
+    other = 'HTTP Request: GET https://huggingface.co/api/models/x?revision=main "HTTP/1.1 200 OK"'
+    ours = f'HTTP Request: PATCH https://api.browser-use.com/api/v3/browsers/{BROWSER_ID}?x=1 "HTTP/1.1 200 OK"'
+    records = [logging.LogRecord("httpx", logging.INFO, __file__, 1, message, None, None) for message in (other, ours)]
+    for record in records:
+        cloud._scrub_logged_urls(record)
+
+    assert records[0].getMessage() == other
+    assert records[1].getMessage() == 'HTTP Request: PATCH https://api.browser-use.com/api/v3/browsers/<id>?<redacted> ' \
+                                      '"HTTP/1.1 200 OK"'

@@ -30,7 +30,7 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
-#: Browsers whose start failed and whose stop never went through: the caller never got them, so no one else can.
+#: Browsers whose stop never went through, listed until it does: whoever still can (an exit hook, a close) stops them.
 UNSTOPPED: list = []
 
 #: What httpx's request log line (INFO, logger ``httpx``) must not keep: a browser's CDP host, its id in the API's
@@ -38,11 +38,16 @@ UNSTOPPED: list = []
 LOGGED_URL_SECRETS = ((re.compile(r"[\w-]+\.cdp[\w.-]*\.browser-use\.com"), "<cdp>"),  # also cdp.eu., cdp0.
                       (re.compile(r"/browsers/[^/?#\s\"]+"), "/browsers/<id>"),
                       (re.compile(r"\?[^\s\"]*"), "?<redacted>"))
+#: Hosts of the recording links this process read: their requests are scrubbed too.
+RECORDING_HOSTS: set[str] = set()
 
 
 def _scrub_logged_urls(record: logging.LogRecord) -> bool:
-    """httpx logs every request's URL at INFO, the level ``agent-env up`` logs at."""
+    """httpx logs every request's URL at INFO, the level ``agent-env up`` logs at. Only requests to Browser Use, its
+    configured API or a recording link are scrubbed: the filter is process-wide, and other requests are not ours."""
     message = record.getMessage()
+    if not any(host and host in message for host in ("browser-use.com", urlparse(API).hostname, *RECORDING_HOSTS)):
+        return True
     for pattern, replacement in LOGGED_URL_SECRETS:
         message = pattern.sub(replacement, message)
     record.msg, record.args = message, None
@@ -58,6 +63,9 @@ KEY_NAME = "BROWSER_USE_API_KEY"
 STOP_ATTEMPTS = 3
 STOP_REQUEST_S = 20.0
 STOP_RETRY_S = 1.0
+#: Browser Use can take minutes to answer a create, and a client that gives up never learns the id of the browser it
+#: made, which then bills until its timeout: the answer gets 5 minutes.
+CREATE_TIMEOUT = httpx.Timeout(60, read=300)
 
 
 def api_key() -> str:
@@ -97,7 +105,8 @@ def scrub_json(value: Any, secrets: list[str]) -> Any:
     return json.loads(scrub(json.dumps(value, default=str), secrets))
 
 
-async def request(method: str, path: str, body: dict[str, Any] | None = None, timeout: float = 60) -> dict[str, Any]:
+async def request(method: str, path: str, body: dict[str, Any] | None = None,
+                  timeout: float | httpx.Timeout = 60) -> dict[str, Any]:
     async with httpx.AsyncClient(timeout=timeout) as client:
         response = await client.request(method, f"{API}{path}", json=body,
                                         headers={"X-Browser-Use-API-Key": api_key()})
@@ -128,7 +137,8 @@ class CloudBrowser:
                     enable_recording: bool = True) -> CloudBrowser:
         created = await request("POST", "/browsers", {"proxyCountryCode": proxy_country_code,
                                                       "timeout": timeout_minutes,
-                                                      "enableRecording": enable_recording})
+                                                      "enableRecording": enable_recording},
+                                timeout=CREATE_TIMEOUT)
         cdp_url = str(created.get("cdpUrl") or "").rstrip("/")
         browser = cls(id=str(created["id"]), ws_url="", cdp_url=cdp_url)
         try:
@@ -144,9 +154,10 @@ class CloudBrowser:
             if not browser.ws_url:
                 raise RuntimeError(f"cloud browser {browser.label} did not expose webSocketDebuggerUrl")
         except BaseException:
+            UNSTOPPED.append(browser)  # listed first: a stop cancelled midway leaves it to the exit hook
             await browser.stop()
-            if not browser.stopped:  # the exit hook tries once more
-                UNSTOPPED.append(browser)
+            if browser.stopped:
+                UNSTOPPED.remove(browser)
             raise
         return browser
 
@@ -183,6 +194,7 @@ def recording_urls(session: dict[str, Any]) -> list[str]:
         if "record" in key.lower():
             values = value if isinstance(value, list) else [value]
             urls += [v for v in values if isinstance(v, str) and v.startswith("http")]
+    RECORDING_HOSTS.update(urlparse(url).hostname or "" for url in urls)
     return urls
 
 
