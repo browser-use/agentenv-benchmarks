@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 API = os.environ.get("BROWSER_USE_API_URL", "https://api.browser-use.com/api/v3")
 KEY_NAME = "BROWSER_USE_API_KEY"
 #: Stop requests per browser, the wait for each, and the wait before each retry (times the attempt): one 503 must not
-#: leave it billing. All of them take at most 63 s, inside bu-browser's 90 s close.
+#: leave it billing. All of them take at most 63 s, inside bu-browser's 115 s close.
 STOP_ATTEMPTS = 3
 STOP_REQUEST_S = 20.0
 STOP_RETRY_S = 1.0

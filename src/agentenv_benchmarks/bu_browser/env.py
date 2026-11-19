@@ -18,8 +18,9 @@ from agent_env.env.envs.multi_env import MultiEnv
 logger = logging.getLogger(__name__)
 
 #: The site's stop takes at most 63 s (its STOP_ATTEMPTS requests of STOP_REQUEST_S and the waits between them,
-#: cloud.py), and teardown gives each env's close 120 s. Also the extension call's own timeout, whose default is 30 s.
-STOP_TIMEOUT_S = 90.0
+#: cloud.py), plus a create still in flight at teardown, which is waited for so its browser can be stopped; teardown
+#: gives each env's close 120 s. Also the extension call's own timeout, whose default is 30 s.
+STOP_TIMEOUT_S = 115.0
 #: The site's extension that stops its browser for good (envs/bu-browser-site/browser_site.py).
 CLOSE_URI = "urn:agentenv-benchmarks:bu-browser-close/v1"
 

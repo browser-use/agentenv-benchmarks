@@ -230,6 +230,8 @@ class PlaywrightMcp:
                     process.kill()
                     await process.wait()
         finally:
+            if process is not None and process.returncode is None:
+                process.kill()  # cancelled before it was ended: never leave Playwright MCP running
             if stopping is not None:
                 try:
                     await asyncio.shield(stopping)

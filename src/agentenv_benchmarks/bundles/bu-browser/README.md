@@ -17,8 +17,8 @@ browser of the run's own:
 - If Browser Use ends the browser mid-episode (its `timeout_minutes`, a crash), the next failing call says so and the
   call after it starts a fresh browser. A call fails that way when the browser's CDP discovery answers 404 or 410 or
   refuses the connection twice. On any other answer (a timeout, a 5xx) the site asks Browser Use's API for the
-  browser's status and treats anything but `active` as ended. Only when that also fails is the browser left running,
-  and the call returns the tool's own error. If Playwright MCP dies, the next call starts a fresh browser and its
+  browser's status and treats any status but `active` as ended (no status counts as running). Only when that also
+  fails is the browser left running, and the call returns the tool's own error. If Playwright MCP dies, the next call starts a fresh browser and its
   result says the earlier pages are gone.
 - `browser_evaluate` is hidden until a task's tool access enables it. `browser_run_code_unsafe` is never served,
   because it would run the agent's code in the site's container, and neither is `browser_close`, which can end the
@@ -49,10 +49,10 @@ One episode uses one browser. The browser is stopped when:
 - a `reset_env` step runs (`data/reset`: the next tool call starts a fresh browser);
 - the site's server gets SIGTERM.
 
-A failed stop request is retried twice. Each request waits at most 20 s, and the run's teardown waits up to 90 s for
-all three. A browser still being created at teardown gets at most 20 s to come up before it is stopped, so its stop
-fits in those 90 s too. If none of these happens, Browser Use ends the browser after `timeout_minutes` (30 by default), counted from
-the first tool call. That is the case when:
+A failed stop request is retried twice. Each request waits at most 20 s, and the run's teardown waits up to 115 s for
+the stop. A browser still being created at teardown is waited for and then stopped; if its create and stop together
+take longer than that, it runs to its timeout. If none of these happens, Browser Use ends the browser after
+`timeout_minutes` (30 by default), counted from the first tool call. That is the case when:
 
 - the server process or its container is killed outright;
 - the run's teardown skips `close()`: a retried `deploy_env` span's earlier deployment, and an env on a provider that
