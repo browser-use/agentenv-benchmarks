@@ -22,6 +22,8 @@ TOOL_OUTPUT_CHARS = 20_000
 PRICES = {"input": 1.0, "cached": 0.10, "output": 5.0}  # $/1M tokens: the bake-off's cost basis
 #: Event types that are no step of the agent's: Codex's thread and turn events, AgentEnv's usage record.
 CONTROL_EVENTS = ("thread.", "turn.", "agentenv.")
+#: Steps the frozen findings judge drops before it reads the trajectory (upstream/findings_judge.py).
+JUDGE_HIDDEN = ("thinking:", "reasoning:")
 
 
 def clip(text: str, limit: int) -> str:
@@ -152,6 +154,11 @@ def steps_and_usage(trajectory: Any) -> tuple[str, list[str], dict[str, int]]:
         return ("codex-exec-json/1", *codex_steps(items))
     return (str(declared or "unknown"), [clip(text_of(item), TOOL_OUTPUT_CHARS) for item in items
                                          if not str(item.get("type", "")).startswith(CONTROL_EVENTS)], _usage())
+
+
+def judge_visible(steps: list[str]) -> list[str]:
+    """The steps the findings judge reads: it drops each one that starts with a JUDGE_HIDDEN prefix."""
+    return [step for step in steps if not step.lstrip().startswith(JUDGE_HIDDEN)]
 
 
 def model_usd(usage: dict[str, int]) -> float:

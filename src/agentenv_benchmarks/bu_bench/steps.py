@@ -7,10 +7,10 @@ screenshot capture the judge reads, and puts the task's instruction into the see
 ``bu_findings_verifier`` stops the capture and the browser (always, even when the agent failed), keeps the
 recording, builds the judge evidence from the agent's reply, its trajectory and the delivered files (scrubbed of the
 browser's CDP address, which is its credential), and runs the frozen BU Bench V2.1 findings judge unchanged, as a
-subprocess. The score is the judge's continuous one, 0 to 1. A judge
-error is asked again; one that persists, a turn that left no response, a failed step it depends on other than the
-turn's own (collect_artifacts), a trajectory it can't read or with no step and a delivered file it can't read fail the
-step and record no score: never a zero.
+subprocess. The score is the judge's continuous one, 0 to 1. A judge error is asked again; one that persists, a turn
+that left no response, a failed step it depends on other than the turn's own (collect_artifacts), a trajectory it
+can't read or with no step the judge reads and a delivered file it can't read fail the step and record no score: never
+a zero.
 """
 
 from __future__ import annotations
@@ -279,10 +279,10 @@ class BuFindingsVerifierTaskStep(TaskStep):
         trajectory = cloud.scrub_json(trajectory, secrets)
         (workspace / "trajectory.json").write_text(json.dumps(trajectory, default=str))
         fmt, steps, usage = evidence.steps_and_usage(trajectory)
-        if not steps:
-            # Lost, empty or only control events: no turn that answered took no step at all, so the judge would see
-            # steps the run lost.
-            raise RuntimeError(f"{self.task_id}: no trajectory with a step in it could be read (source: "
+        if not evidence.judge_visible(steps):
+            # Lost, empty, only control events or only thinking (which the judge drops): no turn that answered took no
+            # step at all, so the judge would see steps the run lost.
+            raise RuntimeError(f"{self.task_id}: no trajectory with a step the judge reads could be read (source: "
                                f"{report['trajectory_source']}), so nothing is judged (its screenshots are kept in "
                                f"{workspace})")
         files = cloud.scrub_json(await asyncio.to_thread(self._delivered, context, response), secrets)
