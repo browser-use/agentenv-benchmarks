@@ -37,7 +37,6 @@ MINI_20 = ["bu2-034", "bu2-046", "bu2-047", "bu2-051", "bu2-055", "bu2-058", "bu
 
 
 def main() -> int:
-    mini = MINI_20
     (BUNDLE / "tasks").mkdir(parents=True, exist_ok=True)
     (BUNDLE / "evals").mkdir(parents=True, exist_ok=True)
     for old in (BUNDLE / "tasks").glob("*.json"):
@@ -48,7 +47,7 @@ def main() -> int:
         lines = ",\n".join("  " + json.dumps(step) for step in steps)
         (BUNDLE / "tasks" / f"{task_id}.json").write_text(f"[\n{lines}\n]\n")
     for name, ids, note in (("smoke-2", SMOKE, "The bake-off's two smoke tasks."),
-                            ("mini-20", mini, "20 BU Bench V2.1 tasks, spread over task length, picked from two full reference runs."),
+                            ("mini-20", MINI_20, "20 BU Bench V2.1 tasks, spread over task length, picked from two full reference runs."),
                             ("bu-bench-v21", every, "All 200 BU Bench V2.1 tasks (the harness bake-off's set).")):
         listed = ", ".join(json.dumps(t) for t in ids)
         (BUNDLE / "evals" / f"{name}.toml").write_text(f"# {note}\ntasks = [{listed}]\n")

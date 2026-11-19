@@ -285,7 +285,10 @@ def test_repository_carries_no_decrypted_task_text():
     # the rubrics' template text.
     public = {tasks.JUDGE_DIR / name for name in json.loads((tasks.JUDGE_DIR / "SOURCE.json").read_text())["files"]}
     leaks = []
-    ours = [ROOT / "src" / "agentenv_benchmarks" / "bu_bench", BUNDLE, TOOLS, Path(__file__)]
+    # Every file this benchmark's change adds or touches.
+    ours = [ROOT / "src" / "agentenv_benchmarks" / "bu_bench", BUNDLE, TOOLS, ROOT / "tests",
+            ROOT / "src" / "agentenv_benchmarks" / "bu_browser", BUNDLE.parent / "bu-browser", ROOT / "README.md",
+            ROOT / "NOTICE"]
     for path in (p for top in ours for p in ([top] if top.is_file() else top.rglob("*"))):
         if path.is_dir() or skip & set(path.relative_to(ROOT).parts) or path in public:
             continue
