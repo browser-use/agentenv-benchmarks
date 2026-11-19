@@ -1,0 +1,286 @@
+"""Browser Use Cloud browsers: create, connect, screenshot, stop.
+
+The request is the one the harness bake-off sent for every arm (new-eval-platform harnesses/codex-browser-tools):
+POST /api/v3/browsers {proxyCountryCode, timeout, enableRecording}, then the CDP WebSocket from cdpUrl/json/version,
+PATCH {action: stop} when done, and the billed cost from GET /browsers/{id}.
+
+A running browser's CDP address is its credential: ``https://<browser id>.cdp.browser-use.com`` answers
+``/json/version`` without a key, so the full browser id is one too. Only ``label`` (its first 8 characters) is logged
+or stored, error text is scrubbed of the address before it is kept, and the live-view link, which embeds the
+WebSocket URL, is never kept at all.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import base64
+import hashlib
+import itertools
+import json
+import logging
+import os
+import time
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+from urllib.parse import urlparse
+
+import httpx
+
+logger = logging.getLogger(__name__)
+
+API = os.environ.get("BROWSER_USE_API_URL", "https://api.browser-use.com/api/v3")
+KEY_NAME = "BROWSER_USE_API_KEY"
+
+
+def api_key() -> str:
+    """The key from the environment, else agent-env's secret store under the same name."""
+    key = os.environ.get(KEY_NAME, "")
+    if not key:
+        try:
+            from agent_env.config import get_config
+
+            key = get_config().get_secret_store().get(KEY_NAME) or ""
+        except Exception:  # noqa: BLE001 - no framework or no secret: the error below says what to set
+            key = ""
+    if not key:
+        raise RuntimeError(f"{KEY_NAME} is not set (environment or agent-env secret store)")
+    return key
+
+
+def secrets_of(*urls: str) -> list[str]:
+    """What must not be kept from these CDP addresses: each URL, its host, and its first label (the browser id)."""
+    found: list[str] = []
+    for url in urls:
+        host = urlparse(url).hostname or ""
+        found += [url, host, host.split(".")[0] if host.count(".") >= 2 else ""]
+    return sorted({s for s in found if len(s) >= 8}, key=len, reverse=True)
+
+
+def scrub(text: str, secrets: list[str]) -> str:
+    for secret in secrets:
+        text = text.replace(secret, "<cdp>")
+    return text
+
+
+def scrub_json(value: Any, secrets: list[str]) -> Any:
+    """``value`` with every secret replaced in any string inside it (JSON round trip, so non-JSON values stringify)."""
+    if not secrets:
+        return value
+    return json.loads(scrub(json.dumps(value, default=str), secrets))
+
+
+async def request(method: str, path: str, body: dict[str, Any] | None = None) -> dict[str, Any]:
+    async with httpx.AsyncClient(timeout=60) as client:
+        response = await client.request(method, f"{API}{path}", json=body,
+                                        headers={"X-Browser-Use-API-Key": api_key()})
+    if response.is_error:
+        # httpx's own error names the URL, and /browsers/{id} carries the full browser id.
+        raise RuntimeError(f"Browser Use API {method} /{path.strip('/').split('/')[0]} returned {response.status_code}")
+    return response.json() if response.content else {}
+
+
+@dataclass
+class CloudBrowser:
+    id: str = field(repr=False)  # with the host it names, enough to reach the browser
+    ws_url: str = field(repr=False)  # a credential
+    cdp_url: str = field(default="", repr=False)  # also a credential
+    stopped: bool = False
+
+    @property
+    def label(self) -> str:
+        """The id as far as it is safe to log: not enough to reach the browser."""
+        return self.id[:8]
+
+    @property
+    def secrets(self) -> list[str]:
+        return sorted({*secrets_of(self.ws_url, self.cdp_url), self.id} - {""}, key=len, reverse=True)
+
+    @classmethod
+    async def start(cls, *, proxy_country_code: str | None = "us", timeout_minutes: int = 70,
+                    enable_recording: bool = True) -> CloudBrowser:
+        created = await request("POST", "/browsers", {"proxyCountryCode": proxy_country_code,
+                                                      "timeout": timeout_minutes,
+                                                      "enableRecording": enable_recording})
+        cdp_url = str(created.get("cdpUrl") or "").rstrip("/")
+        browser = cls(id=str(created["id"]), ws_url="", cdp_url=cdp_url)
+        try:
+            if not cdp_url:
+                raise RuntimeError("Browser Use did not return cdpUrl")
+            try:
+                async with httpx.AsyncClient(timeout=15) as client:
+                    version = (await client.get(f"{cdp_url}/json/version")).json()
+            except Exception as error:  # noqa: BLE001 - its text can name the address
+                raise RuntimeError(f"cloud browser {browser.label}: CDP discovery failed "
+                                   f"({type(error).__name__})") from None
+            browser.ws_url = str(version.get("webSocketDebuggerUrl") or "")
+            if not browser.ws_url:
+                raise RuntimeError(f"cloud browser {browser.label} did not expose webSocketDebuggerUrl")
+        except BaseException:
+            await browser.stop()
+            raise
+        return browser
+
+    async def stop(self) -> None:
+        if self.stopped:
+            return
+        try:
+            await request("PATCH", f"/browsers/{self.id}", {"action": "stop"})
+            self.stopped = True
+        except Exception as error:  # noqa: BLE001 - the browser's own timeout is the backstop
+            logger.warning("stopping cloud browser %s failed (%s); its timeout will end it", self.label,
+                           scrub(str(error), self.secrets))
+
+    async def session(self) -> dict[str, Any]:
+        """The session as Browser Use reports it: costs once stopped, recording when enabled."""
+        return await request("GET", f"/browsers/{self.id}")
+
+
+def costs(session: dict[str, Any]) -> dict[str, float]:
+    return {"browser_usd": float(session.get("browserCost") or 0), "proxy_usd": float(session.get("proxyCost") or 0),
+            "proxy_mb": float(session.get("proxyUsedMb") or 0)}
+
+
+def recording_urls(session: dict[str, Any]) -> list[str]:
+    """Whatever recording links the session carries; the field name is not part of a documented contract."""
+    urls = []
+    for key, value in session.items():
+        if "record" in key.lower():
+            values = value if isinstance(value, list) else [value]
+            urls += [v for v in values if isinstance(v, str) and v.startswith("http")]
+    return urls
+
+
+class Screenshots:
+    """After-action evidence for the judge, taken over the env's own CDP connection, never the agent's.
+
+    The agent drives the browser directly, so the env cannot see its actions; it captures the active page every
+    ``interval`` seconds and keeps a frame only when it differs from the last one. Fail-open: errors are counted,
+    never raised into the task.
+    """
+
+    def __init__(self, ws_url: str, directory: Path, interval: float = 2.0, limit: int = 400) -> None:
+        self.ws_url, self.directory, self.interval, self.limit = ws_url, directory, interval, limit
+        self._secrets = secrets_of(ws_url)
+        self.directory.mkdir(parents=True, exist_ok=True)
+        self.saved: list[str] = []
+        self.status: dict[str, Any] = {"captures": 0, "saved": 0, "duplicates": 0, "errors": []}
+        self._ids = itertools.count(1)
+        self._ws: Any = None
+        self._pending: dict[int, asyncio.Future] = {}
+        self._reader: asyncio.Task | None = None
+        self._loop: asyncio.Task | None = None
+        self._sessions: dict[str, str] = {}
+        self._urls: dict[str, str] = {}
+        self._active = ""
+        self._last = ""
+
+    def start(self) -> None:
+        self._loop = asyncio.create_task(self._run())
+
+    async def stop(self) -> dict[str, Any]:
+        """One last capture, then close. The final frame is what the judge sees last."""
+        if self._loop is not None:
+            self._loop.cancel()
+            await asyncio.gather(self._loop, return_exceptions=True)
+        await self.capture("final")
+        await self._close()
+        self.status["errors"] = self.status["errors"][-20:]
+        return self.status
+
+    async def _run(self) -> None:
+        while True:
+            await asyncio.sleep(self.interval)
+            await self.capture(f"t{int(time.time())}")
+
+    async def capture(self, label: str) -> None:
+        if len(self.saved) >= self.limit:
+            return
+        self.status["captures"] += 1
+        try:
+            await asyncio.wait_for(self._capture(label), timeout=15)
+        except asyncio.CancelledError:
+            raise
+        except Exception as error:  # noqa: BLE001
+            self.status["errors"].append(f"{label}:{type(error).__name__}:{scrub(str(error), self._secrets)[:120]}")
+            self._sessions.pop(self._active, None)
+            await self._close()
+
+    async def _capture(self, label: str) -> None:
+        if self._ws is None:
+            import websockets
+
+            self._ws = await websockets.connect(self.ws_url, max_size=64 * 1024 * 1024, open_timeout=15)
+            self._reader = asyncio.create_task(self._read())
+        target = await self._page()
+        if not target:
+            return
+        if target not in self._sessions:
+            attached = await self._send("Target.attachToTarget", {"targetId": target, "flatten": True})
+            self._sessions[target] = attached["sessionId"]
+        shot = await self._send("Page.captureScreenshot", {"format": "jpeg", "quality": 80}, self._sessions[target])
+        data = base64.b64decode(shot["data"])
+        digest = hashlib.sha256(data).hexdigest()
+        if digest == self._last:
+            self.status["duplicates"] += 1
+            return
+        self._last = digest
+        name = f"{len(self.saved) + 1:04d}-{label}.jpg"
+        (self.directory / name).write_bytes(data)
+        self.saved.append(name)
+        self.status["saved"] = len(self.saved)
+
+    async def _page(self) -> str:
+        """The page the agent last navigated or opened, as the bake-off harness picked it."""
+        targets = (await self._send("Target.getTargets", {})).get("targetInfos", [])
+        pages = [t for t in targets if t.get("type") == "page"
+                 and not str(t.get("url", "")).startswith(("chrome://", "devtools://", "chrome-extension://"))]
+        changed = [str(t["targetId"]) for t in pages if self._urls.get(str(t["targetId"])) != t.get("url")]
+        self._urls = {str(t["targetId"]): str(t.get("url", "")) for t in pages}
+        if changed:
+            self._active = changed[-1]
+        elif self._active not in self._urls:
+            real = [tid for tid, url in self._urls.items() if url != "about:blank"]
+            self._active = (real or list(self._urls) or [""])[-1]
+        return self._active
+
+    async def _send(self, method: str, params: dict[str, Any], session_id: str | None = None) -> dict[str, Any]:
+        message_id = next(self._ids)
+        future: asyncio.Future = asyncio.get_running_loop().create_future()
+        self._pending[message_id] = future
+        payload = {"id": message_id, "method": method, "params": params}
+        if session_id:
+            payload["sessionId"] = session_id
+        await self._ws.send(json.dumps(payload))
+        try:
+            reply = await asyncio.wait_for(future, timeout=10)
+        finally:
+            self._pending.pop(message_id, None)
+        if "error" in reply:
+            raise RuntimeError(f"{method}: {reply['error'].get('message')}")
+        return reply.get("result") or {}
+
+    async def _read(self) -> None:
+        try:
+            async for raw in self._ws:
+                message = json.loads(raw)
+                future = self._pending.get(message.get("id"))
+                if future is not None and not future.done():
+                    future.set_result(message)
+        except Exception:  # noqa: BLE001, S110 - a dropped socket fails the pending sends, and the next capture reconnects
+            pass
+        finally:
+            for future in self._pending.values():
+                if not future.done():
+                    future.set_exception(ConnectionError("CDP socket closed"))
+
+    async def _close(self) -> None:
+        if self._ws is not None:
+            try:
+                await self._ws.close()
+            except Exception:  # noqa: BLE001, S110 - closing a dead socket
+                pass
+        if self._reader is not None:
+            self._reader.cancel()
+            await asyncio.gather(self._reader, return_exceptions=True)
+        self._ws, self._reader, self._sessions = None, None, {}

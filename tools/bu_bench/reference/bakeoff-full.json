@@ -1,0 +1,9659 @@
+{
+ "source": "Write reference/bakeoff-full.json: every bake-off entry's per-task result on all 200 tasks, from our eval platform.\n\nThe 7 Codex arms come from the harness bake-off r2 (full/pertask.csv; Nov 12-13); browser-use 1.0.4rc1 from its\nNov 13 run (eval a1487b98, two judge crashes rejudged in e089dc24). Numbers only: score x100, minutes, model $ at the\nbake-off basis ($1 / $0.10 cached / $5 out per 1M; Stagehand includes its own model calls), cloud $ (Codex arms).",
+ "runs": {
+  "browser-use-104rc1": [
+   "43498031169 (eval a1487b98)",
+   "43502449663 (rejudge e089dc24)"
+  ],
+  "codex-agent-browser": [
+   "43347037828"
+  ],
+  "codex-browser-use-mcp": [
+   "43347061635"
+  ],
+  "codex-bu-cli": [
+   "43347026688"
+  ],
+  "codex-chrome-devtools-mcp": [
+   "43347073254"
+  ],
+  "codex-opencode-browse": [
+   "43347097626",
+   "43386061395"
+  ],
+  "codex-playwright-mcp": [
+   "43347085913"
+  ],
+  "codex-stagehand": [
+   "43347049428"
+  ]
+ },
+ "means": {
+  "browser-use-104rc1": 76.13,
+  "codex-agent-browser": 69.57,
+  "codex-browser-use-mcp": 71.72,
+  "codex-bu-cli": 70.45,
+  "codex-chrome-devtools-mcp": 70.31,
+  "codex-opencode-browse": 62.45,
+  "codex-playwright-mcp": 73.48,
+  "codex-stagehand": 62.83
+ },
+ "arms": {
+  "browser-use-104rc1": {
+   "bu2-001": {
+    "score": 73.0,
+    "minutes": 8.012,
+    "model_usd": 0.4537,
+    "cloud_usd": null
+   },
+   "bu2-002": {
+    "score": 66.0,
+    "minutes": 4.307,
+    "model_usd": 0.2198,
+    "cloud_usd": null
+   },
+   "bu2-003": {
+    "score": 48.0,
+    "minutes": 12.483,
+    "model_usd": 0.5279,
+    "cloud_usd": null
+   },
+   "bu2-004": {
+    "score": 92.0,
+    "minutes": 8.043,
+    "model_usd": 0.5425,
+    "cloud_usd": null
+   },
+   "bu2-005": {
+    "score": 100.0,
+    "minutes": 0.0,
+    "model_usd": 0.0,
+    "cloud_usd": null
+   },
+   "bu2-006": {
+    "score": 64.0,
+    "minutes": 7.857,
+    "model_usd": 0.445,
+    "cloud_usd": null
+   },
+   "bu2-007": {
+    "score": 78.0,
+    "minutes": 7.418,
+    "model_usd": 0.2476,
+    "cloud_usd": null
+   },
+   "bu2-008": {
+    "score": 60.0,
+    "minutes": 5.676,
+    "model_usd": 0.2844,
+    "cloud_usd": null
+   },
+   "bu2-009": {
+    "score": 72.0,
+    "minutes": 5.829,
+    "model_usd": 0.2593,
+    "cloud_usd": null
+   },
+   "bu2-010": {
+    "score": 46.0,
+    "minutes": 1.583,
+    "model_usd": 0.0509,
+    "cloud_usd": null
+   },
+   "bu2-011": {
+    "score": 66.0,
+    "minutes": 7.537,
+    "model_usd": 0.2138,
+    "cloud_usd": null
+   },
+   "bu2-012": {
+    "score": 36.0,
+    "minutes": 3.414,
+    "model_usd": 0.0946,
+    "cloud_usd": null
+   },
+   "bu2-013": {
+    "score": 20.0,
+    "minutes": 7.886,
+    "model_usd": 0.1962,
+    "cloud_usd": null
+   },
+   "bu2-014": {
+    "score": 59.0,
+    "minutes": 5.917,
+    "model_usd": 0.265,
+    "cloud_usd": null
+   },
+   "bu2-015": {
+    "score": 74.0,
+    "minutes": 7.207,
+    "model_usd": 0.4033,
+    "cloud_usd": null
+   },
+   "bu2-016": {
+    "score": 100.0,
+    "minutes": 5.98,
+    "model_usd": 0.3105,
+    "cloud_usd": null
+   },
+   "bu2-017": {
+    "score": 72.0,
+    "minutes": 13.674,
+    "model_usd": 0.4944,
+    "cloud_usd": null
+   },
+   "bu2-018": {
+    "score": 88.0,
+    "minutes": 5.587,
+    "model_usd": 0.3435,
+    "cloud_usd": null
+   },
+   "bu2-019": {
+    "score": 72.0,
+    "minutes": 8.289,
+    "model_usd": 0.3872,
+    "cloud_usd": null
+   },
+   "bu2-020": {
+    "score": 100.0,
+    "minutes": 7.793,
+    "model_usd": 0.4364,
+    "cloud_usd": null
+   },
+   "bu2-021": {
+    "score": 44.0,
+    "minutes": 10.452,
+    "model_usd": 0.6406,
+    "cloud_usd": null
+   },
+   "bu2-022": {
+    "score": 82.0,
+    "minutes": 4.897,
+    "model_usd": 0.2703,
+    "cloud_usd": null
+   },
+   "bu2-023": {
+    "score": 88.0,
+    "minutes": 8.427,
+    "model_usd": 0.4613,
+    "cloud_usd": null
+   },
+   "bu2-024": {
+    "score": 78.0,
+    "minutes": 7.718,
+    "model_usd": 0.5589,
+    "cloud_usd": null
+   },
+   "bu2-025": {
+    "score": 92.0,
+    "minutes": 4.644,
+    "model_usd": 0.261,
+    "cloud_usd": null
+   },
+   "bu2-026": {
+    "score": 100.0,
+    "minutes": 10.291,
+    "model_usd": 0.5434,
+    "cloud_usd": null
+   },
+   "bu2-027": {
+    "score": 100.0,
+    "minutes": 8.287,
+    "model_usd": 0.3143,
+    "cloud_usd": null
+   },
+   "bu2-028": {
+    "score": 86.0,
+    "minutes": 5.314,
+    "model_usd": 0.2972,
+    "cloud_usd": null
+   },
+   "bu2-029": {
+    "score": 66.0,
+    "minutes": 6.789,
+    "model_usd": 0.2707,
+    "cloud_usd": null
+   },
+   "bu2-030": {
+    "score": 52.0,
+    "minutes": 15.406,
+    "model_usd": 0.5841,
+    "cloud_usd": null
+   },
+   "bu2-031": {
+    "score": 57.0,
+    "minutes": 4.979,
+    "model_usd": 0.1967,
+    "cloud_usd": null
+   },
+   "bu2-032": {
+    "score": 68.0,
+    "minutes": 6.824,
+    "model_usd": 0.4773,
+    "cloud_usd": null
+   },
+   "bu2-033": {
+    "score": 100.0,
+    "minutes": 6.457,
+    "model_usd": 0.3156,
+    "cloud_usd": null
+   },
+   "bu2-034": {
+    "score": 70.0,
+    "minutes": 7.118,
+    "model_usd": 0.4076,
+    "cloud_usd": null
+   },
+   "bu2-035": {
+    "score": 48.0,
+    "minutes": 2.575,
+    "model_usd": 0.1086,
+    "cloud_usd": null
+   },
+   "bu2-036": {
+    "score": 50.0,
+    "minutes": 4.5,
+    "model_usd": 0.2902,
+    "cloud_usd": null
+   },
+   "bu2-037": {
+    "score": 92.0,
+    "minutes": 0.0,
+    "model_usd": 0.0,
+    "cloud_usd": null
+   },
+   "bu2-038": {
+    "score": 100.0,
+    "minutes": 5.886,
+    "model_usd": 0.1622,
+    "cloud_usd": null
+   },
+   "bu2-039": {
+    "score": 100.0,
+    "minutes": 10.814,
+    "model_usd": 0.2596,
+    "cloud_usd": null
+   },
+   "bu2-040": {
+    "score": 74.0,
+    "minutes": 8.448,
+    "model_usd": 0.4638,
+    "cloud_usd": null
+   },
+   "bu2-041": {
+    "score": 84.0,
+    "minutes": 9.828,
+    "model_usd": 0.4484,
+    "cloud_usd": null
+   },
+   "bu2-042": {
+    "score": 73.0,
+    "minutes": 4.826,
+    "model_usd": 0.2177,
+    "cloud_usd": null
+   },
+   "bu2-043": {
+    "score": 94.0,
+    "minutes": 7.942,
+    "model_usd": 0.5846,
+    "cloud_usd": null
+   },
+   "bu2-044": {
+    "score": 88.0,
+    "minutes": 7.972,
+    "model_usd": 0.2713,
+    "cloud_usd": null
+   },
+   "bu2-045": {
+    "score": 80.0,
+    "minutes": 6.709,
+    "model_usd": 0.3579,
+    "cloud_usd": null
+   },
+   "bu2-046": {
+    "score": 92.0,
+    "minutes": 5.901,
+    "model_usd": 0.2335,
+    "cloud_usd": null
+   },
+   "bu2-047": {
+    "score": 28.0,
+    "minutes": 9.996,
+    "model_usd": 0.3536,
+    "cloud_usd": null
+   },
+   "bu2-048": {
+    "score": 88.0,
+    "minutes": 4.675,
+    "model_usd": 0.2207,
+    "cloud_usd": null
+   },
+   "bu2-049": {
+    "score": 14.0,
+    "minutes": 4.862,
+    "model_usd": 0.0983,
+    "cloud_usd": null
+   },
+   "bu2-050": {
+    "score": 78.0,
+    "minutes": 7.343,
+    "model_usd": 0.4461,
+    "cloud_usd": null
+   },
+   "bu2-051": {
+    "score": 44.0,
+    "minutes": 7.204,
+    "model_usd": 0.174,
+    "cloud_usd": null
+   },
+   "bu2-052": {
+    "score": 100.0,
+    "minutes": 3.245,
+    "model_usd": 0.1222,
+    "cloud_usd": null
+   },
+   "bu2-053": {
+    "score": 80.0,
+    "minutes": 8.441,
+    "model_usd": 0.4688,
+    "cloud_usd": null
+   },
+   "bu2-054": {
+    "score": 76.0,
+    "minutes": 8.504,
+    "model_usd": 0.4979,
+    "cloud_usd": null
+   },
+   "bu2-055": {
+    "score": 52.0,
+    "minutes": 4.785,
+    "model_usd": 0.2837,
+    "cloud_usd": null
+   },
+   "bu2-056": {
+    "score": 40.0,
+    "minutes": 1.432,
+    "model_usd": 0.0447,
+    "cloud_usd": null
+   },
+   "bu2-057": {
+    "score": 80.0,
+    "minutes": 1.503,
+    "model_usd": 0.0507,
+    "cloud_usd": null
+   },
+   "bu2-058": {
+    "score": 70.0,
+    "minutes": 1.705,
+    "model_usd": 0.0677,
+    "cloud_usd": null
+   },
+   "bu2-059": {
+    "score": 82.0,
+    "minutes": 7.64,
+    "model_usd": 0.2497,
+    "cloud_usd": null
+   },
+   "bu2-060": {
+    "score": 88.0,
+    "minutes": 2.034,
+    "model_usd": 0.1349,
+    "cloud_usd": null
+   },
+   "bu2-061": {
+    "score": 24.0,
+    "minutes": 1.145,
+    "model_usd": 0.0774,
+    "cloud_usd": null
+   },
+   "bu2-062": {
+    "score": 100.0,
+    "minutes": 1.721,
+    "model_usd": 0.0961,
+    "cloud_usd": null
+   },
+   "bu2-063": {
+    "score": 79.0,
+    "minutes": 6.216,
+    "model_usd": 0.2237,
+    "cloud_usd": null
+   },
+   "bu2-064": {
+    "score": 100.0,
+    "minutes": 2.628,
+    "model_usd": 0.0538,
+    "cloud_usd": null
+   },
+   "bu2-065": {
+    "score": 69.0,
+    "minutes": 2.543,
+    "model_usd": 0.1174,
+    "cloud_usd": null
+   },
+   "bu2-066": {
+    "score": 38.0,
+    "minutes": 0.814,
+    "model_usd": 0.0359,
+    "cloud_usd": null
+   },
+   "bu2-067": {
+    "score": 44.0,
+    "minutes": 4.923,
+    "model_usd": 0.3415,
+    "cloud_usd": null
+   },
+   "bu2-068": {
+    "score": 100.0,
+    "minutes": 0.761,
+    "model_usd": 0.0333,
+    "cloud_usd": null
+   },
+   "bu2-069": {
+    "score": 100.0,
+    "minutes": 3.022,
+    "model_usd": 0.1165,
+    "cloud_usd": null
+   },
+   "bu2-070": {
+    "score": 48.0,
+    "minutes": 2.496,
+    "model_usd": 0.0639,
+    "cloud_usd": null
+   },
+   "bu2-071": {
+    "score": 76.0,
+    "minutes": 4.566,
+    "model_usd": 0.2695,
+    "cloud_usd": null
+   },
+   "bu2-072": {
+    "score": 100.0,
+    "minutes": 2.412,
+    "model_usd": 0.1094,
+    "cloud_usd": null
+   },
+   "bu2-073": {
+    "score": 100.0,
+    "minutes": 3.499,
+    "model_usd": 0.1664,
+    "cloud_usd": null
+   },
+   "bu2-074": {
+    "score": 100.0,
+    "minutes": 2.831,
+    "model_usd": 0.1032,
+    "cloud_usd": null
+   },
+   "bu2-075": {
+    "score": 48.0,
+    "minutes": 1.263,
+    "model_usd": 0.0354,
+    "cloud_usd": null
+   },
+   "bu2-076": {
+    "score": 73.0,
+    "minutes": 8.905,
+    "model_usd": 0.6232,
+    "cloud_usd": null
+   },
+   "bu2-077": {
+    "score": 40.0,
+    "minutes": 2.46,
+    "model_usd": 0.092,
+    "cloud_usd": null
+   },
+   "bu2-078": {
+    "score": 85.0,
+    "minutes": 2.005,
+    "model_usd": 0.0444,
+    "cloud_usd": null
+   },
+   "bu2-079": {
+    "score": 80.0,
+    "minutes": 2.557,
+    "model_usd": 0.1763,
+    "cloud_usd": null
+   },
+   "bu2-080": {
+    "score": 100.0,
+    "minutes": 1.222,
+    "model_usd": 0.0326,
+    "cloud_usd": null
+   },
+   "bu2-081": {
+    "score": 47.0,
+    "minutes": 1.5,
+    "model_usd": 0.0696,
+    "cloud_usd": null
+   },
+   "bu2-082": {
+    "score": 100.0,
+    "minutes": 2.071,
+    "model_usd": 0.0628,
+    "cloud_usd": null
+   },
+   "bu2-083": {
+    "score": 100.0,
+    "minutes": 1.498,
+    "model_usd": 0.0846,
+    "cloud_usd": null
+   },
+   "bu2-084": {
+    "score": 100.0,
+    "minutes": 6.828,
+    "model_usd": 0.095,
+    "cloud_usd": null
+   },
+   "bu2-085": {
+    "score": 100.0,
+    "minutes": 2.46,
+    "model_usd": 0.1084,
+    "cloud_usd": null
+   },
+   "bu2-086": {
+    "score": 100.0,
+    "minutes": 2.395,
+    "model_usd": 0.0847,
+    "cloud_usd": null
+   },
+   "bu2-087": {
+    "score": 71.0,
+    "minutes": 3.236,
+    "model_usd": 0.1431,
+    "cloud_usd": null
+   },
+   "bu2-088": {
+    "score": 100.0,
+    "minutes": 2.804,
+    "model_usd": 0.12,
+    "cloud_usd": null
+   },
+   "bu2-089": {
+    "score": 100.0,
+    "minutes": 3.904,
+    "model_usd": 0.0701,
+    "cloud_usd": null
+   },
+   "bu2-090": {
+    "score": 56.0,
+    "minutes": 1.317,
+    "model_usd": 0.0643,
+    "cloud_usd": null
+   },
+   "bu2-091": {
+    "score": 32.0,
+    "minutes": 3.121,
+    "model_usd": 0.171,
+    "cloud_usd": null
+   },
+   "bu2-092": {
+    "score": 82.0,
+    "minutes": 1.454,
+    "model_usd": 0.042,
+    "cloud_usd": null
+   },
+   "bu2-093": {
+    "score": 88.0,
+    "minutes": 1.846,
+    "model_usd": 0.0667,
+    "cloud_usd": null
+   },
+   "bu2-094": {
+    "score": 30.0,
+    "minutes": 0.493,
+    "model_usd": 0.0176,
+    "cloud_usd": null
+   },
+   "bu2-095": {
+    "score": 86.0,
+    "minutes": 5.076,
+    "model_usd": 0.206,
+    "cloud_usd": null
+   },
+   "bu2-096": {
+    "score": 96.0,
+    "minutes": 5.183,
+    "model_usd": 0.1752,
+    "cloud_usd": null
+   },
+   "bu2-097": {
+    "score": 100.0,
+    "minutes": 4.907,
+    "model_usd": 0.1814,
+    "cloud_usd": null
+   },
+   "bu2-098": {
+    "score": 100.0,
+    "minutes": 1.08,
+    "model_usd": 0.0424,
+    "cloud_usd": null
+   },
+   "bu2-099": {
+    "score": 82.0,
+    "minutes": 12.565,
+    "model_usd": 0.8108,
+    "cloud_usd": null
+   },
+   "bu2-100": {
+    "score": 100.0,
+    "minutes": 3.654,
+    "model_usd": 0.1269,
+    "cloud_usd": null
+   },
+   "bu2-101": {
+    "score": 100.0,
+    "minutes": 3.963,
+    "model_usd": 0.2102,
+    "cloud_usd": null
+   },
+   "bu2-102": {
+    "score": 51.0,
+    "minutes": 2.389,
+    "model_usd": 0.0602,
+    "cloud_usd": null
+   },
+   "bu2-103": {
+    "score": 100.0,
+    "minutes": 3.257,
+    "model_usd": 0.1186,
+    "cloud_usd": null
+   },
+   "bu2-104": {
+    "score": 76.0,
+    "minutes": 2.024,
+    "model_usd": 0.052,
+    "cloud_usd": null
+   },
+   "bu2-105": {
+    "score": 68.0,
+    "minutes": 3.802,
+    "model_usd": 0.1764,
+    "cloud_usd": null
+   },
+   "bu2-106": {
+    "score": 35.0,
+    "minutes": 3.848,
+    "model_usd": 0.1087,
+    "cloud_usd": null
+   },
+   "bu2-107": {
+    "score": 62.0,
+    "minutes": 10.587,
+    "model_usd": 0.9333,
+    "cloud_usd": null
+   },
+   "bu2-108": {
+    "score": 72.0,
+    "minutes": 5.998,
+    "model_usd": 0.2179,
+    "cloud_usd": null
+   },
+   "bu2-109": {
+    "score": 100.0,
+    "minutes": 0.677,
+    "model_usd": 0.0406,
+    "cloud_usd": null
+   },
+   "bu2-110": {
+    "score": 88.0,
+    "minutes": 5.236,
+    "model_usd": 0.3326,
+    "cloud_usd": null
+   },
+   "bu2-111": {
+    "score": 86.0,
+    "minutes": 3.17,
+    "model_usd": 0.0997,
+    "cloud_usd": null
+   },
+   "bu2-112": {
+    "score": 100.0,
+    "minutes": 1.274,
+    "model_usd": 0.0412,
+    "cloud_usd": null
+   },
+   "bu2-113": {
+    "score": 100.0,
+    "minutes": 2.034,
+    "model_usd": 0.0821,
+    "cloud_usd": null
+   },
+   "bu2-114": {
+    "score": 100.0,
+    "minutes": 1.49,
+    "model_usd": 0.0859,
+    "cloud_usd": null
+   },
+   "bu2-115": {
+    "score": 90.0,
+    "minutes": 5.737,
+    "model_usd": 0.2979,
+    "cloud_usd": null
+   },
+   "bu2-116": {
+    "score": 72.0,
+    "minutes": 2.79,
+    "model_usd": 0.1232,
+    "cloud_usd": null
+   },
+   "bu2-117": {
+    "score": 38.0,
+    "minutes": 5.384,
+    "model_usd": 0.1934,
+    "cloud_usd": null
+   },
+   "bu2-118": {
+    "score": 70.0,
+    "minutes": 2.759,
+    "model_usd": 0.091,
+    "cloud_usd": null
+   },
+   "bu2-119": {
+    "score": 73.0,
+    "minutes": 4.731,
+    "model_usd": 0.1251,
+    "cloud_usd": null
+   },
+   "bu2-120": {
+    "score": 82.0,
+    "minutes": 3.235,
+    "model_usd": 0.1225,
+    "cloud_usd": null
+   },
+   "bu2-121": {
+    "score": 100.0,
+    "minutes": 3.881,
+    "model_usd": 0.1357,
+    "cloud_usd": null
+   },
+   "bu2-122": {
+    "score": 100.0,
+    "minutes": 6.545,
+    "model_usd": 0.193,
+    "cloud_usd": null
+   },
+   "bu2-123": {
+    "score": 100.0,
+    "minutes": 0.521,
+    "model_usd": 0.0131,
+    "cloud_usd": null
+   },
+   "bu2-124": {
+    "score": 76.0,
+    "minutes": 5.841,
+    "model_usd": 0.1901,
+    "cloud_usd": null
+   },
+   "bu2-125": {
+    "score": 100.0,
+    "minutes": 1.709,
+    "model_usd": 0.0831,
+    "cloud_usd": null
+   },
+   "bu2-126": {
+    "score": 70.0,
+    "minutes": 13.054,
+    "model_usd": 1.1847,
+    "cloud_usd": null
+   },
+   "bu2-127": {
+    "score": 90.0,
+    "minutes": 1.667,
+    "model_usd": 0.076,
+    "cloud_usd": null
+   },
+   "bu2-128": {
+    "score": 50.0,
+    "minutes": 5.752,
+    "model_usd": 0.1296,
+    "cloud_usd": null
+   },
+   "bu2-129": {
+    "score": 84.0,
+    "minutes": 6.555,
+    "model_usd": 0.246,
+    "cloud_usd": null
+   },
+   "bu2-130": {
+    "score": 90.0,
+    "minutes": 1.722,
+    "model_usd": 0.073,
+    "cloud_usd": null
+   },
+   "bu2-131": {
+    "score": 38.0,
+    "minutes": 3.218,
+    "model_usd": 0.1285,
+    "cloud_usd": null
+   },
+   "bu2-132": {
+    "score": 0.0,
+    "minutes": 6.887,
+    "model_usd": 0.181,
+    "cloud_usd": null
+   },
+   "bu2-133": {
+    "score": 100.0,
+    "minutes": 1.594,
+    "model_usd": 0.1266,
+    "cloud_usd": null
+   },
+   "bu2-134": {
+    "score": 100.0,
+    "minutes": 1.86,
+    "model_usd": 0.0824,
+    "cloud_usd": null
+   },
+   "bu2-135": {
+    "score": 21.0,
+    "minutes": 1.135,
+    "model_usd": 0.0705,
+    "cloud_usd": null
+   },
+   "bu2-136": {
+    "score": 84.0,
+    "minutes": 7.746,
+    "model_usd": 0.519,
+    "cloud_usd": null
+   },
+   "bu2-137": {
+    "score": 80.0,
+    "minutes": 4.653,
+    "model_usd": 0.2225,
+    "cloud_usd": null
+   },
+   "bu2-138": {
+    "score": 88.0,
+    "minutes": 1.683,
+    "model_usd": 0.08,
+    "cloud_usd": null
+   },
+   "bu2-139": {
+    "score": 76.0,
+    "minutes": 2.728,
+    "model_usd": 0.0811,
+    "cloud_usd": null
+   },
+   "bu2-140": {
+    "score": 100.0,
+    "minutes": 2.406,
+    "model_usd": 0.1626,
+    "cloud_usd": null
+   },
+   "bu2-141": {
+    "score": 100.0,
+    "minutes": 1.85,
+    "model_usd": 0.0857,
+    "cloud_usd": null
+   },
+   "bu2-142": {
+    "score": 88.0,
+    "minutes": 9.094,
+    "model_usd": 0.3889,
+    "cloud_usd": null
+   },
+   "bu2-143": {
+    "score": 86.0,
+    "minutes": 3.75,
+    "model_usd": 0.1703,
+    "cloud_usd": null
+   },
+   "bu2-144": {
+    "score": 100.0,
+    "minutes": 3.403,
+    "model_usd": 0.1769,
+    "cloud_usd": null
+   },
+   "bu2-145": {
+    "score": 18.0,
+    "minutes": 0.365,
+    "model_usd": 0.0065,
+    "cloud_usd": null
+   },
+   "bu2-146": {
+    "score": 88.0,
+    "minutes": 5.375,
+    "model_usd": 0.3289,
+    "cloud_usd": null
+   },
+   "bu2-147": {
+    "score": 84.0,
+    "minutes": 3.735,
+    "model_usd": 0.1353,
+    "cloud_usd": null
+   },
+   "bu2-148": {
+    "score": 19.0,
+    "minutes": 1.395,
+    "model_usd": 0.0317,
+    "cloud_usd": null
+   },
+   "bu2-149": {
+    "score": 100.0,
+    "minutes": 0.713,
+    "model_usd": 0.0313,
+    "cloud_usd": null
+   },
+   "bu2-150": {
+    "score": 90.0,
+    "minutes": 2.713,
+    "model_usd": 0.1025,
+    "cloud_usd": null
+   },
+   "bu2-151": {
+    "score": 12.0,
+    "minutes": 6.774,
+    "model_usd": 0.1536,
+    "cloud_usd": null
+   },
+   "bu2-152": {
+    "score": 100.0,
+    "minutes": 2.495,
+    "model_usd": 0.1068,
+    "cloud_usd": null
+   },
+   "bu2-153": {
+    "score": 67.0,
+    "minutes": 4.506,
+    "model_usd": 0.1888,
+    "cloud_usd": null
+   },
+   "bu2-154": {
+    "score": 100.0,
+    "minutes": 0.694,
+    "model_usd": 0.0231,
+    "cloud_usd": null
+   },
+   "bu2-155": {
+    "score": 88.0,
+    "minutes": 2.994,
+    "model_usd": 0.1329,
+    "cloud_usd": null
+   },
+   "bu2-156": {
+    "score": 100.0,
+    "minutes": 1.588,
+    "model_usd": 0.0691,
+    "cloud_usd": null
+   },
+   "bu2-157": {
+    "score": 100.0,
+    "minutes": 2.94,
+    "model_usd": 0.129,
+    "cloud_usd": null
+   },
+   "bu2-158": {
+    "score": 60.0,
+    "minutes": 1.269,
+    "model_usd": 0.0407,
+    "cloud_usd": null
+   },
+   "bu2-159": {
+    "score": 92.0,
+    "minutes": 2.08,
+    "model_usd": 0.0559,
+    "cloud_usd": null
+   },
+   "bu2-160": {
+    "score": 100.0,
+    "minutes": 2.098,
+    "model_usd": 0.0577,
+    "cloud_usd": null
+   },
+   "bu2-161": {
+    "score": 86.0,
+    "minutes": 7.317,
+    "model_usd": 0.3273,
+    "cloud_usd": null
+   },
+   "bu2-162": {
+    "score": 58.0,
+    "minutes": 5.478,
+    "model_usd": 0.3394,
+    "cloud_usd": null
+   },
+   "bu2-163": {
+    "score": 50.0,
+    "minutes": 6.638,
+    "model_usd": 0.4157,
+    "cloud_usd": null
+   },
+   "bu2-164": {
+    "score": 88.0,
+    "minutes": 10.128,
+    "model_usd": 0.8182,
+    "cloud_usd": null
+   },
+   "bu2-165": {
+    "score": 69.0,
+    "minutes": 1.238,
+    "model_usd": 0.059,
+    "cloud_usd": null
+   },
+   "bu2-166": {
+    "score": 85.0,
+    "minutes": 1.993,
+    "model_usd": 0.0816,
+    "cloud_usd": null
+   },
+   "bu2-167": {
+    "score": 70.0,
+    "minutes": 2.443,
+    "model_usd": 0.108,
+    "cloud_usd": null
+   },
+   "bu2-168": {
+    "score": 100.0,
+    "minutes": 1.079,
+    "model_usd": 0.0517,
+    "cloud_usd": null
+   },
+   "bu2-169": {
+    "score": 74.0,
+    "minutes": 4.097,
+    "model_usd": 0.089,
+    "cloud_usd": null
+   },
+   "bu2-170": {
+    "score": 85.0,
+    "minutes": 2.211,
+    "model_usd": 0.1056,
+    "cloud_usd": null
+   },
+   "bu2-171": {
+    "score": 100.0,
+    "minutes": 2.925,
+    "model_usd": 0.1374,
+    "cloud_usd": null
+   },
+   "bu2-172": {
+    "score": 72.0,
+    "minutes": 1.45,
+    "model_usd": 0.0475,
+    "cloud_usd": null
+   },
+   "bu2-173": {
+    "score": 90.0,
+    "minutes": 1.701,
+    "model_usd": 0.0927,
+    "cloud_usd": null
+   },
+   "bu2-174": {
+    "score": 100.0,
+    "minutes": 7.346,
+    "model_usd": 0.2028,
+    "cloud_usd": null
+   },
+   "bu2-175": {
+    "score": 20.0,
+    "minutes": 3.487,
+    "model_usd": 0.1697,
+    "cloud_usd": null
+   },
+   "bu2-176": {
+    "score": 100.0,
+    "minutes": 1.283,
+    "model_usd": 0.0821,
+    "cloud_usd": null
+   },
+   "bu2-177": {
+    "score": 100.0,
+    "minutes": 3.194,
+    "model_usd": 0.1193,
+    "cloud_usd": null
+   },
+   "bu2-178": {
+    "score": 100.0,
+    "minutes": 11.101,
+    "model_usd": 0.7336,
+    "cloud_usd": null
+   },
+   "bu2-179": {
+    "score": 75.0,
+    "minutes": 6.052,
+    "model_usd": 0.3453,
+    "cloud_usd": null
+   },
+   "bu2-180": {
+    "score": 100.0,
+    "minutes": 2.828,
+    "model_usd": 0.1326,
+    "cloud_usd": null
+   },
+   "bu2-181": {
+    "score": 100.0,
+    "minutes": 1.133,
+    "model_usd": 0.049,
+    "cloud_usd": null
+   },
+   "bu2-182": {
+    "score": 12.0,
+    "minutes": 3.236,
+    "model_usd": 0.1078,
+    "cloud_usd": null
+   },
+   "bu2-183": {
+    "score": 72.0,
+    "minutes": 4.067,
+    "model_usd": 0.1209,
+    "cloud_usd": null
+   },
+   "bu2-184": {
+    "score": 74.0,
+    "minutes": 12.322,
+    "model_usd": 0.416,
+    "cloud_usd": null
+   },
+   "bu2-185": {
+    "score": 100.0,
+    "minutes": 3.159,
+    "model_usd": 0.0623,
+    "cloud_usd": null
+   },
+   "bu2-186": {
+    "score": 100.0,
+    "minutes": 2.006,
+    "model_usd": 0.119,
+    "cloud_usd": null
+   },
+   "bu2-187": {
+    "score": 100.0,
+    "minutes": 1.87,
+    "model_usd": 0.064,
+    "cloud_usd": null
+   },
+   "bu2-188": {
+    "score": 87.0,
+    "minutes": 4.534,
+    "model_usd": 0.2093,
+    "cloud_usd": null
+   },
+   "bu2-189": {
+    "score": 63.0,
+    "minutes": 4.662,
+    "model_usd": 0.0595,
+    "cloud_usd": null
+   },
+   "bu2-190": {
+    "score": 50.0,
+    "minutes": 3.881,
+    "model_usd": 0.1302,
+    "cloud_usd": null
+   },
+   "bu2-191": {
+    "score": 56.0,
+    "minutes": 4.767,
+    "model_usd": 0.2154,
+    "cloud_usd": null
+   },
+   "bu2-192": {
+    "score": 46.0,
+    "minutes": 3.368,
+    "model_usd": 0.1489,
+    "cloud_usd": null
+   },
+   "bu2-193": {
+    "score": 39.0,
+    "minutes": 2.094,
+    "model_usd": 0.1159,
+    "cloud_usd": null
+   },
+   "bu2-194": {
+    "score": 78.0,
+    "minutes": 5.291,
+    "model_usd": 0.282,
+    "cloud_usd": null
+   },
+   "bu2-195": {
+    "score": 90.0,
+    "minutes": 1.347,
+    "model_usd": 0.0745,
+    "cloud_usd": null
+   },
+   "bu2-196": {
+    "score": 84.0,
+    "minutes": 2.265,
+    "model_usd": 0.1133,
+    "cloud_usd": null
+   },
+   "bu2-197": {
+    "score": 76.0,
+    "minutes": 8.374,
+    "model_usd": 0.0961,
+    "cloud_usd": null
+   },
+   "bu2-198": {
+    "score": 17.0,
+    "minutes": 2.416,
+    "model_usd": 0.0679,
+    "cloud_usd": null
+   },
+   "bu2-199": {
+    "score": 60.0,
+    "minutes": 3.63,
+    "model_usd": 0.1332,
+    "cloud_usd": null
+   },
+   "bu2-200": {
+    "score": 60.0,
+    "minutes": 6.746,
+    "model_usd": 0.1315,
+    "cloud_usd": null
+   }
+  },
+  "codex-agent-browser": {
+   "bu2-001": {
+    "score": 75.0,
+    "minutes": 9.25,
+    "model_usd": 1.006,
+    "cloud_usd": 0.3015
+   },
+   "bu2-002": {
+    "score": 54.0,
+    "minutes": 17.184,
+    "model_usd": 1.6949,
+    "cloud_usd": 1.8422
+   },
+   "bu2-003": {
+    "score": 68.0,
+    "minutes": 22.606,
+    "model_usd": 2.7024,
+    "cloud_usd": 0.1993
+   },
+   "bu2-004": {
+    "score": 82.0,
+    "minutes": 7.255,
+    "model_usd": 0.9168,
+    "cloud_usd": 0.1393
+   },
+   "bu2-005": {
+    "score": 100.0,
+    "minutes": 3.312,
+    "model_usd": 0.3601,
+    "cloud_usd": 0.0403
+   },
+   "bu2-006": {
+    "score": 64.0,
+    "minutes": 13.78,
+    "model_usd": 1.0044,
+    "cloud_usd": 0.2588
+   },
+   "bu2-007": {
+    "score": 78.0,
+    "minutes": 8.573,
+    "model_usd": 0.785,
+    "cloud_usd": 0.3401
+   },
+   "bu2-008": {
+    "score": 50.0,
+    "minutes": 8.263,
+    "model_usd": 0.6995,
+    "cloud_usd": 0.1026
+   },
+   "bu2-009": {
+    "score": 70.0,
+    "minutes": 18.318,
+    "model_usd": 2.0019,
+    "cloud_usd": 1.5279
+   },
+   "bu2-010": {
+    "score": 48.0,
+    "minutes": 43.785,
+    "model_usd": 1.6639,
+    "cloud_usd": 0.4625
+   },
+   "bu2-011": {
+    "score": 71.0,
+    "minutes": 12.228,
+    "model_usd": 1.4814,
+    "cloud_usd": 0.5923
+   },
+   "bu2-012": {
+    "score": 58.0,
+    "minutes": 3.306,
+    "model_usd": 0.499,
+    "cloud_usd": 0.4961
+   },
+   "bu2-013": {
+    "score": 32.0,
+    "minutes": 9.316,
+    "model_usd": 0.7847,
+    "cloud_usd": 0.489
+   },
+   "bu2-014": {
+    "score": 85.0,
+    "minutes": 13.849,
+    "model_usd": 1.8308,
+    "cloud_usd": 0.2709
+   },
+   "bu2-015": {
+    "score": 76.0,
+    "minutes": 13.979,
+    "model_usd": 1.3585,
+    "cloud_usd": 1.2067
+   },
+   "bu2-016": {
+    "score": 92.0,
+    "minutes": 8.87,
+    "model_usd": 0.6434,
+    "cloud_usd": 0.1014
+   },
+   "bu2-017": {
+    "score": 92.0,
+    "minutes": 22.24,
+    "model_usd": 2.5802,
+    "cloud_usd": 0.3258
+   },
+   "bu2-018": {
+    "score": 37.0,
+    "minutes": 2.05,
+    "model_usd": 0.0845,
+    "cloud_usd": 0.001
+   },
+   "bu2-019": {
+    "score": 62.0,
+    "minutes": 12.925,
+    "model_usd": 1.1566,
+    "cloud_usd": 0.168
+   },
+   "bu2-020": {
+    "score": 64.0,
+    "minutes": 8.323,
+    "model_usd": 0.5843,
+    "cloud_usd": 0.3277
+   },
+   "bu2-021": {
+    "score": 64.0,
+    "minutes": 12.807,
+    "model_usd": 1.4303,
+    "cloud_usd": 0.4308
+   },
+   "bu2-022": {
+    "score": 100.0,
+    "minutes": 10.359,
+    "model_usd": 1.729,
+    "cloud_usd": 0.5864
+   },
+   "bu2-023": {
+    "score": 88.0,
+    "minutes": 10.678,
+    "model_usd": 1.1586,
+    "cloud_usd": 0.4291
+   },
+   "bu2-024": {
+    "score": 70.0,
+    "minutes": 16.848,
+    "model_usd": 1.3899,
+    "cloud_usd": 0.7209
+   },
+   "bu2-025": {
+    "score": 86.0,
+    "minutes": 11.097,
+    "model_usd": 0.5332,
+    "cloud_usd": 0.1242
+   },
+   "bu2-026": {
+    "score": 92.0,
+    "minutes": 8.481,
+    "model_usd": 0.8928,
+    "cloud_usd": 0.1126
+   },
+   "bu2-027": {
+    "score": 78.0,
+    "minutes": 8.592,
+    "model_usd": 0.7718,
+    "cloud_usd": 0.4769
+   },
+   "bu2-028": {
+    "score": 86.0,
+    "minutes": 7.316,
+    "model_usd": 0.5419,
+    "cloud_usd": 0.057
+   },
+   "bu2-029": {
+    "score": 74.0,
+    "minutes": 12.188,
+    "model_usd": 1.2372,
+    "cloud_usd": 0.2589
+   },
+   "bu2-030": {
+    "score": 54.0,
+    "minutes": 7.122,
+    "model_usd": 0.5255,
+    "cloud_usd": 0.2055
+   },
+   "bu2-031": {
+    "score": 60.0,
+    "minutes": 6.532,
+    "model_usd": 0.748,
+    "cloud_usd": 0.2696
+   },
+   "bu2-032": {
+    "score": 80.0,
+    "minutes": 13.061,
+    "model_usd": 1.4456,
+    "cloud_usd": 0.077
+   },
+   "bu2-033": {
+    "score": 76.0,
+    "minutes": 9.031,
+    "model_usd": 0.9109,
+    "cloud_usd": 0.5491
+   },
+   "bu2-034": {
+    "score": 38.0,
+    "minutes": 26.908,
+    "model_usd": 4.6443,
+    "cloud_usd": 0.9713
+   },
+   "bu2-035": {
+    "score": 36.0,
+    "minutes": 7.44,
+    "model_usd": 0.5357,
+    "cloud_usd": 0.2976
+   },
+   "bu2-036": {
+    "score": 86.0,
+    "minutes": 8.717,
+    "model_usd": 0.8234,
+    "cloud_usd": 0.0676
+   },
+   "bu2-037": {
+    "score": 92.0,
+    "minutes": 17.335,
+    "model_usd": 1.6742,
+    "cloud_usd": 1.3229
+   },
+   "bu2-038": {
+    "score": 100.0,
+    "minutes": 3.377,
+    "model_usd": 0.3717,
+    "cloud_usd": 0.1293
+   },
+   "bu2-039": {
+    "score": 90.0,
+    "minutes": 8.654,
+    "model_usd": 1.1471,
+    "cloud_usd": 0.1709
+   },
+   "bu2-040": {
+    "score": 66.0,
+    "minutes": 10.876,
+    "model_usd": 1.4101,
+    "cloud_usd": 1.0946
+   },
+   "bu2-041": {
+    "score": 100.0,
+    "minutes": 23.759,
+    "model_usd": 2.2065,
+    "cloud_usd": 1.0981
+   },
+   "bu2-042": {
+    "score": 61.0,
+    "minutes": 4.035,
+    "model_usd": 0.2892,
+    "cloud_usd": 0.0847
+   },
+   "bu2-043": {
+    "score": 94.0,
+    "minutes": 9.938,
+    "model_usd": 0.9709,
+    "cloud_usd": 1.1599
+   },
+   "bu2-044": {
+    "score": 100.0,
+    "minutes": 17.006,
+    "model_usd": 1.6991,
+    "cloud_usd": 0.3936
+   },
+   "bu2-045": {
+    "score": 56.0,
+    "minutes": 9.708,
+    "model_usd": 0.8721,
+    "cloud_usd": 0.4042
+   },
+   "bu2-046": {
+    "score": 88.0,
+    "minutes": 6.49,
+    "model_usd": 0.4882,
+    "cloud_usd": 0.1978
+   },
+   "bu2-047": {
+    "score": 62.0,
+    "minutes": 24.091,
+    "model_usd": 2.9468,
+    "cloud_usd": 0.822
+   },
+   "bu2-048": {
+    "score": 78.0,
+    "minutes": 6.507,
+    "model_usd": 0.5514,
+    "cloud_usd": 0.0725
+   },
+   "bu2-049": {
+    "score": 60.0,
+    "minutes": 12.467,
+    "model_usd": 0.9872,
+    "cloud_usd": 0.1379
+   },
+   "bu2-050": {
+    "score": 100.0,
+    "minutes": 12.311,
+    "model_usd": 1.6042,
+    "cloud_usd": 0.6903
+   },
+   "bu2-051": {
+    "score": 48.0,
+    "minutes": 7.234,
+    "model_usd": 0.7495,
+    "cloud_usd": 0.1041
+   },
+   "bu2-052": {
+    "score": 70.0,
+    "minutes": 6.828,
+    "model_usd": 0.6607,
+    "cloud_usd": 0.0655
+   },
+   "bu2-053": {
+    "score": 88.0,
+    "minutes": 14.482,
+    "model_usd": 1.8357,
+    "cloud_usd": 1.3329
+   },
+   "bu2-054": {
+    "score": 64.0,
+    "minutes": 7.73,
+    "model_usd": 0.6898,
+    "cloud_usd": 0.3718
+   },
+   "bu2-055": {
+    "score": 71.0,
+    "minutes": 19.275,
+    "model_usd": 3.6092,
+    "cloud_usd": 0.2443
+   },
+   "bu2-056": {
+    "score": 6.0,
+    "minutes": 0.534,
+    "model_usd": 0.0318,
+    "cloud_usd": 0.0003
+   },
+   "bu2-057": {
+    "score": 100.0,
+    "minutes": 2.441,
+    "model_usd": 0.3054,
+    "cloud_usd": 0.0503
+   },
+   "bu2-058": {
+    "score": 60.0,
+    "minutes": 5.182,
+    "model_usd": 0.3932,
+    "cloud_usd": 0.002
+   },
+   "bu2-059": {
+    "score": 10.0,
+    "minutes": 0.878,
+    "model_usd": 0.0636,
+    "cloud_usd": 0.0003
+   },
+   "bu2-060": {
+    "score": 56.0,
+    "minutes": 3.455,
+    "model_usd": 0.3394,
+    "cloud_usd": 0.015
+   },
+   "bu2-061": {
+    "score": 100.0,
+    "minutes": 1.391,
+    "model_usd": 0.1083,
+    "cloud_usd": 0.0067
+   },
+   "bu2-062": {
+    "score": 100.0,
+    "minutes": 5.515,
+    "model_usd": 0.2968,
+    "cloud_usd": 0.6273
+   },
+   "bu2-063": {
+    "score": 49.0,
+    "minutes": 1.669,
+    "model_usd": 0.1478,
+    "cloud_usd": 0.0529
+   },
+   "bu2-064": {
+    "score": 88.0,
+    "minutes": 3.27,
+    "model_usd": 0.3473,
+    "cloud_usd": 0.2023
+   },
+   "bu2-065": {
+    "score": 45.0,
+    "minutes": 2.729,
+    "model_usd": 0.2238,
+    "cloud_usd": 0.0504
+   },
+   "bu2-066": {
+    "score": 14.0,
+    "minutes": 2.15,
+    "model_usd": 0.134,
+    "cloud_usd": 0.1026
+   },
+   "bu2-067": {
+    "score": 36.0,
+    "minutes": 10.404,
+    "model_usd": 1.5784,
+    "cloud_usd": 0.0674
+   },
+   "bu2-068": {
+    "score": 100.0,
+    "minutes": 1.16,
+    "model_usd": 0.0587,
+    "cloud_usd": 0.0033
+   },
+   "bu2-069": {
+    "score": 74.0,
+    "minutes": 11.588,
+    "model_usd": 1.023,
+    "cloud_usd": 0.1008
+   },
+   "bu2-070": {
+    "score": 0.0,
+    "minutes": 0.569,
+    "model_usd": 0.0421,
+    "cloud_usd": 0.0003
+   },
+   "bu2-071": {
+    "score": 90.0,
+    "minutes": 12.903,
+    "model_usd": 1.0463,
+    "cloud_usd": 0.1283
+   },
+   "bu2-072": {
+    "score": 90.0,
+    "minutes": 2.424,
+    "model_usd": 0.2135,
+    "cloud_usd": 0.05
+   },
+   "bu2-073": {
+    "score": 58.0,
+    "minutes": 3.776,
+    "model_usd": 0.2848,
+    "cloud_usd": 0.4248
+   },
+   "bu2-074": {
+    "score": 12.0,
+    "minutes": 0.595,
+    "model_usd": 0.0323,
+    "cloud_usd": 0.0003
+   },
+   "bu2-075": {
+    "score": 30.0,
+    "minutes": 2.746,
+    "model_usd": 0.0849,
+    "cloud_usd": 0.001
+   },
+   "bu2-076": {
+    "score": 20.0,
+    "minutes": 10.012,
+    "model_usd": 0.8383,
+    "cloud_usd": 0.5001
+   },
+   "bu2-077": {
+    "score": 4.0,
+    "minutes": 0.716,
+    "model_usd": 0.0626,
+    "cloud_usd": 0.0003
+   },
+   "bu2-078": {
+    "score": 85.0,
+    "minutes": 1.772,
+    "model_usd": 0.1212,
+    "cloud_usd": 0.0443
+   },
+   "bu2-079": {
+    "score": 72.0,
+    "minutes": 3.753,
+    "model_usd": 0.4252,
+    "cloud_usd": 0.3169
+   },
+   "bu2-080": {
+    "score": 100.0,
+    "minutes": 1.266,
+    "model_usd": 0.1059,
+    "cloud_usd": 0.0007
+   },
+   "bu2-081": {
+    "score": 62.0,
+    "minutes": 1.836,
+    "model_usd": 0.1048,
+    "cloud_usd": 0.0218
+   },
+   "bu2-082": {
+    "score": 74.0,
+    "minutes": 3.022,
+    "model_usd": 0.2318,
+    "cloud_usd": 0.1216
+   },
+   "bu2-083": {
+    "score": 100.0,
+    "minutes": 1.364,
+    "model_usd": 0.1216,
+    "cloud_usd": 0.1259
+   },
+   "bu2-084": {
+    "score": 100.0,
+    "minutes": 3.725,
+    "model_usd": 0.1898,
+    "cloud_usd": 0.0348
+   },
+   "bu2-085": {
+    "score": 82.0,
+    "minutes": 8.12,
+    "model_usd": 0.5665,
+    "cloud_usd": 1.0173
+   },
+   "bu2-086": {
+    "score": 100.0,
+    "minutes": 5.154,
+    "model_usd": 0.2052,
+    "cloud_usd": 0.1312
+   },
+   "bu2-087": {
+    "score": 71.0,
+    "minutes": 5.788,
+    "model_usd": 0.4007,
+    "cloud_usd": 0.0661
+   },
+   "bu2-088": {
+    "score": 100.0,
+    "minutes": 5.402,
+    "model_usd": 0.64,
+    "cloud_usd": 0.0849
+   },
+   "bu2-089": {
+    "score": 100.0,
+    "minutes": 3.095,
+    "model_usd": 0.1445,
+    "cloud_usd": 0.0406
+   },
+   "bu2-090": {
+    "score": 56.0,
+    "minutes": 1.906,
+    "model_usd": 0.1661,
+    "cloud_usd": 0.1287
+   },
+   "bu2-091": {
+    "score": 44.0,
+    "minutes": 8.968,
+    "model_usd": 0.8793,
+    "cloud_usd": 0.4278
+   },
+   "bu2-092": {
+    "score": 100.0,
+    "minutes": 1.442,
+    "model_usd": 0.0801,
+    "cloud_usd": 0.0007
+   },
+   "bu2-093": {
+    "score": 100.0,
+    "minutes": 1.67,
+    "model_usd": 0.0992,
+    "cloud_usd": 0.0007
+   },
+   "bu2-094": {
+    "score": 20.0,
+    "minutes": 0.583,
+    "model_usd": 0.0373,
+    "cloud_usd": 0.0003
+   },
+   "bu2-095": {
+    "score": 45.0,
+    "minutes": 4.368,
+    "model_usd": 0.432,
+    "cloud_usd": 0.2271
+   },
+   "bu2-096": {
+    "score": 72.0,
+    "minutes": 14.762,
+    "model_usd": 1.468,
+    "cloud_usd": 0.0932
+   },
+   "bu2-097": {
+    "score": 100.0,
+    "minutes": 7.888,
+    "model_usd": 0.5732,
+    "cloud_usd": 0.1269
+   },
+   "bu2-098": {
+    "score": 100.0,
+    "minutes": 1.385,
+    "model_usd": 0.0875,
+    "cloud_usd": 0.0314
+   },
+   "bu2-099": {
+    "score": 50.0,
+    "minutes": 11.35,
+    "model_usd": 0.9734,
+    "cloud_usd": 0.3767
+   },
+   "bu2-100": {
+    "score": 100.0,
+    "minutes": 3.288,
+    "model_usd": 0.2897,
+    "cloud_usd": 0.0518
+   },
+   "bu2-101": {
+    "score": 68.0,
+    "minutes": 5.957,
+    "model_usd": 0.4311,
+    "cloud_usd": 0.1086
+   },
+   "bu2-102": {
+    "score": 51.0,
+    "minutes": 2.967,
+    "model_usd": 0.1955,
+    "cloud_usd": 0.1582
+   },
+   "bu2-103": {
+    "score": 100.0,
+    "minutes": 4.409,
+    "model_usd": 0.5168,
+    "cloud_usd": 0.1548
+   },
+   "bu2-104": {
+    "score": 14.0,
+    "minutes": 3.313,
+    "model_usd": 0.2332,
+    "cloud_usd": 0.0506
+   },
+   "bu2-105": {
+    "score": 32.0,
+    "minutes": 5.979,
+    "model_usd": 0.7828,
+    "cloud_usd": 0.0959
+   },
+   "bu2-106": {
+    "score": 35.0,
+    "minutes": 0.601,
+    "model_usd": 0.0381,
+    "cloud_usd": 0.0003
+   },
+   "bu2-107": {
+    "score": 56.0,
+    "minutes": 17.812,
+    "model_usd": 2.1659,
+    "cloud_usd": 0.8172
+   },
+   "bu2-108": {
+    "score": 100.0,
+    "minutes": 9.285,
+    "model_usd": 0.9894,
+    "cloud_usd": 0.2524
+   },
+   "bu2-109": {
+    "score": 100.0,
+    "minutes": 1.136,
+    "model_usd": 0.0518,
+    "cloud_usd": 0.0007
+   },
+   "bu2-110": {
+    "score": 86.0,
+    "minutes": 9.197,
+    "model_usd": 0.7969,
+    "cloud_usd": 0.3996
+   },
+   "bu2-111": {
+    "score": 86.0,
+    "minutes": 9.348,
+    "model_usd": 1.152,
+    "cloud_usd": 0.0739
+   },
+   "bu2-112": {
+    "score": 100.0,
+    "minutes": 2.144,
+    "model_usd": 0.1377,
+    "cloud_usd": 0.001
+   },
+   "bu2-113": {
+    "score": 88.0,
+    "minutes": 6.829,
+    "model_usd": 0.6122,
+    "cloud_usd": 0.4254
+   },
+   "bu2-114": {
+    "score": 100.0,
+    "minutes": 6.791,
+    "model_usd": 0.1778,
+    "cloud_usd": 0.0927
+   },
+   "bu2-115": {
+    "score": 60.0,
+    "minutes": 4.343,
+    "model_usd": 0.3026,
+    "cloud_usd": 0.2734
+   },
+   "bu2-116": {
+    "score": 72.0,
+    "minutes": 4.673,
+    "model_usd": 0.2384,
+    "cloud_usd": 0.3266
+   },
+   "bu2-117": {
+    "score": 80.0,
+    "minutes": 12.768,
+    "model_usd": 1.3138,
+    "cloud_usd": 0.2176
+   },
+   "bu2-118": {
+    "score": 75.0,
+    "minutes": 3.473,
+    "model_usd": 0.2488,
+    "cloud_usd": 0.1057
+   },
+   "bu2-119": {
+    "score": 43.0,
+    "minutes": 26.965,
+    "model_usd": 0.8973,
+    "cloud_usd": 0.929
+   },
+   "bu2-120": {
+    "score": 100.0,
+    "minutes": 4.251,
+    "model_usd": 0.3175,
+    "cloud_usd": 0.0544
+   },
+   "bu2-121": {
+    "score": 22.0,
+    "minutes": 5.298,
+    "model_usd": 0.2723,
+    "cloud_usd": 0.2589
+   },
+   "bu2-122": {
+    "score": 46.0,
+    "minutes": 15.147,
+    "model_usd": 1.6215,
+    "cloud_usd": 0.0369
+   },
+   "bu2-123": {
+    "score": 100.0,
+    "minutes": 0.737,
+    "model_usd": 0.0513,
+    "cloud_usd": 0.001
+   },
+   "bu2-124": {
+    "score": 86.0,
+    "minutes": 7.103,
+    "model_usd": 0.5575,
+    "cloud_usd": 0.178
+   },
+   "bu2-125": {
+    "score": 82.0,
+    "minutes": 3.868,
+    "model_usd": 0.4444,
+    "cloud_usd": 0.004
+   },
+   "bu2-126": {
+    "score": 100.0,
+    "minutes": 14.973,
+    "model_usd": 1.7493,
+    "cloud_usd": 0.0603
+   },
+   "bu2-127": {
+    "score": 53.0,
+    "minutes": 3.301,
+    "model_usd": 0.3312,
+    "cloud_usd": 0.052
+   },
+   "bu2-128": {
+    "score": 100.0,
+    "minutes": 26.073,
+    "model_usd": 0.8624,
+    "cloud_usd": 0.1506
+   },
+   "bu2-129": {
+    "score": 100.0,
+    "minutes": 6.929,
+    "model_usd": 0.7844,
+    "cloud_usd": 0.2664
+   },
+   "bu2-130": {
+    "score": 60.0,
+    "minutes": 1.47,
+    "model_usd": 0.1395,
+    "cloud_usd": 0.002
+   },
+   "bu2-131": {
+    "score": 38.0,
+    "minutes": 4.922,
+    "model_usd": 0.3958,
+    "cloud_usd": 0.0552
+   },
+   "bu2-132": {
+    "score": 72.0,
+    "minutes": 7.62,
+    "model_usd": 0.7382,
+    "cloud_usd": 0.1505
+   },
+   "bu2-133": {
+    "score": 100.0,
+    "minutes": 1.188,
+    "model_usd": 0.116,
+    "cloud_usd": 0.0515
+   },
+   "bu2-134": {
+    "score": 85.0,
+    "minutes": 2.969,
+    "model_usd": 0.2472,
+    "cloud_usd": 0.1167
+   },
+   "bu2-135": {
+    "score": 47.0,
+    "minutes": 2.833,
+    "model_usd": 0.2203,
+    "cloud_usd": 0.003
+   },
+   "bu2-136": {
+    "score": 34.0,
+    "minutes": 5.841,
+    "model_usd": 0.5135,
+    "cloud_usd": 0.198
+   },
+   "bu2-137": {
+    "score": 54.0,
+    "minutes": 4.648,
+    "model_usd": 0.2422,
+    "cloud_usd": 0.0525
+   },
+   "bu2-138": {
+    "score": 53.0,
+    "minutes": 2.072,
+    "model_usd": 0.1536,
+    "cloud_usd": 0.003
+   },
+   "bu2-139": {
+    "score": 70.0,
+    "minutes": 3.534,
+    "model_usd": 0.3802,
+    "cloud_usd": 0.8229
+   },
+   "bu2-140": {
+    "score": 86.0,
+    "minutes": 1.461,
+    "model_usd": 0.1125,
+    "cloud_usd": 0.17
+   },
+   "bu2-141": {
+    "score": 100.0,
+    "minutes": 3.278,
+    "model_usd": 0.2312,
+    "cloud_usd": 0.0533
+   },
+   "bu2-142": {
+    "score": 71.0,
+    "minutes": 10.669,
+    "model_usd": 0.8812,
+    "cloud_usd": 0.23
+   },
+   "bu2-143": {
+    "score": 88.0,
+    "minutes": 3.362,
+    "model_usd": 0.2525,
+    "cloud_usd": 0.0533
+   },
+   "bu2-144": {
+    "score": 100.0,
+    "minutes": 2.608,
+    "model_usd": 0.2238,
+    "cloud_usd": 0.0519
+   },
+   "bu2-145": {
+    "score": 18.0,
+    "minutes": 0.54,
+    "model_usd": 0.0291,
+    "cloud_usd": 0.001
+   },
+   "bu2-146": {
+    "score": 88.0,
+    "minutes": 3.043,
+    "model_usd": 0.246,
+    "cloud_usd": 0.1548
+   },
+   "bu2-147": {
+    "score": 8.0,
+    "minutes": 0.943,
+    "model_usd": 0.0394,
+    "cloud_usd": 0.001
+   },
+   "bu2-148": {
+    "score": 19.0,
+    "minutes": 0.539,
+    "model_usd": 0.032,
+    "cloud_usd": 0.001
+   },
+   "bu2-149": {
+    "score": 100.0,
+    "minutes": 7.954,
+    "model_usd": 0.3244,
+    "cloud_usd": 0.2599
+   },
+   "bu2-150": {
+    "score": 10.0,
+    "minutes": 5.046,
+    "model_usd": 0.1608,
+    "cloud_usd": 0.1533
+   },
+   "bu2-151": {
+    "score": 28.0,
+    "minutes": 8.507,
+    "model_usd": 0.5057,
+    "cloud_usd": 0.1188
+   },
+   "bu2-152": {
+    "score": 100.0,
+    "minutes": 2.138,
+    "model_usd": 0.1805,
+    "cloud_usd": 0.101
+   },
+   "bu2-153": {
+    "score": 100.0,
+    "minutes": 9.937,
+    "model_usd": 1.6927,
+    "cloud_usd": 0.02
+   },
+   "bu2-154": {
+    "score": 100.0,
+    "minutes": 0.984,
+    "model_usd": 0.0739,
+    "cloud_usd": 0.001
+   },
+   "bu2-155": {
+    "score": 88.0,
+    "minutes": 3.243,
+    "model_usd": 0.4497,
+    "cloud_usd": 0.0467
+   },
+   "bu2-156": {
+    "score": 100.0,
+    "minutes": 2.087,
+    "model_usd": 0.2041,
+    "cloud_usd": 0.1212
+   },
+   "bu2-157": {
+    "score": 100.0,
+    "minutes": 3.334,
+    "model_usd": 0.2461,
+    "cloud_usd": 0.0542
+   },
+   "bu2-158": {
+    "score": 48.0,
+    "minutes": 1.84,
+    "model_usd": 0.1313,
+    "cloud_usd": 0.0508
+   },
+   "bu2-159": {
+    "score": 100.0,
+    "minutes": 3.573,
+    "model_usd": 0.6213,
+    "cloud_usd": 0.1159
+   },
+   "bu2-160": {
+    "score": 100.0,
+    "minutes": 2.82,
+    "model_usd": 0.1508,
+    "cloud_usd": 0.003
+   },
+   "bu2-161": {
+    "score": 76.0,
+    "minutes": 6.135,
+    "model_usd": 0.795,
+    "cloud_usd": 0.2588
+   },
+   "bu2-162": {
+    "score": 80.0,
+    "minutes": 13.517,
+    "model_usd": 1.4016,
+    "cloud_usd": 0.4316
+   },
+   "bu2-163": {
+    "score": 78.0,
+    "minutes": 8.794,
+    "model_usd": 0.9471,
+    "cloud_usd": 0.0959
+   },
+   "bu2-164": {
+    "score": 90.0,
+    "minutes": 13.925,
+    "model_usd": 2.6426,
+    "cloud_usd": 0.4134
+   },
+   "bu2-165": {
+    "score": 44.0,
+    "minutes": 2.585,
+    "model_usd": 0.1674,
+    "cloud_usd": 0.052
+   },
+   "bu2-166": {
+    "score": 100.0,
+    "minutes": 1.821,
+    "model_usd": 0.1497,
+    "cloud_usd": 0.002
+   },
+   "bu2-167": {
+    "score": 58.0,
+    "minutes": 2.644,
+    "model_usd": 0.2832,
+    "cloud_usd": 0.003
+   },
+   "bu2-168": {
+    "score": 64.0,
+    "minutes": 5.325,
+    "model_usd": 0.5189,
+    "cloud_usd": 0.2628
+   },
+   "bu2-169": {
+    "score": 74.0,
+    "minutes": 6.667,
+    "model_usd": 0.2987,
+    "cloud_usd": 0.2959
+   },
+   "bu2-170": {
+    "score": 87.0,
+    "minutes": 3.45,
+    "model_usd": 0.3243,
+    "cloud_usd": 0.004
+   },
+   "bu2-171": {
+    "score": 77.0,
+    "minutes": 3.421,
+    "model_usd": 0.3776,
+    "cloud_usd": 0.1025
+   },
+   "bu2-172": {
+    "score": 62.0,
+    "minutes": 1.357,
+    "model_usd": 0.1017,
+    "cloud_usd": 0.2747
+   },
+   "bu2-173": {
+    "score": 56.0,
+    "minutes": 4.47,
+    "model_usd": 0.3984,
+    "cloud_usd": 0.156
+   },
+   "bu2-174": {
+    "score": 78.0,
+    "minutes": 10.08,
+    "model_usd": 0.6261,
+    "cloud_usd": 0.2656
+   },
+   "bu2-175": {
+    "score": 16.0,
+    "minutes": 0.658,
+    "model_usd": 0.0424,
+    "cloud_usd": 0.001
+   },
+   "bu2-176": {
+    "score": 100.0,
+    "minutes": 1.937,
+    "model_usd": 0.1374,
+    "cloud_usd": 0.002
+   },
+   "bu2-177": {
+    "score": 62.0,
+    "minutes": 2.094,
+    "model_usd": 0.2562,
+    "cloud_usd": 0.003
+   },
+   "bu2-178": {
+    "score": 88.0,
+    "minutes": 6.011,
+    "model_usd": 0.4716,
+    "cloud_usd": 0.1502
+   },
+   "bu2-179": {
+    "score": 68.0,
+    "minutes": 7.534,
+    "model_usd": 1.1776,
+    "cloud_usd": 0.3254
+   },
+   "bu2-180": {
+    "score": 86.0,
+    "minutes": 1.334,
+    "model_usd": 0.1142,
+    "cloud_usd": 0.0514
+   },
+   "bu2-181": {
+    "score": 100.0,
+    "minutes": 1.347,
+    "model_usd": 0.1087,
+    "cloud_usd": 0.0262
+   },
+   "bu2-182": {
+    "score": 78.0,
+    "minutes": 14.692,
+    "model_usd": 1.3415,
+    "cloud_usd": 0.246
+   },
+   "bu2-183": {
+    "score": 58.0,
+    "minutes": 9.519,
+    "model_usd": 0.764,
+    "cloud_usd": 1.156
+   },
+   "bu2-184": {
+    "score": 74.0,
+    "minutes": 19.087,
+    "model_usd": 1.8654,
+    "cloud_usd": 0.9498
+   },
+   "bu2-185": {
+    "score": 25.0,
+    "minutes": 5.876,
+    "model_usd": 0.1752,
+    "cloud_usd": 0.3468
+   },
+   "bu2-186": {
+    "score": 100.0,
+    "minutes": 3.827,
+    "model_usd": 0.243,
+    "cloud_usd": 0.006
+   },
+   "bu2-187": {
+    "score": 54.0,
+    "minutes": 2.211,
+    "model_usd": 0.1222,
+    "cloud_usd": 0.1093
+   },
+   "bu2-188": {
+    "score": 75.0,
+    "minutes": 2.047,
+    "model_usd": 0.1485,
+    "cloud_usd": 0.003
+   },
+   "bu2-189": {
+    "score": 61.0,
+    "minutes": 1.88,
+    "model_usd": 0.121,
+    "cloud_usd": 0.002
+   },
+   "bu2-190": {
+    "score": 36.0,
+    "minutes": 4.468,
+    "model_usd": 0.3784,
+    "cloud_usd": 0.456
+   },
+   "bu2-191": {
+    "score": 68.0,
+    "minutes": 13.637,
+    "model_usd": 1.7276,
+    "cloud_usd": 0.1083
+   },
+   "bu2-192": {
+    "score": 50.0,
+    "minutes": 2.906,
+    "model_usd": 0.1942,
+    "cloud_usd": 0.0474
+   },
+   "bu2-193": {
+    "score": 36.0,
+    "minutes": 10.633,
+    "model_usd": 0.4061,
+    "cloud_usd": 0.4156
+   },
+   "bu2-194": {
+    "score": 52.0,
+    "minutes": 2.492,
+    "model_usd": 0.1636,
+    "cloud_usd": 0.5785
+   },
+   "bu2-195": {
+    "score": 75.0,
+    "minutes": 3.884,
+    "model_usd": 0.3505,
+    "cloud_usd": 0.0531
+   },
+   "bu2-196": {
+    "score": 32.0,
+    "minutes": 4.007,
+    "model_usd": 0.4569,
+    "cloud_usd": 0.0199
+   },
+   "bu2-197": {
+    "score": 46.0,
+    "minutes": 5.403,
+    "model_usd": 0.2339,
+    "cloud_usd": 0.5761
+   },
+   "bu2-198": {
+    "score": 41.0,
+    "minutes": 2.574,
+    "model_usd": 0.1114,
+    "cloud_usd": 0.1019
+   },
+   "bu2-199": {
+    "score": 74.0,
+    "minutes": 4.0,
+    "model_usd": 0.2993,
+    "cloud_usd": 0.0538
+   },
+   "bu2-200": {
+    "score": 46.0,
+    "minutes": 7.058,
+    "model_usd": 0.3165,
+    "cloud_usd": 0.1644
+   }
+  },
+  "codex-browser-use-mcp": {
+   "bu2-001": {
+    "score": 70.0,
+    "minutes": 7.26,
+    "model_usd": 0.4756,
+    "cloud_usd": 0.183
+   },
+   "bu2-002": {
+    "score": 54.0,
+    "minutes": 12.585,
+    "model_usd": 0.7161,
+    "cloud_usd": 0.2503
+   },
+   "bu2-003": {
+    "score": 80.0,
+    "minutes": 13.581,
+    "model_usd": 0.7235,
+    "cloud_usd": 0.5052
+   },
+   "bu2-004": {
+    "score": 62.0,
+    "minutes": 11.884,
+    "model_usd": 0.6999,
+    "cloud_usd": 0.3619
+   },
+   "bu2-005": {
+    "score": 100.0,
+    "minutes": 3.709,
+    "model_usd": 0.2303,
+    "cloud_usd": 0.0472
+   },
+   "bu2-006": {
+    "score": 86.0,
+    "minutes": 9.239,
+    "model_usd": 0.6109,
+    "cloud_usd": 0.1962
+   },
+   "bu2-007": {
+    "score": 58.0,
+    "minutes": 16.486,
+    "model_usd": 0.6766,
+    "cloud_usd": 0.4143
+   },
+   "bu2-008": {
+    "score": 58.0,
+    "minutes": 7.361,
+    "model_usd": 0.4955,
+    "cloud_usd": 0.0697
+   },
+   "bu2-009": {
+    "score": 66.0,
+    "minutes": 17.079,
+    "model_usd": 0.6836,
+    "cloud_usd": 0.8774
+   },
+   "bu2-010": {
+    "score": 38.0,
+    "minutes": 0.691,
+    "model_usd": 0.0415,
+    "cloud_usd": 0.0003
+   },
+   "bu2-011": {
+    "score": 85.0,
+    "minutes": 13.138,
+    "model_usd": 0.7256,
+    "cloud_usd": 0.3925
+   },
+   "bu2-012": {
+    "score": 48.0,
+    "minutes": 9.372,
+    "model_usd": 0.5977,
+    "cloud_usd": 0.9185
+   },
+   "bu2-013": {
+    "score": 20.0,
+    "minutes": 32.528,
+    "model_usd": 1.4677,
+    "cloud_usd": 1.8541
+   },
+   "bu2-014": {
+    "score": 61.0,
+    "minutes": 12.129,
+    "model_usd": 0.6533,
+    "cloud_usd": 0.3375
+   },
+   "bu2-015": {
+    "score": 84.0,
+    "minutes": 12.241,
+    "model_usd": 0.969,
+    "cloud_usd": 0.3404
+   },
+   "bu2-016": {
+    "score": 90.0,
+    "minutes": 12.242,
+    "model_usd": 0.4907,
+    "cloud_usd": 0.2764
+   },
+   "bu2-017": {
+    "score": 78.0,
+    "minutes": 27.375,
+    "model_usd": 1.5927,
+    "cloud_usd": 0.4266
+   },
+   "bu2-018": {
+    "score": 88.0,
+    "minutes": 15.134,
+    "model_usd": 0.8307,
+    "cloud_usd": 0.4512
+   },
+   "bu2-019": {
+    "score": 63.0,
+    "minutes": 14.581,
+    "model_usd": 0.8663,
+    "cloud_usd": 0.1747
+   },
+   "bu2-020": {
+    "score": 90.0,
+    "minutes": 10.338,
+    "model_usd": 0.5895,
+    "cloud_usd": 0.3747
+   },
+   "bu2-021": {
+    "score": 50.0,
+    "minutes": 18.338,
+    "model_usd": 1.1799,
+    "cloud_usd": 0.3911
+   },
+   "bu2-022": {
+    "score": 90.0,
+    "minutes": 16.207,
+    "model_usd": 1.209,
+    "cloud_usd": 0.6439
+   },
+   "bu2-023": {
+    "score": 100.0,
+    "minutes": 6.897,
+    "model_usd": 0.3955,
+    "cloud_usd": 0.4528
+   },
+   "bu2-024": {
+    "score": 60.0,
+    "minutes": 5.421,
+    "model_usd": 0.3229,
+    "cloud_usd": 0.2604
+   },
+   "bu2-025": {
+    "score": 88.0,
+    "minutes": 27.047,
+    "model_usd": 1.4131,
+    "cloud_usd": 0.867
+   },
+   "bu2-026": {
+    "score": 92.0,
+    "minutes": 7.803,
+    "model_usd": 0.6975,
+    "cloud_usd": 0.1482
+   },
+   "bu2-027": {
+    "score": 90.0,
+    "minutes": 7.508,
+    "model_usd": 0.4454,
+    "cloud_usd": 0.4278
+   },
+   "bu2-028": {
+    "score": 78.0,
+    "minutes": 8.167,
+    "model_usd": 0.6658,
+    "cloud_usd": 0.136
+   },
+   "bu2-029": {
+    "score": 86.0,
+    "minutes": 10.57,
+    "model_usd": 0.6004,
+    "cloud_usd": 0.4566
+   },
+   "bu2-030": {
+    "score": 42.0,
+    "minutes": 8.754,
+    "model_usd": 0.4507,
+    "cloud_usd": 0.3778
+   },
+   "bu2-031": {
+    "score": 44.0,
+    "minutes": 4.513,
+    "model_usd": 0.333,
+    "cloud_usd": 0.2013
+   },
+   "bu2-032": {
+    "score": 80.0,
+    "minutes": 16.537,
+    "model_usd": 1.4384,
+    "cloud_usd": 0.1087
+   },
+   "bu2-033": {
+    "score": 100.0,
+    "minutes": 7.112,
+    "model_usd": 0.4174,
+    "cloud_usd": 0.3454
+   },
+   "bu2-034": {
+    "score": 34.0,
+    "minutes": 15.914,
+    "model_usd": 1.1812,
+    "cloud_usd": 0.907
+   },
+   "bu2-035": {
+    "score": 56.0,
+    "minutes": 2.089,
+    "model_usd": 0.1081,
+    "cloud_usd": 0.0501
+   },
+   "bu2-036": {
+    "score": 86.0,
+    "minutes": 8.33,
+    "model_usd": 0.9383,
+    "cloud_usd": 0.1161
+   },
+   "bu2-037": {
+    "score": 80.0,
+    "minutes": 11.767,
+    "model_usd": 0.5132,
+    "cloud_usd": 1.5083
+   },
+   "bu2-038": {
+    "score": 100.0,
+    "minutes": 2.297,
+    "model_usd": 0.1276,
+    "cloud_usd": 0.2564
+   },
+   "bu2-039": {
+    "score": 55.0,
+    "minutes": 7.856,
+    "model_usd": 0.4044,
+    "cloud_usd": 0.1012
+   },
+   "bu2-040": {
+    "score": 94.0,
+    "minutes": 9.485,
+    "model_usd": 0.9056,
+    "cloud_usd": 0.4879
+   },
+   "bu2-041": {
+    "score": 100.0,
+    "minutes": 17.603,
+    "model_usd": 0.9423,
+    "cloud_usd": 1.3424
+   },
+   "bu2-042": {
+    "score": 76.0,
+    "minutes": 14.899,
+    "model_usd": 1.0616,
+    "cloud_usd": 8.9497
+   },
+   "bu2-043": {
+    "score": 69.0,
+    "minutes": 9.24,
+    "model_usd": 0.955,
+    "cloud_usd": 1.1407
+   },
+   "bu2-044": {
+    "score": 100.0,
+    "minutes": 13.189,
+    "model_usd": 0.4808,
+    "cloud_usd": 0.3138
+   },
+   "bu2-045": {
+    "score": 56.0,
+    "minutes": 12.38,
+    "model_usd": 0.598,
+    "cloud_usd": 0.6526
+   },
+   "bu2-046": {
+    "score": 82.0,
+    "minutes": 6.759,
+    "model_usd": 0.392,
+    "cloud_usd": 0.1541
+   },
+   "bu2-047": {
+    "score": 28.0,
+    "minutes": 25.147,
+    "model_usd": 0.7156,
+    "cloud_usd": 0.3718
+   },
+   "bu2-048": {
+    "score": 64.0,
+    "minutes": 8.714,
+    "model_usd": 0.6658,
+    "cloud_usd": 0.3745
+   },
+   "bu2-049": {
+    "score": 38.0,
+    "minutes": 12.172,
+    "model_usd": 0.6449,
+    "cloud_usd": 0.0536
+   },
+   "bu2-050": {
+    "score": 94.0,
+    "minutes": 10.25,
+    "model_usd": 0.8847,
+    "cloud_usd": 0.2745
+   },
+   "bu2-051": {
+    "score": 0.0,
+    "minutes": 61.523,
+    "model_usd": 0.0,
+    "cloud_usd": 0.0
+   },
+   "bu2-052": {
+    "score": 68.0,
+    "minutes": 5.308,
+    "model_usd": 0.1696,
+    "cloud_usd": 0.159
+   },
+   "bu2-053": {
+    "score": 88.0,
+    "minutes": 22.63,
+    "model_usd": 1.0753,
+    "cloud_usd": 0.254
+   },
+   "bu2-054": {
+    "score": 88.0,
+    "minutes": 6.152,
+    "model_usd": 0.3709,
+    "cloud_usd": 0.3111
+   },
+   "bu2-055": {
+    "score": 65.0,
+    "minutes": 12.45,
+    "model_usd": 1.3092,
+    "cloud_usd": 0.3532
+   },
+   "bu2-056": {
+    "score": 6.0,
+    "minutes": 0.698,
+    "model_usd": 0.0317,
+    "cloud_usd": 0.0003
+   },
+   "bu2-057": {
+    "score": 74.0,
+    "minutes": 1.419,
+    "model_usd": 0.0706,
+    "cloud_usd": 0.0497
+   },
+   "bu2-058": {
+    "score": 60.0,
+    "minutes": 5.107,
+    "model_usd": 0.2464,
+    "cloud_usd": 0.002
+   },
+   "bu2-059": {
+    "score": 100.0,
+    "minutes": 3.649,
+    "model_usd": 0.2096,
+    "cloud_usd": 0.1008
+   },
+   "bu2-060": {
+    "score": 76.0,
+    "minutes": 4.006,
+    "model_usd": 0.2549,
+    "cloud_usd": 0.062
+   },
+   "bu2-061": {
+    "score": 100.0,
+    "minutes": 1.298,
+    "model_usd": 0.1022,
+    "cloud_usd": 0.0007
+   },
+   "bu2-062": {
+    "score": 100.0,
+    "minutes": 2.597,
+    "model_usd": 0.1658,
+    "cloud_usd": 0.218
+   },
+   "bu2-063": {
+    "score": 75.0,
+    "minutes": 8.228,
+    "model_usd": 0.3611,
+    "cloud_usd": 0.0237
+   },
+   "bu2-064": {
+    "score": 64.0,
+    "minutes": 5.458,
+    "model_usd": 0.3719,
+    "cloud_usd": 0.0645
+   },
+   "bu2-065": {
+    "score": 69.0,
+    "minutes": 1.912,
+    "model_usd": 0.1038,
+    "cloud_usd": 0.0509
+   },
+   "bu2-066": {
+    "score": 0.0,
+    "minutes": 1.555,
+    "model_usd": 0.1329,
+    "cloud_usd": 0.0711
+   },
+   "bu2-067": {
+    "score": 60.0,
+    "minutes": 5.313,
+    "model_usd": 0.4956,
+    "cloud_usd": 0.0249
+   },
+   "bu2-068": {
+    "score": 100.0,
+    "minutes": 0.818,
+    "model_usd": 0.0508,
+    "cloud_usd": 0.0033
+   },
+   "bu2-069": {
+    "score": 74.0,
+    "minutes": 4.857,
+    "model_usd": 0.2143,
+    "cloud_usd": 0.0708
+   },
+   "bu2-070": {
+    "score": 76.0,
+    "minutes": 1.898,
+    "model_usd": 0.0645,
+    "cloud_usd": 0.002
+   },
+   "bu2-071": {
+    "score": 66.0,
+    "minutes": 19.761,
+    "model_usd": 1.2621,
+    "cloud_usd": 0.5614
+   },
+   "bu2-072": {
+    "score": 100.0,
+    "minutes": 2.928,
+    "model_usd": 0.1772,
+    "cloud_usd": 0.0521
+   },
+   "bu2-073": {
+    "score": 58.0,
+    "minutes": 3.782,
+    "model_usd": 0.2119,
+    "cloud_usd": 0.2698
+   },
+   "bu2-074": {
+    "score": 100.0,
+    "minutes": 14.3,
+    "model_usd": 0.3349,
+    "cloud_usd": 0.0249
+   },
+   "bu2-075": {
+    "score": 48.0,
+    "minutes": 2.202,
+    "model_usd": 0.1081,
+    "cloud_usd": 0.003
+   },
+   "bu2-076": {
+    "score": 78.0,
+    "minutes": 17.047,
+    "model_usd": 1.791,
+    "cloud_usd": 0.4889
+   },
+   "bu2-077": {
+    "score": 36.0,
+    "minutes": 5.083,
+    "model_usd": 0.2131,
+    "cloud_usd": 0.0284
+   },
+   "bu2-078": {
+    "score": 85.0,
+    "minutes": 2.021,
+    "model_usd": 0.0931,
+    "cloud_usd": 0.0517
+   },
+   "bu2-079": {
+    "score": 70.0,
+    "minutes": 4.754,
+    "model_usd": 0.3993,
+    "cloud_usd": 1.0506
+   },
+   "bu2-080": {
+    "score": 100.0,
+    "minutes": 2.143,
+    "model_usd": 0.0952,
+    "cloud_usd": 0.003
+   },
+   "bu2-081": {
+    "score": 47.0,
+    "minutes": 1.558,
+    "model_usd": 0.085,
+    "cloud_usd": 0.023
+   },
+   "bu2-082": {
+    "score": 74.0,
+    "minutes": 1.906,
+    "model_usd": 0.1083,
+    "cloud_usd": 0.0519
+   },
+   "bu2-083": {
+    "score": 80.0,
+    "minutes": 1.149,
+    "model_usd": 0.07,
+    "cloud_usd": 0.002
+   },
+   "bu2-084": {
+    "score": 100.0,
+    "minutes": 4.741,
+    "model_usd": 0.1753,
+    "cloud_usd": 0.005
+   },
+   "bu2-085": {
+    "score": 100.0,
+    "minutes": 8.028,
+    "model_usd": 0.2957,
+    "cloud_usd": 0.107
+   },
+   "bu2-086": {
+    "score": 100.0,
+    "minutes": 2.181,
+    "model_usd": 0.103,
+    "cloud_usd": 0.1109
+   },
+   "bu2-087": {
+    "score": 71.0,
+    "minutes": 2.763,
+    "model_usd": 0.125,
+    "cloud_usd": 0.003
+   },
+   "bu2-088": {
+    "score": 86.0,
+    "minutes": 4.271,
+    "model_usd": 0.23,
+    "cloud_usd": 0.1466
+   },
+   "bu2-089": {
+    "score": 36.0,
+    "minutes": 5.783,
+    "model_usd": 0.2321,
+    "cloud_usd": 0.0445
+   },
+   "bu2-090": {
+    "score": 76.0,
+    "minutes": 1.608,
+    "model_usd": 0.1066,
+    "cloud_usd": 0.0508
+   },
+   "bu2-091": {
+    "score": 86.0,
+    "minutes": 10.359,
+    "model_usd": 0.3791,
+    "cloud_usd": 0.9344
+   },
+   "bu2-092": {
+    "score": 30.0,
+    "minutes": 1.123,
+    "model_usd": 0.0507,
+    "cloud_usd": 0.002
+   },
+   "bu2-093": {
+    "score": 100.0,
+    "minutes": 1.604,
+    "model_usd": 0.1117,
+    "cloud_usd": 0.0515
+   },
+   "bu2-094": {
+    "score": 20.0,
+    "minutes": 0.619,
+    "model_usd": 0.0326,
+    "cloud_usd": 0.001
+   },
+   "bu2-095": {
+    "score": 45.0,
+    "minutes": 7.903,
+    "model_usd": 0.4354,
+    "cloud_usd": 0.5485
+   },
+   "bu2-096": {
+    "score": 64.0,
+    "minutes": 4.351,
+    "model_usd": 0.0997,
+    "cloud_usd": 0.0591
+   },
+   "bu2-097": {
+    "score": 11.0,
+    "minutes": 5.804,
+    "model_usd": 0.0734,
+    "cloud_usd": 0.0205
+   },
+   "bu2-098": {
+    "score": 5.0,
+    "minutes": 2.953,
+    "model_usd": 0.0878,
+    "cloud_usd": 0.003
+   },
+   "bu2-099": {
+    "score": 50.0,
+    "minutes": 12.252,
+    "model_usd": 0.8981,
+    "cloud_usd": 2.3033
+   },
+   "bu2-100": {
+    "score": 100.0,
+    "minutes": 3.109,
+    "model_usd": 0.145,
+    "cloud_usd": 0.004
+   },
+   "bu2-101": {
+    "score": 68.0,
+    "minutes": 9.149,
+    "model_usd": 0.295,
+    "cloud_usd": 0.1445
+   },
+   "bu2-102": {
+    "score": 51.0,
+    "minutes": 2.844,
+    "model_usd": 0.2139,
+    "cloud_usd": 0.1937
+   },
+   "bu2-103": {
+    "score": 100.0,
+    "minutes": 3.907,
+    "model_usd": 0.245,
+    "cloud_usd": 0.0529
+   },
+   "bu2-104": {
+    "score": 24.0,
+    "minutes": 3.644,
+    "model_usd": 0.1399,
+    "cloud_usd": 0.1025
+   },
+   "bu2-105": {
+    "score": 44.0,
+    "minutes": 16.814,
+    "model_usd": 0.4792,
+    "cloud_usd": 0.1906
+   },
+   "bu2-106": {
+    "score": 35.0,
+    "minutes": 0.619,
+    "model_usd": 0.0322,
+    "cloud_usd": 0.001
+   },
+   "bu2-107": {
+    "score": 54.0,
+    "minutes": 10.222,
+    "model_usd": 0.7779,
+    "cloud_usd": 0.3909
+   },
+   "bu2-108": {
+    "score": 71.0,
+    "minutes": 6.311,
+    "model_usd": 0.2901,
+    "cloud_usd": 0.2039
+   },
+   "bu2-109": {
+    "score": 100.0,
+    "minutes": 1.378,
+    "model_usd": 0.07,
+    "cloud_usd": 0.002
+   },
+   "bu2-110": {
+    "score": 100.0,
+    "minutes": 6.941,
+    "model_usd": 0.5139,
+    "cloud_usd": 0.2615
+   },
+   "bu2-111": {
+    "score": 92.0,
+    "minutes": 2.23,
+    "model_usd": 0.1478,
+    "cloud_usd": 0.0526
+   },
+   "bu2-112": {
+    "score": 100.0,
+    "minutes": 2.152,
+    "model_usd": 0.1267,
+    "cloud_usd": 0.003
+   },
+   "bu2-113": {
+    "score": 88.0,
+    "minutes": 2.532,
+    "model_usd": 0.1774,
+    "cloud_usd": 0.0534
+   },
+   "bu2-114": {
+    "score": 100.0,
+    "minutes": 4.083,
+    "model_usd": 0.247,
+    "cloud_usd": 0.1052
+   },
+   "bu2-115": {
+    "score": 80.0,
+    "minutes": 11.571,
+    "model_usd": 0.4065,
+    "cloud_usd": 0.2621
+   },
+   "bu2-116": {
+    "score": 72.0,
+    "minutes": 9.485,
+    "model_usd": 0.2006,
+    "cloud_usd": 0.2107
+   },
+   "bu2-117": {
+    "score": 70.0,
+    "minutes": 5.406,
+    "model_usd": 0.2522,
+    "cloud_usd": 0.1336
+   },
+   "bu2-118": {
+    "score": 97.0,
+    "minutes": 3.407,
+    "model_usd": 0.157,
+    "cloud_usd": 0.053
+   },
+   "bu2-119": {
+    "score": 73.0,
+    "minutes": 8.361,
+    "model_usd": 0.3133,
+    "cloud_usd": 0.1848
+   },
+   "bu2-120": {
+    "score": 24.0,
+    "minutes": 4.549,
+    "model_usd": 0.1063,
+    "cloud_usd": 0.0413
+   },
+   "bu2-121": {
+    "score": 100.0,
+    "minutes": 4.753,
+    "model_usd": 0.128,
+    "cloud_usd": 0.2524
+   },
+   "bu2-122": {
+    "score": 76.0,
+    "minutes": 8.177,
+    "model_usd": 0.3656,
+    "cloud_usd": 0.0328
+   },
+   "bu2-123": {
+    "score": 100.0,
+    "minutes": 1.508,
+    "model_usd": 0.0772,
+    "cloud_usd": 0.002
+   },
+   "bu2-124": {
+    "score": 90.0,
+    "minutes": 6.782,
+    "model_usd": 0.3655,
+    "cloud_usd": 0.0558
+   },
+   "bu2-125": {
+    "score": 82.0,
+    "minutes": 4.998,
+    "model_usd": 0.5898,
+    "cloud_usd": 0.0305
+   },
+   "bu2-126": {
+    "score": 100.0,
+    "minutes": 9.086,
+    "model_usd": 1.0919,
+    "cloud_usd": 0.0623
+   },
+   "bu2-127": {
+    "score": 65.0,
+    "minutes": 2.32,
+    "model_usd": 0.1383,
+    "cloud_usd": 0.003
+   },
+   "bu2-128": {
+    "score": 58.0,
+    "minutes": 5.755,
+    "model_usd": 0.1822,
+    "cloud_usd": 0.021
+   },
+   "bu2-129": {
+    "score": 84.0,
+    "minutes": 5.049,
+    "model_usd": 0.4118,
+    "cloud_usd": 0.2056
+   },
+   "bu2-130": {
+    "score": 43.0,
+    "minutes": 1.929,
+    "model_usd": 0.1308,
+    "cloud_usd": 0.002
+   },
+   "bu2-131": {
+    "score": 46.0,
+    "minutes": 3.348,
+    "model_usd": 0.1581,
+    "cloud_usd": 0.0262
+   },
+   "bu2-132": {
+    "score": 82.0,
+    "minutes": 9.009,
+    "model_usd": 0.4675,
+    "cloud_usd": 0.0721
+   },
+   "bu2-133": {
+    "score": 100.0,
+    "minutes": 2.785,
+    "model_usd": 0.1914,
+    "cloud_usd": 0.0508
+   },
+   "bu2-134": {
+    "score": 100.0,
+    "minutes": 2.449,
+    "model_usd": 0.2209,
+    "cloud_usd": 0.0557
+   },
+   "bu2-135": {
+    "score": 43.0,
+    "minutes": 3.825,
+    "model_usd": 0.1585,
+    "cloud_usd": 0.0199
+   },
+   "bu2-136": {
+    "score": 16.0,
+    "minutes": 7.598,
+    "model_usd": 0.7072,
+    "cloud_usd": 0.2865
+   },
+   "bu2-137": {
+    "score": 54.0,
+    "minutes": 6.075,
+    "model_usd": 0.157,
+    "cloud_usd": 0.0712
+   },
+   "bu2-138": {
+    "score": 78.0,
+    "minutes": 1.937,
+    "model_usd": 0.1214,
+    "cloud_usd": 0.002
+   },
+   "bu2-139": {
+    "score": 62.0,
+    "minutes": 3.464,
+    "model_usd": 0.1488,
+    "cloud_usd": 0.3877
+   },
+   "bu2-140": {
+    "score": 100.0,
+    "minutes": 0.87,
+    "model_usd": 0.0716,
+    "cloud_usd": 0.05
+   },
+   "bu2-141": {
+    "score": 50.0,
+    "minutes": 6.132,
+    "model_usd": 0.3316,
+    "cloud_usd": 0.0685
+   },
+   "bu2-142": {
+    "score": 79.0,
+    "minutes": 7.67,
+    "model_usd": 0.3598,
+    "cloud_usd": 0.2647
+   },
+   "bu2-143": {
+    "score": 96.0,
+    "minutes": 7.782,
+    "model_usd": 0.398,
+    "cloud_usd": 0.3484
+   },
+   "bu2-144": {
+    "score": 100.0,
+    "minutes": 4.257,
+    "model_usd": 0.383,
+    "cloud_usd": 0.0549
+   },
+   "bu2-145": {
+    "score": 18.0,
+    "minutes": 0.488,
+    "model_usd": 0.0274,
+    "cloud_usd": 0.001
+   },
+   "bu2-146": {
+    "score": 88.0,
+    "minutes": 6.974,
+    "model_usd": 0.4584,
+    "cloud_usd": 0.2015
+   },
+   "bu2-147": {
+    "score": 100.0,
+    "minutes": 2.15,
+    "model_usd": 0.1402,
+    "cloud_usd": 0.003
+   },
+   "bu2-148": {
+    "score": 19.0,
+    "minutes": 1.466,
+    "model_usd": 0.0575,
+    "cloud_usd": 0.002
+   },
+   "bu2-149": {
+    "score": 100.0,
+    "minutes": 0.919,
+    "model_usd": 0.0623,
+    "cloud_usd": 0.0507
+   },
+   "bu2-150": {
+    "score": 47.0,
+    "minutes": 4.154,
+    "model_usd": 0.1188,
+    "cloud_usd": 0.0539
+   },
+   "bu2-151": {
+    "score": 84.0,
+    "minutes": 18.876,
+    "model_usd": 1.1758,
+    "cloud_usd": 0.4553
+   },
+   "bu2-152": {
+    "score": 100.0,
+    "minutes": 2.228,
+    "model_usd": 0.131,
+    "cloud_usd": 0.0559
+   },
+   "bu2-153": {
+    "score": 42.0,
+    "minutes": 8.377,
+    "model_usd": 0.5831,
+    "cloud_usd": 0.0248
+   },
+   "bu2-154": {
+    "score": 100.0,
+    "minutes": 1.193,
+    "model_usd": 0.0595,
+    "cloud_usd": 0.002
+   },
+   "bu2-155": {
+    "score": 88.0,
+    "minutes": 3.435,
+    "model_usd": 0.3648,
+    "cloud_usd": 0.0451
+   },
+   "bu2-156": {
+    "score": 100.0,
+    "minutes": 1.89,
+    "model_usd": 0.1131,
+    "cloud_usd": 0.0632
+   },
+   "bu2-157": {
+    "score": 100.0,
+    "minutes": 2.214,
+    "model_usd": 0.1216,
+    "cloud_usd": 0.0519
+   },
+   "bu2-158": {
+    "score": 48.0,
+    "minutes": 1.694,
+    "model_usd": 0.1061,
+    "cloud_usd": 0.0536
+   },
+   "bu2-159": {
+    "score": 92.0,
+    "minutes": 3.566,
+    "model_usd": 0.1294,
+    "cloud_usd": 0.0532
+   },
+   "bu2-160": {
+    "score": 80.0,
+    "minutes": 2.638,
+    "model_usd": 0.141,
+    "cloud_usd": 0.003
+   },
+   "bu2-161": {
+    "score": 86.0,
+    "minutes": 8.696,
+    "model_usd": 0.6184,
+    "cloud_usd": 0.3458
+   },
+   "bu2-162": {
+    "score": 90.0,
+    "minutes": 31.032,
+    "model_usd": 0.9589,
+    "cloud_usd": 1.9964
+   },
+   "bu2-163": {
+    "score": 66.0,
+    "minutes": 6.613,
+    "model_usd": 0.6747,
+    "cloud_usd": 0.0782
+   },
+   "bu2-164": {
+    "score": 88.0,
+    "minutes": 9.824,
+    "model_usd": 1.2379,
+    "cloud_usd": 0.5941
+   },
+   "bu2-165": {
+    "score": 63.0,
+    "minutes": 1.514,
+    "model_usd": 0.1288,
+    "cloud_usd": 0.002
+   },
+   "bu2-166": {
+    "score": 100.0,
+    "minutes": 2.628,
+    "model_usd": 0.1458,
+    "cloud_usd": 0.003
+   },
+   "bu2-167": {
+    "score": 70.0,
+    "minutes": 4.891,
+    "model_usd": 0.3122,
+    "cloud_usd": 0.0296
+   },
+   "bu2-168": {
+    "score": 64.0,
+    "minutes": 2.451,
+    "model_usd": 0.109,
+    "cloud_usd": 0.0527
+   },
+   "bu2-169": {
+    "score": 28.0,
+    "minutes": 3.333,
+    "model_usd": 0.1142,
+    "cloud_usd": 0.1575
+   },
+   "bu2-170": {
+    "score": 75.0,
+    "minutes": 3.541,
+    "model_usd": 0.1884,
+    "cloud_usd": 0.004
+   },
+   "bu2-171": {
+    "score": 100.0,
+    "minutes": 2.295,
+    "model_usd": 0.1251,
+    "cloud_usd": 0.1009
+   },
+   "bu2-172": {
+    "score": 62.0,
+    "minutes": 1.219,
+    "model_usd": 0.0527,
+    "cloud_usd": 0.1314
+   },
+   "bu2-173": {
+    "score": 90.0,
+    "minutes": 2.37,
+    "model_usd": 0.1278,
+    "cloud_usd": 0.0521
+   },
+   "bu2-174": {
+    "score": 92.0,
+    "minutes": 8.29,
+    "model_usd": 0.3866,
+    "cloud_usd": 0.2169
+   },
+   "bu2-175": {
+    "score": 16.0,
+    "minutes": 13.441,
+    "model_usd": 0.4576,
+    "cloud_usd": 0.753
+   },
+   "bu2-176": {
+    "score": 100.0,
+    "minutes": 2.317,
+    "model_usd": 0.1552,
+    "cloud_usd": 0.0303
+   },
+   "bu2-177": {
+    "score": 77.0,
+    "minutes": 3.287,
+    "model_usd": 0.2642,
+    "cloud_usd": 0.004
+   },
+   "bu2-178": {
+    "score": 42.0,
+    "minutes": 14.661,
+    "model_usd": 1.2807,
+    "cloud_usd": 1.8098
+   },
+   "bu2-179": {
+    "score": 53.0,
+    "minutes": 8.951,
+    "model_usd": 0.7896,
+    "cloud_usd": 0.1713
+   },
+   "bu2-180": {
+    "score": 86.0,
+    "minutes": 1.974,
+    "model_usd": 0.1422,
+    "cloud_usd": 0.0593
+   },
+   "bu2-181": {
+    "score": 100.0,
+    "minutes": 2.945,
+    "model_usd": 0.2405,
+    "cloud_usd": 0.0274
+   },
+   "bu2-182": {
+    "score": 72.0,
+    "minutes": 7.136,
+    "model_usd": 0.2662,
+    "cloud_usd": 0.1673
+   },
+   "bu2-183": {
+    "score": 72.0,
+    "minutes": 8.152,
+    "model_usd": 0.3027,
+    "cloud_usd": 1.359
+   },
+   "bu2-184": {
+    "score": 84.0,
+    "minutes": 13.701,
+    "model_usd": 0.4266,
+    "cloud_usd": 0.5212
+   },
+   "bu2-185": {
+    "score": 100.0,
+    "minutes": 3.05,
+    "model_usd": 0.1154,
+    "cloud_usd": 0.2613
+   },
+   "bu2-186": {
+    "score": 95.0,
+    "minutes": 4.202,
+    "model_usd": 0.1374,
+    "cloud_usd": 0.005
+   },
+   "bu2-187": {
+    "score": 100.0,
+    "minutes": 2.581,
+    "model_usd": 0.1894,
+    "cloud_usd": 0.0525
+   },
+   "bu2-188": {
+    "score": 100.0,
+    "minutes": 3.257,
+    "model_usd": 0.2847,
+    "cloud_usd": 0.0529
+   },
+   "bu2-189": {
+    "score": 50.0,
+    "minutes": 4.054,
+    "model_usd": 0.1263,
+    "cloud_usd": 0.0462
+   },
+   "bu2-190": {
+    "score": 36.0,
+    "minutes": 4.547,
+    "model_usd": 0.1981,
+    "cloud_usd": 0.7771
+   },
+   "bu2-191": {
+    "score": 76.0,
+    "minutes": 52.825,
+    "model_usd": 2.7461,
+    "cloud_usd": 2.3026
+   },
+   "bu2-192": {
+    "score": 62.0,
+    "minutes": 4.865,
+    "model_usd": 0.2194,
+    "cloud_usd": 0.0617
+   },
+   "bu2-193": {
+    "score": 39.0,
+    "minutes": 1.634,
+    "model_usd": 0.1033,
+    "cloud_usd": 0.0604
+   },
+   "bu2-194": {
+    "score": 86.0,
+    "minutes": 4.47,
+    "model_usd": 0.126,
+    "cloud_usd": 1.3079
+   },
+   "bu2-195": {
+    "score": 96.0,
+    "minutes": 4.924,
+    "model_usd": 0.2187,
+    "cloud_usd": 0.0702
+   },
+   "bu2-196": {
+    "score": 82.0,
+    "minutes": 2.224,
+    "model_usd": 0.1733,
+    "cloud_usd": 0.0204
+   },
+   "bu2-197": {
+    "score": 100.0,
+    "minutes": 5.315,
+    "model_usd": 0.1521,
+    "cloud_usd": 1.06
+   },
+   "bu2-198": {
+    "score": 9.0,
+    "minutes": 1.624,
+    "model_usd": 0.0843,
+    "cloud_usd": 0.0528
+   },
+   "bu2-199": {
+    "score": 88.0,
+    "minutes": 3.096,
+    "model_usd": 0.1625,
+    "cloud_usd": 0.0531
+   },
+   "bu2-200": {
+    "score": 40.0,
+    "minutes": 4.53,
+    "model_usd": 0.3453,
+    "cloud_usd": 0.005
+   }
+  },
+  "codex-bu-cli": {
+   "bu2-001": {
+    "score": 63.0,
+    "minutes": 5.518,
+    "model_usd": 0.3593,
+    "cloud_usd": 0.1356
+   },
+   "bu2-002": {
+    "score": 50.0,
+    "minutes": 9.392,
+    "model_usd": 0.6917,
+    "cloud_usd": 0.5988
+   },
+   "bu2-003": {
+    "score": 56.0,
+    "minutes": 9.229,
+    "model_usd": 0.8829,
+    "cloud_usd": 0.4837
+   },
+   "bu2-004": {
+    "score": 62.0,
+    "minutes": 8.799,
+    "model_usd": 0.5204,
+    "cloud_usd": 0.3168
+   },
+   "bu2-005": {
+    "score": 82.0,
+    "minutes": 3.436,
+    "model_usd": 0.2093,
+    "cloud_usd": 0.0502
+   },
+   "bu2-006": {
+    "score": 72.0,
+    "minutes": 8.776,
+    "model_usd": 0.7209,
+    "cloud_usd": 0.2016
+   },
+   "bu2-007": {
+    "score": 78.0,
+    "minutes": 12.482,
+    "model_usd": 0.9672,
+    "cloud_usd": 0.324
+   },
+   "bu2-008": {
+    "score": 60.0,
+    "minutes": 5.001,
+    "model_usd": 0.3671,
+    "cloud_usd": 0.0506
+   },
+   "bu2-009": {
+    "score": 74.0,
+    "minutes": 16.364,
+    "model_usd": 2.0217,
+    "cloud_usd": 0.248
+   },
+   "bu2-010": {
+    "score": 60.0,
+    "minutes": 12.092,
+    "model_usd": 0.8193,
+    "cloud_usd": 0.2021
+   },
+   "bu2-011": {
+    "score": 72.0,
+    "minutes": 9.488,
+    "model_usd": 1.069,
+    "cloud_usd": 0.32
+   },
+   "bu2-012": {
+    "score": 58.0,
+    "minutes": 4.436,
+    "model_usd": 0.4106,
+    "cloud_usd": 0.5598
+   },
+   "bu2-013": {
+    "score": 32.0,
+    "minutes": 16.07,
+    "model_usd": 0.9781,
+    "cloud_usd": 0.6797
+   },
+   "bu2-014": {
+    "score": 59.0,
+    "minutes": 10.144,
+    "model_usd": 0.8304,
+    "cloud_usd": 0.2077
+   },
+   "bu2-015": {
+    "score": 84.0,
+    "minutes": 8.926,
+    "model_usd": 0.7559,
+    "cloud_usd": 0.1758
+   },
+   "bu2-016": {
+    "score": 82.0,
+    "minutes": 10.165,
+    "model_usd": 0.7517,
+    "cloud_usd": 0.2775
+   },
+   "bu2-017": {
+    "score": 68.0,
+    "minutes": 8.731,
+    "model_usd": 0.7473,
+    "cloud_usd": 0.1146
+   },
+   "bu2-018": {
+    "score": 52.0,
+    "minutes": 11.856,
+    "model_usd": 1.7536,
+    "cloud_usd": 0.618
+   },
+   "bu2-019": {
+    "score": 63.0,
+    "minutes": 14.189,
+    "model_usd": 1.8005,
+    "cloud_usd": 0.2532
+   },
+   "bu2-020": {
+    "score": 90.0,
+    "minutes": 8.357,
+    "model_usd": 0.7605,
+    "cloud_usd": 0.2923
+   },
+   "bu2-021": {
+    "score": 58.0,
+    "minutes": 18.413,
+    "model_usd": 2.7534,
+    "cloud_usd": 0.3779
+   },
+   "bu2-022": {
+    "score": 82.0,
+    "minutes": 11.562,
+    "model_usd": 1.034,
+    "cloud_usd": 0.3367
+   },
+   "bu2-023": {
+    "score": 100.0,
+    "minutes": 5.771,
+    "model_usd": 0.5089,
+    "cloud_usd": 0.353
+   },
+   "bu2-024": {
+    "score": 68.0,
+    "minutes": 7.117,
+    "model_usd": 0.5469,
+    "cloud_usd": 0.2255
+   },
+   "bu2-025": {
+    "score": 64.0,
+    "minutes": 6.012,
+    "model_usd": 0.4503,
+    "cloud_usd": 0.1097
+   },
+   "bu2-026": {
+    "score": 92.0,
+    "minutes": 6.824,
+    "model_usd": 0.656,
+    "cloud_usd": 0.16
+   },
+   "bu2-027": {
+    "score": 88.0,
+    "minutes": 8.021,
+    "model_usd": 0.688,
+    "cloud_usd": 0.6629
+   },
+   "bu2-028": {
+    "score": 86.0,
+    "minutes": 7.02,
+    "model_usd": 0.6228,
+    "cloud_usd": 0.1158
+   },
+   "bu2-029": {
+    "score": 66.0,
+    "minutes": 6.873,
+    "model_usd": 0.5587,
+    "cloud_usd": 0.3783
+   },
+   "bu2-030": {
+    "score": 74.0,
+    "minutes": 8.285,
+    "model_usd": 0.5067,
+    "cloud_usd": 0.3367
+   },
+   "bu2-031": {
+    "score": 50.0,
+    "minutes": 6.663,
+    "model_usd": 0.3066,
+    "cloud_usd": 0.2259
+   },
+   "bu2-032": {
+    "score": 54.0,
+    "minutes": 32.45,
+    "model_usd": 3.6618,
+    "cloud_usd": 0.1777
+   },
+   "bu2-033": {
+    "score": 86.0,
+    "minutes": 5.503,
+    "model_usd": 0.3851,
+    "cloud_usd": 0.2171
+   },
+   "bu2-034": {
+    "score": 70.0,
+    "minutes": 14.477,
+    "model_usd": 1.8715,
+    "cloud_usd": 0.585
+   },
+   "bu2-035": {
+    "score": 56.0,
+    "minutes": 2.277,
+    "model_usd": 0.1399,
+    "cloud_usd": 0.0988
+   },
+   "bu2-036": {
+    "score": 86.0,
+    "minutes": 6.79,
+    "model_usd": 0.7291,
+    "cloud_usd": 0.0615
+   },
+   "bu2-037": {
+    "score": 80.0,
+    "minutes": 11.462,
+    "model_usd": 0.8581,
+    "cloud_usd": 0.7387
+   },
+   "bu2-038": {
+    "score": 82.0,
+    "minutes": 8.369,
+    "model_usd": 0.8622,
+    "cloud_usd": 0.1551
+   },
+   "bu2-039": {
+    "score": 70.0,
+    "minutes": 5.613,
+    "model_usd": 0.3142,
+    "cloud_usd": 0.1426
+   },
+   "bu2-040": {
+    "score": 46.0,
+    "minutes": 16.815,
+    "model_usd": 1.8601,
+    "cloud_usd": 1.3847
+   },
+   "bu2-041": {
+    "score": 100.0,
+    "minutes": 10.29,
+    "model_usd": 0.9237,
+    "cloud_usd": 1.2005
+   },
+   "bu2-042": {
+    "score": 73.0,
+    "minutes": 5.275,
+    "model_usd": 0.3094,
+    "cloud_usd": 0.0554
+   },
+   "bu2-043": {
+    "score": 94.0,
+    "minutes": 8.108,
+    "model_usd": 1.039,
+    "cloud_usd": 1.0203
+   },
+   "bu2-044": {
+    "score": 70.0,
+    "minutes": 8.549,
+    "model_usd": 0.61,
+    "cloud_usd": 0.1332
+   },
+   "bu2-045": {
+    "score": 56.0,
+    "minutes": 8.788,
+    "model_usd": 0.5874,
+    "cloud_usd": 0.6015
+   },
+   "bu2-046": {
+    "score": 82.0,
+    "minutes": 7.193,
+    "model_usd": 0.6985,
+    "cloud_usd": 0.1547
+   },
+   "bu2-047": {
+    "score": 40.0,
+    "minutes": 18.526,
+    "model_usd": 1.4981,
+    "cloud_usd": 0.4341
+   },
+   "bu2-048": {
+    "score": 78.0,
+    "minutes": 6.913,
+    "model_usd": 0.6576,
+    "cloud_usd": 0.1891
+   },
+   "bu2-049": {
+    "score": 70.0,
+    "minutes": 18.763,
+    "model_usd": 1.5289,
+    "cloud_usd": 0.219
+   },
+   "bu2-050": {
+    "score": 48.0,
+    "minutes": 12.48,
+    "model_usd": 1.697,
+    "cloud_usd": 0.2304
+   },
+   "bu2-051": {
+    "score": 66.0,
+    "minutes": 61.316,
+    "model_usd": 3.9875,
+    "cloud_usd": 2.1577
+   },
+   "bu2-052": {
+    "score": 86.0,
+    "minutes": 6.528,
+    "model_usd": 0.421,
+    "cloud_usd": 0.3682
+   },
+   "bu2-053": {
+    "score": 88.0,
+    "minutes": 54.591,
+    "model_usd": 5.2607,
+    "cloud_usd": 2.0446
+   },
+   "bu2-054": {
+    "score": 100.0,
+    "minutes": 7.484,
+    "model_usd": 0.7376,
+    "cloud_usd": 0.2973
+   },
+   "bu2-055": {
+    "score": 86.0,
+    "minutes": 10.623,
+    "model_usd": 1.1071,
+    "cloud_usd": 0.4392
+   },
+   "bu2-056": {
+    "score": 78.0,
+    "minutes": 11.081,
+    "model_usd": 0.3872,
+    "cloud_usd": 0.0194
+   },
+   "bu2-057": {
+    "score": 100.0,
+    "minutes": 2.215,
+    "model_usd": 0.1222,
+    "cloud_usd": 0.0519
+   },
+   "bu2-058": {
+    "score": 26.0,
+    "minutes": 3.045,
+    "model_usd": 0.2024,
+    "cloud_usd": 0.004
+   },
+   "bu2-059": {
+    "score": 100.0,
+    "minutes": 6.155,
+    "model_usd": 0.4972,
+    "cloud_usd": 0.1575
+   },
+   "bu2-060": {
+    "score": 76.0,
+    "minutes": 3.972,
+    "model_usd": 0.3083,
+    "cloud_usd": 0.0542
+   },
+   "bu2-061": {
+    "score": 100.0,
+    "minutes": 1.381,
+    "model_usd": 0.1274,
+    "cloud_usd": 0.008
+   },
+   "bu2-062": {
+    "score": 88.0,
+    "minutes": 3.748,
+    "model_usd": 0.2029,
+    "cloud_usd": 0.1075
+   },
+   "bu2-063": {
+    "score": 64.0,
+    "minutes": 11.348,
+    "model_usd": 0.7837,
+    "cloud_usd": 0.1928
+   },
+   "bu2-064": {
+    "score": 100.0,
+    "minutes": 3.733,
+    "model_usd": 0.1841,
+    "cloud_usd": 0.1057
+   },
+   "bu2-065": {
+    "score": 61.0,
+    "minutes": 2.426,
+    "model_usd": 0.1495,
+    "cloud_usd": 0.0518
+   },
+   "bu2-066": {
+    "score": 26.0,
+    "minutes": 1.174,
+    "model_usd": 0.0729,
+    "cloud_usd": 0.0528
+   },
+   "bu2-067": {
+    "score": 68.0,
+    "minutes": 4.85,
+    "model_usd": 0.3197,
+    "cloud_usd": 0.0296
+   },
+   "bu2-068": {
+    "score": 100.0,
+    "minutes": 1.12,
+    "model_usd": 0.0572,
+    "cloud_usd": 0.0047
+   },
+   "bu2-069": {
+    "score": 64.0,
+    "minutes": 7.025,
+    "model_usd": 0.4811,
+    "cloud_usd": 0.0331
+   },
+   "bu2-070": {
+    "score": 54.0,
+    "minutes": 1.935,
+    "model_usd": 0.0832,
+    "cloud_usd": 0.002
+   },
+   "bu2-071": {
+    "score": 62.0,
+    "minutes": 4.941,
+    "model_usd": 0.2977,
+    "cloud_usd": 0.0539
+   },
+   "bu2-072": {
+    "score": 100.0,
+    "minutes": 2.865,
+    "model_usd": 0.1401,
+    "cloud_usd": 0.0525
+   },
+   "bu2-073": {
+    "score": 58.0,
+    "minutes": 4.527,
+    "model_usd": 0.292,
+    "cloud_usd": 0.263
+   },
+   "bu2-074": {
+    "score": 12.0,
+    "minutes": 9.278,
+    "model_usd": 0.2273,
+    "cloud_usd": 0.0152
+   },
+   "bu2-075": {
+    "score": 48.0,
+    "minutes": 1.954,
+    "model_usd": 0.1203,
+    "cloud_usd": 0.002
+   },
+   "bu2-076": {
+    "score": 65.0,
+    "minutes": 14.508,
+    "model_usd": 2.8602,
+    "cloud_usd": 0.3353
+   },
+   "bu2-077": {
+    "score": 74.0,
+    "minutes": 3.524,
+    "model_usd": 0.1929,
+    "cloud_usd": 0.0258
+   },
+   "bu2-078": {
+    "score": 85.0,
+    "minutes": 2.108,
+    "model_usd": 0.0899,
+    "cloud_usd": 0.003
+   },
+   "bu2-079": {
+    "score": 70.0,
+    "minutes": 3.306,
+    "model_usd": 0.2972,
+    "cloud_usd": 0.0569
+   },
+   "bu2-080": {
+    "score": 100.0,
+    "minutes": 2.061,
+    "model_usd": 0.0873,
+    "cloud_usd": 0.003
+   },
+   "bu2-081": {
+    "score": 72.0,
+    "minutes": 1.707,
+    "model_usd": 0.1286,
+    "cloud_usd": 0.0238
+   },
+   "bu2-082": {
+    "score": 86.0,
+    "minutes": 2.275,
+    "model_usd": 0.1048,
+    "cloud_usd": 0.052
+   },
+   "bu2-083": {
+    "score": 100.0,
+    "minutes": 1.46,
+    "model_usd": 0.0927,
+    "cloud_usd": 0.002
+   },
+   "bu2-084": {
+    "score": 74.0,
+    "minutes": 4.072,
+    "model_usd": 0.1468,
+    "cloud_usd": 0.0408
+   },
+   "bu2-085": {
+    "score": 64.0,
+    "minutes": 6.588,
+    "model_usd": 0.384,
+    "cloud_usd": 0.125
+   },
+   "bu2-086": {
+    "score": 100.0,
+    "minutes": 9.313,
+    "model_usd": 0.1801,
+    "cloud_usd": 0.1457
+   },
+   "bu2-087": {
+    "score": 71.0,
+    "minutes": 3.148,
+    "model_usd": 0.1969,
+    "cloud_usd": 0.054
+   },
+   "bu2-088": {
+    "score": 94.0,
+    "minutes": 4.617,
+    "model_usd": 0.4165,
+    "cloud_usd": 0.1248
+   },
+   "bu2-089": {
+    "score": 88.0,
+    "minutes": 3.495,
+    "model_usd": 0.1296,
+    "cloud_usd": 0.0424
+   },
+   "bu2-090": {
+    "score": 76.0,
+    "minutes": 2.128,
+    "model_usd": 0.1341,
+    "cloud_usd": 0.052
+   },
+   "bu2-091": {
+    "score": 72.0,
+    "minutes": 7.932,
+    "model_usd": 0.6498,
+    "cloud_usd": 0.5917
+   },
+   "bu2-092": {
+    "score": 100.0,
+    "minutes": 2.806,
+    "model_usd": 0.1406,
+    "cloud_usd": 0.003
+   },
+   "bu2-093": {
+    "score": 100.0,
+    "minutes": 1.456,
+    "model_usd": 0.0764,
+    "cloud_usd": 0.002
+   },
+   "bu2-094": {
+    "score": 20.0,
+    "minutes": 0.572,
+    "model_usd": 0.0296,
+    "cloud_usd": 0.001
+   },
+   "bu2-095": {
+    "score": 54.0,
+    "minutes": 14.511,
+    "model_usd": 1.0341,
+    "cloud_usd": 0.3362
+   },
+   "bu2-096": {
+    "score": 50.0,
+    "minutes": 4.721,
+    "model_usd": 0.1917,
+    "cloud_usd": 0.0687
+   },
+   "bu2-097": {
+    "score": 19.0,
+    "minutes": 3.326,
+    "model_usd": 0.083,
+    "cloud_usd": 0.0187
+   },
+   "bu2-098": {
+    "score": 5.0,
+    "minutes": 3.546,
+    "model_usd": 0.0865,
+    "cloud_usd": 0.004
+   },
+   "bu2-099": {
+    "score": 48.0,
+    "minutes": 9.46,
+    "model_usd": 1.237,
+    "cloud_usd": 0.6015
+   },
+   "bu2-100": {
+    "score": 92.0,
+    "minutes": 4.069,
+    "model_usd": 0.2689,
+    "cloud_usd": 0.0662
+   },
+   "bu2-101": {
+    "score": 84.0,
+    "minutes": 5.246,
+    "model_usd": 0.4002,
+    "cloud_usd": 0.0821
+   },
+   "bu2-102": {
+    "score": 38.0,
+    "minutes": 1.931,
+    "model_usd": 0.0908,
+    "cloud_usd": 0.1092
+   },
+   "bu2-103": {
+    "score": 100.0,
+    "minutes": 4.617,
+    "model_usd": 0.2105,
+    "cloud_usd": 0.0539
+   },
+   "bu2-104": {
+    "score": 16.0,
+    "minutes": 3.204,
+    "model_usd": 0.1426,
+    "cloud_usd": 0.0548
+   },
+   "bu2-105": {
+    "score": 26.0,
+    "minutes": 5.144,
+    "model_usd": 0.3131,
+    "cloud_usd": 0.0555
+   },
+   "bu2-106": {
+    "score": 35.0,
+    "minutes": 0.723,
+    "model_usd": 0.0321,
+    "cloud_usd": 0.001
+   },
+   "bu2-107": {
+    "score": 48.0,
+    "minutes": 8.558,
+    "model_usd": 0.6342,
+    "cloud_usd": 0.5634
+   },
+   "bu2-108": {
+    "score": 78.0,
+    "minutes": 7.963,
+    "model_usd": 0.4127,
+    "cloud_usd": 0.2187
+   },
+   "bu2-109": {
+    "score": 100.0,
+    "minutes": 1.813,
+    "model_usd": 0.1293,
+    "cloud_usd": 0.002
+   },
+   "bu2-110": {
+    "score": 64.0,
+    "minutes": 11.445,
+    "model_usd": 0.7698,
+    "cloud_usd": 0.2604
+   },
+   "bu2-111": {
+    "score": 92.0,
+    "minutes": 1.794,
+    "model_usd": 0.1197,
+    "cloud_usd": 0.002
+   },
+   "bu2-112": {
+    "score": 100.0,
+    "minutes": 2.2,
+    "model_usd": 0.1318,
+    "cloud_usd": 0.003
+   },
+   "bu2-113": {
+    "score": 88.0,
+    "minutes": 4.146,
+    "model_usd": 0.2195,
+    "cloud_usd": 0.2082
+   },
+   "bu2-114": {
+    "score": 100.0,
+    "minutes": 2.883,
+    "model_usd": 0.1796,
+    "cloud_usd": 0.0521
+   },
+   "bu2-115": {
+    "score": 68.0,
+    "minutes": 5.009,
+    "model_usd": 0.3866,
+    "cloud_usd": 0.311
+   },
+   "bu2-116": {
+    "score": 72.0,
+    "minutes": 10.215,
+    "model_usd": 0.4964,
+    "cloud_usd": 0.3924
+   },
+   "bu2-117": {
+    "score": 70.0,
+    "minutes": 4.575,
+    "model_usd": 0.2704,
+    "cloud_usd": 0.0885
+   },
+   "bu2-118": {
+    "score": 100.0,
+    "minutes": 5.378,
+    "model_usd": 0.2926,
+    "cloud_usd": 0.132
+   },
+   "bu2-119": {
+    "score": 57.0,
+    "minutes": 7.312,
+    "model_usd": 0.1845,
+    "cloud_usd": 0.0753
+   },
+   "bu2-120": {
+    "score": 24.0,
+    "minutes": 3.982,
+    "model_usd": 0.1549,
+    "cloud_usd": 0.042
+   },
+   "bu2-121": {
+    "score": 22.0,
+    "minutes": 2.506,
+    "model_usd": 0.1797,
+    "cloud_usd": 0.1523
+   },
+   "bu2-122": {
+    "score": 76.0,
+    "minutes": 13.858,
+    "model_usd": 1.1374,
+    "cloud_usd": 0.083
+   },
+   "bu2-123": {
+    "score": 100.0,
+    "minutes": 1.372,
+    "model_usd": 0.0905,
+    "cloud_usd": 0.002
+   },
+   "bu2-124": {
+    "score": 64.0,
+    "minutes": 6.426,
+    "model_usd": 0.2483,
+    "cloud_usd": 0.0419
+   },
+   "bu2-125": {
+    "score": 82.0,
+    "minutes": 3.479,
+    "model_usd": 0.2942,
+    "cloud_usd": 0.004
+   },
+   "bu2-126": {
+    "score": 84.0,
+    "minutes": 9.051,
+    "model_usd": 0.9014,
+    "cloud_usd": 0.1086
+   },
+   "bu2-127": {
+    "score": 65.0,
+    "minutes": 2.856,
+    "model_usd": 0.2204,
+    "cloud_usd": 0.0421
+   },
+   "bu2-128": {
+    "score": 50.0,
+    "minutes": 4.353,
+    "model_usd": 0.2073,
+    "cloud_usd": 0.0127
+   },
+   "bu2-129": {
+    "score": 76.0,
+    "minutes": 7.226,
+    "model_usd": 0.5081,
+    "cloud_usd": 0.1473
+   },
+   "bu2-130": {
+    "score": 60.0,
+    "minutes": 4.248,
+    "model_usd": 0.234,
+    "cloud_usd": 0.005
+   },
+   "bu2-131": {
+    "score": 46.0,
+    "minutes": 5.772,
+    "model_usd": 0.3029,
+    "cloud_usd": 0.0283
+   },
+   "bu2-132": {
+    "score": 82.0,
+    "minutes": 9.587,
+    "model_usd": 0.7836,
+    "cloud_usd": 0.0663
+   },
+   "bu2-133": {
+    "score": 82.0,
+    "minutes": 1.641,
+    "model_usd": 0.1423,
+    "cloud_usd": 0.0498
+   },
+   "bu2-134": {
+    "score": 100.0,
+    "minutes": 5.391,
+    "model_usd": 0.3918,
+    "cloud_usd": 0.1024
+   },
+   "bu2-135": {
+    "score": 35.0,
+    "minutes": 2.864,
+    "model_usd": 0.2139,
+    "cloud_usd": 0.003
+   },
+   "bu2-136": {
+    "score": 72.0,
+    "minutes": 4.167,
+    "model_usd": 0.3515,
+    "cloud_usd": 0.2122
+   },
+   "bu2-137": {
+    "score": 92.0,
+    "minutes": 13.361,
+    "model_usd": 0.7968,
+    "cloud_usd": 0.4472
+   },
+   "bu2-138": {
+    "score": 35.0,
+    "minutes": 1.271,
+    "model_usd": 0.0692,
+    "cloud_usd": 0.002
+   },
+   "bu2-139": {
+    "score": 68.0,
+    "minutes": 2.748,
+    "model_usd": 0.1355,
+    "cloud_usd": 0.0265
+   },
+   "bu2-140": {
+    "score": 100.0,
+    "minutes": 1.036,
+    "model_usd": 0.0657,
+    "cloud_usd": 0.051
+   },
+   "bu2-141": {
+    "score": 20.0,
+    "minutes": 3.433,
+    "model_usd": 0.1064,
+    "cloud_usd": 0.0415
+   },
+   "bu2-142": {
+    "score": 100.0,
+    "minutes": 18.416,
+    "model_usd": 0.5825,
+    "cloud_usd": 0.4534
+   },
+   "bu2-143": {
+    "score": 96.0,
+    "minutes": 13.181,
+    "model_usd": 0.9721,
+    "cloud_usd": 0.4668
+   },
+   "bu2-144": {
+    "score": 100.0,
+    "minutes": 3.748,
+    "model_usd": 0.3748,
+    "cloud_usd": 0.0538
+   },
+   "bu2-145": {
+    "score": 18.0,
+    "minutes": 0.58,
+    "model_usd": 0.0242,
+    "cloud_usd": 0.001
+   },
+   "bu2-146": {
+    "score": 78.0,
+    "minutes": 4.706,
+    "model_usd": 0.2599,
+    "cloud_usd": 0.2403
+   },
+   "bu2-147": {
+    "score": 100.0,
+    "minutes": 6.729,
+    "model_usd": 0.3622,
+    "cloud_usd": 0.0372
+   },
+   "bu2-148": {
+    "score": 19.0,
+    "minutes": 1.484,
+    "model_usd": 0.0542,
+    "cloud_usd": 0.002
+   },
+   "bu2-149": {
+    "score": 100.0,
+    "minutes": 1.171,
+    "model_usd": 0.0672,
+    "cloud_usd": 0.0513
+   },
+   "bu2-150": {
+    "score": 65.0,
+    "minutes": 2.039,
+    "model_usd": 0.1312,
+    "cloud_usd": 0.1361
+   },
+   "bu2-151": {
+    "score": 44.0,
+    "minutes": 10.876,
+    "model_usd": 0.9088,
+    "cloud_usd": 0.2334
+   },
+   "bu2-152": {
+    "score": 100.0,
+    "minutes": 2.353,
+    "model_usd": 0.1068,
+    "cloud_usd": 0.0531
+   },
+   "bu2-153": {
+    "score": 57.0,
+    "minutes": 6.61,
+    "model_usd": 0.4024,
+    "cloud_usd": 0.0293
+   },
+   "bu2-154": {
+    "score": 100.0,
+    "minutes": 1.499,
+    "model_usd": 0.0686,
+    "cloud_usd": 0.002
+   },
+   "bu2-155": {
+    "score": 88.0,
+    "minutes": 3.524,
+    "model_usd": 0.2647,
+    "cloud_usd": 0.028
+   },
+   "bu2-156": {
+    "score": 100.0,
+    "minutes": 2.892,
+    "model_usd": 0.1208,
+    "cloud_usd": 0.1664
+   },
+   "bu2-157": {
+    "score": 10.0,
+    "minutes": 3.818,
+    "model_usd": 0.1197,
+    "cloud_usd": 0.0617
+   },
+   "bu2-158": {
+    "score": 48.0,
+    "minutes": 1.3,
+    "model_usd": 0.0687,
+    "cloud_usd": 0.0527
+   },
+   "bu2-159": {
+    "score": 100.0,
+    "minutes": 2.469,
+    "model_usd": 0.1361,
+    "cloud_usd": 0.0518
+   },
+   "bu2-160": {
+    "score": 100.0,
+    "minutes": 2.693,
+    "model_usd": 0.1249,
+    "cloud_usd": 0.003
+   },
+   "bu2-161": {
+    "score": 68.0,
+    "minutes": 8.077,
+    "model_usd": 0.6963,
+    "cloud_usd": 0.2174
+   },
+   "bu2-162": {
+    "score": 90.0,
+    "minutes": 25.106,
+    "model_usd": 0.8592,
+    "cloud_usd": 1.1053
+   },
+   "bu2-163": {
+    "score": 78.0,
+    "minutes": 10.459,
+    "model_usd": 1.2281,
+    "cloud_usd": 0.15
+   },
+   "bu2-164": {
+    "score": 73.0,
+    "minutes": 9.62,
+    "model_usd": 1.0061,
+    "cloud_usd": 0.4547
+   },
+   "bu2-165": {
+    "score": 69.0,
+    "minutes": 1.521,
+    "model_usd": 0.1545,
+    "cloud_usd": 0.002
+   },
+   "bu2-166": {
+    "score": 100.0,
+    "minutes": 2.57,
+    "model_usd": 0.1631,
+    "cloud_usd": 0.003
+   },
+   "bu2-167": {
+    "score": 72.0,
+    "minutes": 2.98,
+    "model_usd": 0.1897,
+    "cloud_usd": 0.003
+   },
+   "bu2-168": {
+    "score": 100.0,
+    "minutes": 1.13,
+    "model_usd": 0.078,
+    "cloud_usd": 0.0541
+   },
+   "bu2-169": {
+    "score": 86.0,
+    "minutes": 4.41,
+    "model_usd": 0.2335,
+    "cloud_usd": 0.1522
+   },
+   "bu2-170": {
+    "score": 75.0,
+    "minutes": 3.161,
+    "model_usd": 0.2299,
+    "cloud_usd": 0.053
+   },
+   "bu2-171": {
+    "score": 100.0,
+    "minutes": 5.005,
+    "model_usd": 0.377,
+    "cloud_usd": 0.1756
+   },
+   "bu2-172": {
+    "score": 62.0,
+    "minutes": 1.459,
+    "model_usd": 0.0637,
+    "cloud_usd": 0.2148
+   },
+   "bu2-173": {
+    "score": 56.0,
+    "minutes": 3.048,
+    "model_usd": 0.2446,
+    "cloud_usd": 0.0532
+   },
+   "bu2-174": {
+    "score": 64.0,
+    "minutes": 11.512,
+    "model_usd": 0.7426,
+    "cloud_usd": 0.1972
+   },
+   "bu2-175": {
+    "score": 16.0,
+    "minutes": 0.812,
+    "model_usd": 0.0483,
+    "cloud_usd": 0.001
+   },
+   "bu2-176": {
+    "score": 90.0,
+    "minutes": 1.987,
+    "model_usd": 0.128,
+    "cloud_usd": 0.002
+   },
+   "bu2-177": {
+    "score": 90.0,
+    "minutes": 3.162,
+    "model_usd": 0.2463,
+    "cloud_usd": 0.0241
+   },
+   "bu2-178": {
+    "score": 88.0,
+    "minutes": 10.212,
+    "model_usd": 1.1175,
+    "cloud_usd": 0.4558
+   },
+   "bu2-179": {
+    "score": 46.0,
+    "minutes": 9.678,
+    "model_usd": 1.287,
+    "cloud_usd": 0.1895
+   },
+   "bu2-180": {
+    "score": 100.0,
+    "minutes": 2.591,
+    "model_usd": 0.1572,
+    "cloud_usd": 0.0562
+   },
+   "bu2-181": {
+    "score": 100.0,
+    "minutes": 1.641,
+    "model_usd": 0.1456,
+    "cloud_usd": 0.026
+   },
+   "bu2-182": {
+    "score": 90.0,
+    "minutes": 5.724,
+    "model_usd": 0.3072,
+    "cloud_usd": 0.1208
+   },
+   "bu2-183": {
+    "score": 58.0,
+    "minutes": 10.946,
+    "model_usd": 0.8278,
+    "cloud_usd": 0.1538
+   },
+   "bu2-184": {
+    "score": 12.0,
+    "minutes": 61.52,
+    "model_usd": 0.0,
+    "cloud_usd": 0.0
+   },
+   "bu2-185": {
+    "score": 35.0,
+    "minutes": 7.014,
+    "model_usd": 0.5118,
+    "cloud_usd": 0.1261
+   },
+   "bu2-186": {
+    "score": 100.0,
+    "minutes": 3.9,
+    "model_usd": 0.2411,
+    "cloud_usd": 0.004
+   },
+   "bu2-187": {
+    "score": 100.0,
+    "minutes": 2.643,
+    "model_usd": 0.1773,
+    "cloud_usd": 0.1017
+   },
+   "bu2-188": {
+    "score": 100.0,
+    "minutes": 2.838,
+    "model_usd": 0.2783,
+    "cloud_usd": 0.0566
+   },
+   "bu2-189": {
+    "score": 87.0,
+    "minutes": 3.995,
+    "model_usd": 0.1422,
+    "cloud_usd": 0.0539
+   },
+   "bu2-190": {
+    "score": 36.0,
+    "minutes": 8.592,
+    "model_usd": 0.3129,
+    "cloud_usd": 1.6934
+   },
+   "bu2-191": {
+    "score": 50.0,
+    "minutes": 2.761,
+    "model_usd": 0.1493,
+    "cloud_usd": 0.003
+   },
+   "bu2-192": {
+    "score": 78.0,
+    "minutes": 10.829,
+    "model_usd": 0.6376,
+    "cloud_usd": 0.0828
+   },
+   "bu2-193": {
+    "score": 0.0,
+    "minutes": 2.258,
+    "model_usd": 0.1639,
+    "cloud_usd": 0.003
+   },
+   "bu2-194": {
+    "score": 86.0,
+    "minutes": 3.599,
+    "model_usd": 0.1887,
+    "cloud_usd": 1.0403
+   },
+   "bu2-195": {
+    "score": 75.0,
+    "minutes": 3.722,
+    "model_usd": 0.2182,
+    "cloud_usd": 0.1023
+   },
+   "bu2-196": {
+    "score": 26.0,
+    "minutes": 2.079,
+    "model_usd": 0.1762,
+    "cloud_usd": 0.016
+   },
+   "bu2-197": {
+    "score": 76.0,
+    "minutes": 11.508,
+    "model_usd": 0.5226,
+    "cloud_usd": 0.1606
+   },
+   "bu2-198": {
+    "score": 41.0,
+    "minutes": 1.632,
+    "model_usd": 0.1173,
+    "cloud_usd": 0.0511
+   },
+   "bu2-199": {
+    "score": 88.0,
+    "minutes": 3.497,
+    "model_usd": 0.1995,
+    "cloud_usd": 0.0552
+   },
+   "bu2-200": {
+    "score": 60.0,
+    "minutes": 15.695,
+    "model_usd": 0.4003,
+    "cloud_usd": 0.0472
+   }
+  },
+  "codex-chrome-devtools-mcp": {
+   "bu2-001": {
+    "score": 58.0,
+    "minutes": 5.778,
+    "model_usd": 0.4474,
+    "cloud_usd": 0.1992
+   },
+   "bu2-002": {
+    "score": 54.0,
+    "minutes": 10.469,
+    "model_usd": 0.8596,
+    "cloud_usd": 0.2276
+   },
+   "bu2-003": {
+    "score": 20.0,
+    "minutes": 11.747,
+    "model_usd": 0.3019,
+    "cloud_usd": 0.2628
+   },
+   "bu2-004": {
+    "score": 44.0,
+    "minutes": 2.066,
+    "model_usd": 0.2246,
+    "cloud_usd": 0.0685
+   },
+   "bu2-005": {
+    "score": 100.0,
+    "minutes": 2.475,
+    "model_usd": 0.3277,
+    "cloud_usd": 0.0376
+   },
+   "bu2-006": {
+    "score": 80.0,
+    "minutes": 18.539,
+    "model_usd": 1.2601,
+    "cloud_usd": 0.2938
+   },
+   "bu2-007": {
+    "score": 58.0,
+    "minutes": 23.153,
+    "model_usd": 1.0932,
+    "cloud_usd": 0.2789
+   },
+   "bu2-008": {
+    "score": 60.0,
+    "minutes": 8.106,
+    "model_usd": 0.7803,
+    "cloud_usd": 0.0822
+   },
+   "bu2-009": {
+    "score": 80.0,
+    "minutes": 11.738,
+    "model_usd": 0.5408,
+    "cloud_usd": 0.1535
+   },
+   "bu2-010": {
+    "score": 40.0,
+    "minutes": 0.724,
+    "model_usd": 0.0431,
+    "cloud_usd": 0.0003
+   },
+   "bu2-011": {
+    "score": 51.0,
+    "minutes": 12.017,
+    "model_usd": 0.6384,
+    "cloud_usd": 0.2338
+   },
+   "bu2-012": {
+    "score": 36.0,
+    "minutes": 6.639,
+    "model_usd": 0.5422,
+    "cloud_usd": 0.7386
+   },
+   "bu2-013": {
+    "score": 0.0,
+    "minutes": 13.793,
+    "model_usd": 0.7174,
+    "cloud_usd": 1.7163
+   },
+   "bu2-014": {
+    "score": 60.0,
+    "minutes": 13.813,
+    "model_usd": 0.8367,
+    "cloud_usd": 0.3053
+   },
+   "bu2-015": {
+    "score": 60.0,
+    "minutes": 27.426,
+    "model_usd": 1.7466,
+    "cloud_usd": 0.2187
+   },
+   "bu2-016": {
+    "score": 100.0,
+    "minutes": 6.598,
+    "model_usd": 0.464,
+    "cloud_usd": 0.1549
+   },
+   "bu2-017": {
+    "score": 92.0,
+    "minutes": 19.625,
+    "model_usd": 2.2352,
+    "cloud_usd": 0.8978
+   },
+   "bu2-018": {
+    "score": 70.0,
+    "minutes": 9.175,
+    "model_usd": 0.6442,
+    "cloud_usd": 0.2649
+   },
+   "bu2-019": {
+    "score": 62.0,
+    "minutes": 10.902,
+    "model_usd": 1.3243,
+    "cloud_usd": 0.2315
+   },
+   "bu2-020": {
+    "score": 65.0,
+    "minutes": 9.359,
+    "model_usd": 0.5878,
+    "cloud_usd": 0.2191
+   },
+   "bu2-021": {
+    "score": 58.0,
+    "minutes": 31.089,
+    "model_usd": 3.1689,
+    "cloud_usd": 0.3508
+   },
+   "bu2-022": {
+    "score": 6.0,
+    "minutes": 12.024,
+    "model_usd": 0.2198,
+    "cloud_usd": 0.1859
+   },
+   "bu2-023": {
+    "score": 64.0,
+    "minutes": 7.622,
+    "model_usd": 0.5778,
+    "cloud_usd": 0.3539
+   },
+   "bu2-024": {
+    "score": 32.0,
+    "minutes": 12.614,
+    "model_usd": 0.493,
+    "cloud_usd": 0.2502
+   },
+   "bu2-025": {
+    "score": 68.0,
+    "minutes": 18.142,
+    "model_usd": 0.866,
+    "cloud_usd": 0.137
+   },
+   "bu2-026": {
+    "score": 92.0,
+    "minutes": 8.289,
+    "model_usd": 1.0636,
+    "cloud_usd": 0.1688
+   },
+   "bu2-027": {
+    "score": 100.0,
+    "minutes": 13.548,
+    "model_usd": 0.5922,
+    "cloud_usd": 0.5284
+   },
+   "bu2-028": {
+    "score": 73.0,
+    "minutes": 5.441,
+    "model_usd": 0.6608,
+    "cloud_usd": 0.087
+   },
+   "bu2-029": {
+    "score": 74.0,
+    "minutes": 12.399,
+    "model_usd": 1.1214,
+    "cloud_usd": 0.1779
+   },
+   "bu2-030": {
+    "score": 56.0,
+    "minutes": 8.343,
+    "model_usd": 0.3048,
+    "cloud_usd": 0.2834
+   },
+   "bu2-031": {
+    "score": 44.0,
+    "minutes": 7.297,
+    "model_usd": 0.8887,
+    "cloud_usd": 0.1943
+   },
+   "bu2-032": {
+    "score": 80.0,
+    "minutes": 13.069,
+    "model_usd": 2.3771,
+    "cloud_usd": 0.0786
+   },
+   "bu2-033": {
+    "score": 100.0,
+    "minutes": 7.919,
+    "model_usd": 0.9444,
+    "cloud_usd": 0.3137
+   },
+   "bu2-034": {
+    "score": 30.0,
+    "minutes": 10.092,
+    "model_usd": 0.2967,
+    "cloud_usd": 0.1559
+   },
+   "bu2-035": {
+    "score": 56.0,
+    "minutes": 2.251,
+    "model_usd": 0.2043,
+    "cloud_usd": 0.1164
+   },
+   "bu2-036": {
+    "score": 86.0,
+    "minutes": 6.835,
+    "model_usd": 0.76,
+    "cloud_usd": 0.111
+   },
+   "bu2-037": {
+    "score": 92.0,
+    "minutes": 18.53,
+    "model_usd": 1.3567,
+    "cloud_usd": 1.5212
+   },
+   "bu2-038": {
+    "score": 100.0,
+    "minutes": 1.323,
+    "model_usd": 0.1054,
+    "cloud_usd": 0.0362
+   },
+   "bu2-039": {
+    "score": 70.0,
+    "minutes": 3.615,
+    "model_usd": 0.1648,
+    "cloud_usd": 0.0706
+   },
+   "bu2-040": {
+    "score": 44.0,
+    "minutes": 10.798,
+    "model_usd": 0.4494,
+    "cloud_usd": 0.3619
+   },
+   "bu2-041": {
+    "score": 70.0,
+    "minutes": 18.762,
+    "model_usd": 0.8499,
+    "cloud_usd": 0.6814
+   },
+   "bu2-042": {
+    "score": 86.0,
+    "minutes": 10.558,
+    "model_usd": 0.5192,
+    "cloud_usd": 0.1944
+   },
+   "bu2-043": {
+    "score": 100.0,
+    "minutes": 13.332,
+    "model_usd": 1.1292,
+    "cloud_usd": 0.4091
+   },
+   "bu2-044": {
+    "score": 100.0,
+    "minutes": 13.004,
+    "model_usd": 0.6834,
+    "cloud_usd": 0.3705
+   },
+   "bu2-045": {
+    "score": 56.0,
+    "minutes": 20.928,
+    "model_usd": 0.8134,
+    "cloud_usd": 0.4582
+   },
+   "bu2-046": {
+    "score": 48.0,
+    "minutes": 6.431,
+    "model_usd": 0.2881,
+    "cloud_usd": 0.1566
+   },
+   "bu2-047": {
+    "score": 20.0,
+    "minutes": 5.871,
+    "model_usd": 0.7996,
+    "cloud_usd": 0.1183
+   },
+   "bu2-048": {
+    "score": 50.0,
+    "minutes": 14.878,
+    "model_usd": 0.8093,
+    "cloud_usd": 0.3617
+   },
+   "bu2-049": {
+    "score": 70.0,
+    "minutes": 12.607,
+    "model_usd": 0.7281,
+    "cloud_usd": 0.1434
+   },
+   "bu2-050": {
+    "score": 74.0,
+    "minutes": 12.064,
+    "model_usd": 0.7387,
+    "cloud_usd": 0.2405
+   },
+   "bu2-051": {
+    "score": 88.0,
+    "minutes": 40.781,
+    "model_usd": 2.6806,
+    "cloud_usd": 1.3973
+   },
+   "bu2-052": {
+    "score": 68.0,
+    "minutes": 6.412,
+    "model_usd": 0.3157,
+    "cloud_usd": 0.3311
+   },
+   "bu2-053": {
+    "score": 92.0,
+    "minutes": 9.637,
+    "model_usd": 0.9294,
+    "cloud_usd": 0.3989
+   },
+   "bu2-054": {
+    "score": 64.0,
+    "minutes": 17.395,
+    "model_usd": 0.7387,
+    "cloud_usd": 0.3286
+   },
+   "bu2-055": {
+    "score": 59.0,
+    "minutes": 16.676,
+    "model_usd": 1.489,
+    "cloud_usd": 0.448
+   },
+   "bu2-056": {
+    "score": 40.0,
+    "minutes": 1.593,
+    "model_usd": 0.1013,
+    "cloud_usd": 0.002
+   },
+   "bu2-057": {
+    "score": 80.0,
+    "minutes": 1.314,
+    "model_usd": 0.1537,
+    "cloud_usd": 0.0605
+   },
+   "bu2-058": {
+    "score": 50.0,
+    "minutes": 2.666,
+    "model_usd": 0.314,
+    "cloud_usd": 0.003
+   },
+   "bu2-059": {
+    "score": 64.0,
+    "minutes": 6.53,
+    "model_usd": 0.5913,
+    "cloud_usd": 0.1302
+   },
+   "bu2-060": {
+    "score": 88.0,
+    "minutes": 3.181,
+    "model_usd": 0.2095,
+    "cloud_usd": 0.0198
+   },
+   "bu2-061": {
+    "score": 100.0,
+    "minutes": 1.665,
+    "model_usd": 0.2299,
+    "cloud_usd": 0.008
+   },
+   "bu2-062": {
+    "score": 68.0,
+    "minutes": 5.5,
+    "model_usd": 0.5392,
+    "cloud_usd": 0.1533
+   },
+   "bu2-063": {
+    "score": 38.0,
+    "minutes": 7.739,
+    "model_usd": 0.4659,
+    "cloud_usd": 0.0414
+   },
+   "bu2-064": {
+    "score": 68.0,
+    "minutes": 1.191,
+    "model_usd": 0.1009,
+    "cloud_usd": 0.0508
+   },
+   "bu2-065": {
+    "score": 54.0,
+    "minutes": 2.239,
+    "model_usd": 0.2011,
+    "cloud_usd": 0.0521
+   },
+   "bu2-066": {
+    "score": 44.0,
+    "minutes": 2.234,
+    "model_usd": 0.186,
+    "cloud_usd": 0.1291
+   },
+   "bu2-067": {
+    "score": 44.0,
+    "minutes": 6.482,
+    "model_usd": 0.5677,
+    "cloud_usd": 0.0244
+   },
+   "bu2-068": {
+    "score": 100.0,
+    "minutes": 1.806,
+    "model_usd": 0.0877,
+    "cloud_usd": 0.0047
+   },
+   "bu2-069": {
+    "score": 74.0,
+    "minutes": 3.16,
+    "model_usd": 0.4477,
+    "cloud_usd": 0.0554
+   },
+   "bu2-070": {
+    "score": 48.0,
+    "minutes": 1.622,
+    "model_usd": 0.064,
+    "cloud_usd": 0.002
+   },
+   "bu2-071": {
+    "score": 54.0,
+    "minutes": 4.496,
+    "model_usd": 0.4881,
+    "cloud_usd": 0.2906
+   },
+   "bu2-072": {
+    "score": 90.0,
+    "minutes": 2.509,
+    "model_usd": 0.2986,
+    "cloud_usd": 0.0528
+   },
+   "bu2-073": {
+    "score": 86.0,
+    "minutes": 3.829,
+    "model_usd": 0.5055,
+    "cloud_usd": 0.3744
+   },
+   "bu2-074": {
+    "score": 100.0,
+    "minutes": 2.32,
+    "model_usd": 0.2877,
+    "cloud_usd": 0.003
+   },
+   "bu2-075": {
+    "score": 30.0,
+    "minutes": 1.125,
+    "model_usd": 0.0917,
+    "cloud_usd": 0.002
+   },
+   "bu2-076": {
+    "score": 20.0,
+    "minutes": 5.107,
+    "model_usd": 0.6056,
+    "cloud_usd": 0.3439
+   },
+   "bu2-077": {
+    "score": 40.0,
+    "minutes": 1.372,
+    "model_usd": 0.0923,
+    "cloud_usd": 0.002
+   },
+   "bu2-078": {
+    "score": 59.0,
+    "minutes": 1.777,
+    "model_usd": 0.1666,
+    "cloud_usd": 0.0695
+   },
+   "bu2-079": {
+    "score": 16.0,
+    "minutes": 3.197,
+    "model_usd": 0.6306,
+    "cloud_usd": 0.3037
+   },
+   "bu2-080": {
+    "score": 82.0,
+    "minutes": 1.608,
+    "model_usd": 0.1446,
+    "cloud_usd": 0.002
+   },
+   "bu2-081": {
+    "score": 57.0,
+    "minutes": 1.55,
+    "model_usd": 0.1261,
+    "cloud_usd": 0.002
+   },
+   "bu2-082": {
+    "score": 100.0,
+    "minutes": 3.528,
+    "model_usd": 0.1327,
+    "cloud_usd": 0.0951
+   },
+   "bu2-083": {
+    "score": 100.0,
+    "minutes": 1.864,
+    "model_usd": 0.1528,
+    "cloud_usd": 0.3013
+   },
+   "bu2-084": {
+    "score": 100.0,
+    "minutes": 3.414,
+    "model_usd": 0.184,
+    "cloud_usd": 0.0397
+   },
+   "bu2-085": {
+    "score": 100.0,
+    "minutes": 2.775,
+    "model_usd": 0.1826,
+    "cloud_usd": 0.0235
+   },
+   "bu2-086": {
+    "score": 100.0,
+    "minutes": 3.264,
+    "model_usd": 0.1849,
+    "cloud_usd": 0.1211
+   },
+   "bu2-087": {
+    "score": 71.0,
+    "minutes": 2.594,
+    "model_usd": 0.3907,
+    "cloud_usd": 0.0534
+   },
+   "bu2-088": {
+    "score": 100.0,
+    "minutes": 5.401,
+    "model_usd": 0.4439,
+    "cloud_usd": 0.0555
+   },
+   "bu2-089": {
+    "score": 100.0,
+    "minutes": 5.533,
+    "model_usd": 0.2043,
+    "cloud_usd": 0.0453
+   },
+   "bu2-090": {
+    "score": 56.0,
+    "minutes": 2.198,
+    "model_usd": 0.2067,
+    "cloud_usd": 0.0528
+   },
+   "bu2-091": {
+    "score": 70.0,
+    "minutes": 6.516,
+    "model_usd": 0.2722,
+    "cloud_usd": 0.1866
+   },
+   "bu2-092": {
+    "score": 100.0,
+    "minutes": 1.392,
+    "model_usd": 0.1127,
+    "cloud_usd": 0.002
+   },
+   "bu2-093": {
+    "score": 100.0,
+    "minutes": 1.526,
+    "model_usd": 0.1245,
+    "cloud_usd": 0.0524
+   },
+   "bu2-094": {
+    "score": 20.0,
+    "minutes": 0.439,
+    "model_usd": 0.0366,
+    "cloud_usd": 0.001
+   },
+   "bu2-095": {
+    "score": 14.0,
+    "minutes": 5.127,
+    "model_usd": 0.2547,
+    "cloud_usd": 0.1567
+   },
+   "bu2-096": {
+    "score": 82.0,
+    "minutes": 4.665,
+    "model_usd": 0.6224,
+    "cloud_usd": 0.1526
+   },
+   "bu2-097": {
+    "score": 100.0,
+    "minutes": 4.414,
+    "model_usd": 0.3876,
+    "cloud_usd": 0.0597
+   },
+   "bu2-098": {
+    "score": 100.0,
+    "minutes": 1.392,
+    "model_usd": 0.0878,
+    "cloud_usd": 0.002
+   },
+   "bu2-099": {
+    "score": 50.0,
+    "minutes": 17.506,
+    "model_usd": 0.8326,
+    "cloud_usd": 1.0619
+   },
+   "bu2-100": {
+    "score": 100.0,
+    "minutes": 2.874,
+    "model_usd": 0.3065,
+    "cloud_usd": 0.0754
+   },
+   "bu2-101": {
+    "score": 90.0,
+    "minutes": 11.485,
+    "model_usd": 0.61,
+    "cloud_usd": 0.1474
+   },
+   "bu2-102": {
+    "score": 51.0,
+    "minutes": 1.345,
+    "model_usd": 0.1092,
+    "cloud_usd": 0.1234
+   },
+   "bu2-103": {
+    "score": 52.0,
+    "minutes": 4.085,
+    "model_usd": 0.4716,
+    "cloud_usd": 0.1058
+   },
+   "bu2-104": {
+    "score": 14.0,
+    "minutes": 1.734,
+    "model_usd": 0.1094,
+    "cloud_usd": 0.0534
+   },
+   "bu2-105": {
+    "score": 80.0,
+    "minutes": 3.408,
+    "model_usd": 0.3128,
+    "cloud_usd": 0.0462
+   },
+   "bu2-106": {
+    "score": 35.0,
+    "minutes": 2.325,
+    "model_usd": 0.1295,
+    "cloud_usd": 0.003
+   },
+   "bu2-107": {
+    "score": 54.0,
+    "minutes": 6.245,
+    "model_usd": 0.3901,
+    "cloud_usd": 0.2055
+   },
+   "bu2-108": {
+    "score": 71.0,
+    "minutes": 4.165,
+    "model_usd": 0.3607,
+    "cloud_usd": 0.2319
+   },
+   "bu2-109": {
+    "score": 95.0,
+    "minutes": 0.925,
+    "model_usd": 0.0736,
+    "cloud_usd": 0.001
+   },
+   "bu2-110": {
+    "score": 68.0,
+    "minutes": 2.173,
+    "model_usd": 0.1731,
+    "cloud_usd": 0.1089
+   },
+   "bu2-111": {
+    "score": 100.0,
+    "minutes": 2.161,
+    "model_usd": 0.211,
+    "cloud_usd": 0.003
+   },
+   "bu2-112": {
+    "score": 100.0,
+    "minutes": 1.816,
+    "model_usd": 0.1615,
+    "cloud_usd": 0.002
+   },
+   "bu2-113": {
+    "score": 88.0,
+    "minutes": 2.598,
+    "model_usd": 0.2474,
+    "cloud_usd": 0.003
+   },
+   "bu2-114": {
+    "score": 84.0,
+    "minutes": 1.91,
+    "model_usd": 0.1669,
+    "cloud_usd": 0.0523
+   },
+   "bu2-115": {
+    "score": 68.0,
+    "minutes": 5.552,
+    "model_usd": 0.5124,
+    "cloud_usd": 0.2779
+   },
+   "bu2-116": {
+    "score": 94.0,
+    "minutes": 4.103,
+    "model_usd": 0.1617,
+    "cloud_usd": 0.0539
+   },
+   "bu2-117": {
+    "score": 54.0,
+    "minutes": 10.244,
+    "model_usd": 0.2749,
+    "cloud_usd": 0.0762
+   },
+   "bu2-118": {
+    "score": 83.0,
+    "minutes": 3.347,
+    "model_usd": 0.2761,
+    "cloud_usd": 0.0528
+   },
+   "bu2-119": {
+    "score": 57.0,
+    "minutes": 5.403,
+    "model_usd": 0.2208,
+    "cloud_usd": 0.1416
+   },
+   "bu2-120": {
+    "score": 100.0,
+    "minutes": 1.402,
+    "model_usd": 0.1168,
+    "cloud_usd": 0.0525
+   },
+   "bu2-121": {
+    "score": 74.0,
+    "minutes": 2.237,
+    "model_usd": 0.178,
+    "cloud_usd": 0.1601
+   },
+   "bu2-122": {
+    "score": 66.0,
+    "minutes": 5.901,
+    "model_usd": 1.0586,
+    "cloud_usd": 0.0388
+   },
+   "bu2-123": {
+    "score": 100.0,
+    "minutes": 0.639,
+    "model_usd": 0.0713,
+    "cloud_usd": 0.001
+   },
+   "bu2-124": {
+    "score": 86.0,
+    "minutes": 6.085,
+    "model_usd": 0.4827,
+    "cloud_usd": 0.0357
+   },
+   "bu2-125": {
+    "score": 82.0,
+    "minutes": 4.256,
+    "model_usd": 0.5904,
+    "cloud_usd": 0.0365
+   },
+   "bu2-126": {
+    "score": 100.0,
+    "minutes": 18.358,
+    "model_usd": 1.8375,
+    "cloud_usd": 0.2133
+   },
+   "bu2-127": {
+    "score": 50.0,
+    "minutes": 4.979,
+    "model_usd": 0.2806,
+    "cloud_usd": 0.0539
+   },
+   "bu2-128": {
+    "score": 58.0,
+    "minutes": 5.205,
+    "model_usd": 0.1908,
+    "cloud_usd": 0.014
+   },
+   "bu2-129": {
+    "score": 73.0,
+    "minutes": 4.254,
+    "model_usd": 0.5172,
+    "cloud_usd": 0.1732
+   },
+   "bu2-130": {
+    "score": 100.0,
+    "minutes": 1.508,
+    "model_usd": 0.1936,
+    "cloud_usd": 0.002
+   },
+   "bu2-131": {
+    "score": 54.0,
+    "minutes": 6.126,
+    "model_usd": 0.5301,
+    "cloud_usd": 0.0874
+   },
+   "bu2-132": {
+    "score": 58.0,
+    "minutes": 2.873,
+    "model_usd": 0.3476,
+    "cloud_usd": 0.003
+   },
+   "bu2-133": {
+    "score": 69.0,
+    "minutes": 1.133,
+    "model_usd": 0.1173,
+    "cloud_usd": 0.0514
+   },
+   "bu2-134": {
+    "score": 100.0,
+    "minutes": 1.645,
+    "model_usd": 0.2224,
+    "cloud_usd": 0.0533
+   },
+   "bu2-135": {
+    "score": 43.0,
+    "minutes": 5.325,
+    "model_usd": 0.272,
+    "cloud_usd": 0.026
+   },
+   "bu2-136": {
+    "score": 34.0,
+    "minutes": 8.731,
+    "model_usd": 0.4828,
+    "cloud_usd": 0.1515
+   },
+   "bu2-137": {
+    "score": 54.0,
+    "minutes": 10.967,
+    "model_usd": 0.2941,
+    "cloud_usd": 0.0636
+   },
+   "bu2-138": {
+    "score": 88.0,
+    "minutes": 1.904,
+    "model_usd": 0.1571,
+    "cloud_usd": 0.002
+   },
+   "bu2-139": {
+    "score": 56.0,
+    "minutes": 3.032,
+    "model_usd": 0.3606,
+    "cloud_usd": 0.6792
+   },
+   "bu2-140": {
+    "score": 86.0,
+    "minutes": 0.988,
+    "model_usd": 0.0836,
+    "cloud_usd": 0.0499
+   },
+   "bu2-141": {
+    "score": 100.0,
+    "minutes": 1.96,
+    "model_usd": 0.142,
+    "cloud_usd": 0.0539
+   },
+   "bu2-142": {
+    "score": 91.0,
+    "minutes": 8.693,
+    "model_usd": 0.3944,
+    "cloud_usd": 0.3738
+   },
+   "bu2-143": {
+    "score": 96.0,
+    "minutes": 3.93,
+    "model_usd": 0.3994,
+    "cloud_usd": 0.0572
+   },
+   "bu2-144": {
+    "score": 73.0,
+    "minutes": 3.313,
+    "model_usd": 0.6982,
+    "cloud_usd": 0.0535
+   },
+   "bu2-145": {
+    "score": 18.0,
+    "minutes": 0.546,
+    "model_usd": 0.0395,
+    "cloud_usd": 0.001
+   },
+   "bu2-146": {
+    "score": 88.0,
+    "minutes": 5.371,
+    "model_usd": 0.5967,
+    "cloud_usd": 0.2071
+   },
+   "bu2-147": {
+    "score": 100.0,
+    "minutes": 2.296,
+    "model_usd": 0.2222,
+    "cloud_usd": 0.003
+   },
+   "bu2-148": {
+    "score": 19.0,
+    "minutes": 0.466,
+    "model_usd": 0.0378,
+    "cloud_usd": 0.001
+   },
+   "bu2-149": {
+    "score": 100.0,
+    "minutes": 0.941,
+    "model_usd": 0.1094,
+    "cloud_usd": 0.0511
+   },
+   "bu2-150": {
+    "score": 62.0,
+    "minutes": 2.848,
+    "model_usd": 0.2807,
+    "cloud_usd": 0.758
+   },
+   "bu2-151": {
+    "score": 24.0,
+    "minutes": 17.678,
+    "model_usd": 0.9652,
+    "cloud_usd": 0.1603
+   },
+   "bu2-152": {
+    "score": 100.0,
+    "minutes": 1.976,
+    "model_usd": 0.1749,
+    "cloud_usd": 0.0523
+   },
+   "bu2-153": {
+    "score": 100.0,
+    "minutes": 6.875,
+    "model_usd": 1.0324,
+    "cloud_usd": 0.0199
+   },
+   "bu2-154": {
+    "score": 100.0,
+    "minutes": 1.105,
+    "model_usd": 0.0679,
+    "cloud_usd": 0.002
+   },
+   "bu2-155": {
+    "score": 88.0,
+    "minutes": 2.058,
+    "model_usd": 0.3164,
+    "cloud_usd": 0.0439
+   },
+   "bu2-156": {
+    "score": 100.0,
+    "minutes": 2.042,
+    "model_usd": 0.1543,
+    "cloud_usd": 0.1031
+   },
+   "bu2-157": {
+    "score": 100.0,
+    "minutes": 2.303,
+    "model_usd": 0.1443,
+    "cloud_usd": 0.0507
+   },
+   "bu2-158": {
+    "score": 48.0,
+    "minutes": 1.43,
+    "model_usd": 0.1163,
+    "cloud_usd": 0.0497
+   },
+   "bu2-159": {
+    "score": 84.0,
+    "minutes": 2.525,
+    "model_usd": 0.2177,
+    "cloud_usd": 0.0509
+   },
+   "bu2-160": {
+    "score": 100.0,
+    "minutes": 1.605,
+    "model_usd": 0.1722,
+    "cloud_usd": 0.0007
+   },
+   "bu2-161": {
+    "score": 76.0,
+    "minutes": 8.41,
+    "model_usd": 0.6245,
+    "cloud_usd": 0.1986
+   },
+   "bu2-162": {
+    "score": 90.0,
+    "minutes": 4.929,
+    "model_usd": 0.5051,
+    "cloud_usd": 0.2089
+   },
+   "bu2-163": {
+    "score": 36.0,
+    "minutes": 4.39,
+    "model_usd": 0.2913,
+    "cloud_usd": 0.0233
+   },
+   "bu2-164": {
+    "score": 49.0,
+    "minutes": 11.155,
+    "model_usd": 0.7087,
+    "cloud_usd": 0.3414
+   },
+   "bu2-165": {
+    "score": 38.0,
+    "minutes": 1.916,
+    "model_usd": 0.3342,
+    "cloud_usd": 0.0007
+   },
+   "bu2-166": {
+    "score": 100.0,
+    "minutes": 2.017,
+    "model_usd": 0.1442,
+    "cloud_usd": 0.0007
+   },
+   "bu2-167": {
+    "score": 84.0,
+    "minutes": 3.348,
+    "model_usd": 0.2405,
+    "cloud_usd": 0.0013
+   },
+   "bu2-168": {
+    "score": 100.0,
+    "minutes": 1.584,
+    "model_usd": 0.1242,
+    "cloud_usd": 0.1008
+   },
+   "bu2-169": {
+    "score": 50.0,
+    "minutes": 3.35,
+    "model_usd": 0.326,
+    "cloud_usd": 0.1289
+   },
+   "bu2-170": {
+    "score": 73.0,
+    "minutes": 2.549,
+    "model_usd": 0.353,
+    "cloud_usd": 0.001
+   },
+   "bu2-171": {
+    "score": 100.0,
+    "minutes": 2.976,
+    "model_usd": 0.2318,
+    "cloud_usd": 0.0677
+   },
+   "bu2-172": {
+    "score": 62.0,
+    "minutes": 1.863,
+    "model_usd": 0.0811,
+    "cloud_usd": 0.3737
+   },
+   "bu2-173": {
+    "score": 100.0,
+    "minutes": 2.193,
+    "model_usd": 0.1857,
+    "cloud_usd": 0.0499
+   },
+   "bu2-174": {
+    "score": 78.0,
+    "minutes": 8.942,
+    "model_usd": 0.4918,
+    "cloud_usd": 0.1072
+   },
+   "bu2-175": {
+    "score": 76.0,
+    "minutes": 4.698,
+    "model_usd": 0.5515,
+    "cloud_usd": 0.085
+   },
+   "bu2-176": {
+    "score": 90.0,
+    "minutes": 1.552,
+    "model_usd": 0.1986,
+    "cloud_usd": 0.0007
+   },
+   "bu2-177": {
+    "score": 87.0,
+    "minutes": 2.183,
+    "model_usd": 0.2378,
+    "cloud_usd": 0.0158
+   },
+   "bu2-178": {
+    "score": 50.0,
+    "minutes": 9.595,
+    "model_usd": 0.3076,
+    "cloud_usd": 0.1891
+   },
+   "bu2-179": {
+    "score": 93.0,
+    "minutes": 11.612,
+    "model_usd": 1.1692,
+    "cloud_usd": 0.2652
+   },
+   "bu2-180": {
+    "score": 77.0,
+    "minutes": 2.781,
+    "model_usd": 0.2173,
+    "cloud_usd": 0.1094
+   },
+   "bu2-181": {
+    "score": 100.0,
+    "minutes": 1.322,
+    "model_usd": 0.1241,
+    "cloud_usd": 0.0007
+   },
+   "bu2-182": {
+    "score": 44.0,
+    "minutes": 6.857,
+    "model_usd": 0.7238,
+    "cloud_usd": 0.139
+   },
+   "bu2-183": {
+    "score": 86.0,
+    "minutes": 14.828,
+    "model_usd": 0.6066,
+    "cloud_usd": 3.8602
+   },
+   "bu2-184": {
+    "score": 70.0,
+    "minutes": 6.471,
+    "model_usd": 0.6588,
+    "cloud_usd": 0.4874
+   },
+   "bu2-185": {
+    "score": 100.0,
+    "minutes": 3.88,
+    "model_usd": 0.2671,
+    "cloud_usd": 0.5988
+   },
+   "bu2-186": {
+    "score": 95.0,
+    "minutes": 1.999,
+    "model_usd": 0.295,
+    "cloud_usd": 0.0007
+   },
+   "bu2-187": {
+    "score": 100.0,
+    "minutes": 1.509,
+    "model_usd": 0.1621,
+    "cloud_usd": 0.052
+   },
+   "bu2-188": {
+    "score": 81.0,
+    "minutes": 2.293,
+    "model_usd": 0.2814,
+    "cloud_usd": 0.001
+   },
+   "bu2-189": {
+    "score": 42.0,
+    "minutes": 5.455,
+    "model_usd": 0.1282,
+    "cloud_usd": 0.046
+   },
+   "bu2-190": {
+    "score": 36.0,
+    "minutes": 3.546,
+    "model_usd": 0.3814,
+    "cloud_usd": 1.4342
+   },
+   "bu2-191": {
+    "score": 60.0,
+    "minutes": 9.229,
+    "model_usd": 0.8457,
+    "cloud_usd": 0.2841
+   },
+   "bu2-192": {
+    "score": 58.0,
+    "minutes": 11.545,
+    "model_usd": 0.7411,
+    "cloud_usd": 0.0908
+   },
+   "bu2-193": {
+    "score": 20.0,
+    "minutes": 1.483,
+    "model_usd": 0.1927,
+    "cloud_usd": 0.0986
+   },
+   "bu2-194": {
+    "score": 56.0,
+    "minutes": 7.806,
+    "model_usd": 0.3494,
+    "cloud_usd": 1.454
+   },
+   "bu2-195": {
+    "score": 75.0,
+    "minutes": 2.005,
+    "model_usd": 0.2193,
+    "cloud_usd": 0.0007
+   },
+   "bu2-196": {
+    "score": 92.0,
+    "minutes": 2.219,
+    "model_usd": 0.2742,
+    "cloud_usd": 0.0163
+   },
+   "bu2-197": {
+    "score": 76.0,
+    "minutes": 9.058,
+    "model_usd": 0.2879,
+    "cloud_usd": 0.6092
+   },
+   "bu2-198": {
+    "score": 58.0,
+    "minutes": 1.965,
+    "model_usd": 0.2284,
+    "cloud_usd": 0.0989
+   },
+   "bu2-199": {
+    "score": 88.0,
+    "minutes": 3.123,
+    "model_usd": 0.2444,
+    "cloud_usd": 0.0533
+   },
+   "bu2-200": {
+    "score": 40.0,
+    "minutes": 2.008,
+    "model_usd": 0.1743,
+    "cloud_usd": 0.0007
+   }
+  },
+  "codex-opencode-browse": {
+   "bu2-001": {
+    "score": 0.0,
+    "minutes": 1.846,
+    "model_usd": 0.0803,
+    "cloud_usd": 0.0007
+   },
+   "bu2-002": {
+    "score": 54.0,
+    "minutes": 9.18,
+    "model_usd": 0.6077,
+    "cloud_usd": 0.1746
+   },
+   "bu2-003": {
+    "score": 88.0,
+    "minutes": 17.366,
+    "model_usd": 1.7416,
+    "cloud_usd": 0.4552
+   },
+   "bu2-004": {
+    "score": 52.0,
+    "minutes": 8.875,
+    "model_usd": 0.5401,
+    "cloud_usd": 0.2247
+   },
+   "bu2-005": {
+    "score": 36.0,
+    "minutes": 0.875,
+    "model_usd": 0.0554,
+    "cloud_usd": 0.0003
+   },
+   "bu2-006": {
+    "score": 78.0,
+    "minutes": 10.014,
+    "model_usd": 0.6227,
+    "cloud_usd": 0.1163
+   },
+   "bu2-007": {
+    "score": 0.0,
+    "minutes": 1.056,
+    "model_usd": 0.0454,
+    "cloud_usd": 0.0007
+   },
+   "bu2-008": {
+    "score": 68.0,
+    "minutes": 7.034,
+    "model_usd": 0.6111,
+    "cloud_usd": 0.0525
+   },
+   "bu2-009": {
+    "score": 72.0,
+    "minutes": 4.821,
+    "model_usd": 0.2015,
+    "cloud_usd": 0.1279
+   },
+   "bu2-010": {
+    "score": 38.0,
+    "minutes": 1.557,
+    "model_usd": 0.1144,
+    "cloud_usd": 0.0007
+   },
+   "bu2-011": {
+    "score": 49.0,
+    "minutes": 8.602,
+    "model_usd": 0.6375,
+    "cloud_usd": 0.3235
+   },
+   "bu2-012": {
+    "score": 58.0,
+    "minutes": 3.385,
+    "model_usd": 0.141,
+    "cloud_usd": 0.0013
+   },
+   "bu2-013": {
+    "score": 12.0,
+    "minutes": 0.815,
+    "model_usd": 0.0389,
+    "cloud_usd": 0.0003
+   },
+   "bu2-014": {
+    "score": 24.0,
+    "minutes": 8.254,
+    "model_usd": 0.4256,
+    "cloud_usd": 0.1941
+   },
+   "bu2-015": {
+    "score": 74.0,
+    "minutes": 13.445,
+    "model_usd": 1.3852,
+    "cloud_usd": 0.135
+   },
+   "bu2-016": {
+    "score": 24.0,
+    "minutes": 2.056,
+    "model_usd": 0.0683,
+    "cloud_usd": 0.013
+   },
+   "bu2-017": {
+    "score": 92.0,
+    "minutes": 22.202,
+    "model_usd": 1.7989,
+    "cloud_usd": 0.2758
+   },
+   "bu2-018": {
+    "score": 82.0,
+    "minutes": 11.753,
+    "model_usd": 1.5245,
+    "cloud_usd": 0.3474
+   },
+   "bu2-019": {
+    "score": 57.0,
+    "minutes": 11.317,
+    "model_usd": 1.3334,
+    "cloud_usd": 0.155
+   },
+   "bu2-020": {
+    "score": 69.0,
+    "minutes": 8.505,
+    "model_usd": 0.3334,
+    "cloud_usd": 0.2118
+   },
+   "bu2-021": {
+    "score": 28.0,
+    "minutes": 18.878,
+    "model_usd": 2.1306,
+    "cloud_usd": 0.3925
+   },
+   "bu2-022": {
+    "score": 70.0,
+    "minutes": 10.273,
+    "model_usd": 1.8254,
+    "cloud_usd": 0.3469
+   },
+   "bu2-023": {
+    "score": 88.0,
+    "minutes": 7.125,
+    "model_usd": 0.483,
+    "cloud_usd": 0.3796
+   },
+   "bu2-024": {
+    "score": 70.0,
+    "minutes": 7.888,
+    "model_usd": 0.6488,
+    "cloud_usd": 0.2611
+   },
+   "bu2-025": {
+    "score": 82.0,
+    "minutes": 7.749,
+    "model_usd": 0.4347,
+    "cloud_usd": 0.0867
+   },
+   "bu2-026": {
+    "score": 80.0,
+    "minutes": 5.891,
+    "model_usd": 0.4904,
+    "cloud_usd": 0.1075
+   },
+   "bu2-027": {
+    "score": 100.0,
+    "minutes": 6.917,
+    "model_usd": 0.4962,
+    "cloud_usd": 0.3968
+   },
+   "bu2-028": {
+    "score": 66.0,
+    "minutes": 8.477,
+    "model_usd": 0.5894,
+    "cloud_usd": 0.048
+   },
+   "bu2-029": {
+    "score": 44.0,
+    "minutes": 5.832,
+    "model_usd": 0.2384,
+    "cloud_usd": 0.2172
+   },
+   "bu2-030": {
+    "score": 70.0,
+    "minutes": 11.676,
+    "model_usd": 0.9034,
+    "cloud_usd": 0.4451
+   },
+   "bu2-031": {
+    "score": 42.0,
+    "minutes": 6.797,
+    "model_usd": 0.9275,
+    "cloud_usd": 0.1699
+   },
+   "bu2-032": {
+    "score": 68.0,
+    "minutes": 3.902,
+    "model_usd": 0.2255,
+    "cloud_usd": 0.0404
+   },
+   "bu2-033": {
+    "score": 86.0,
+    "minutes": 7.731,
+    "model_usd": 0.4555,
+    "cloud_usd": 0.216
+   },
+   "bu2-034": {
+    "score": 40.0,
+    "minutes": 9.802,
+    "model_usd": 0.85,
+    "cloud_usd": 0.649
+   },
+   "bu2-035": {
+    "score": 58.0,
+    "minutes": 3.276,
+    "model_usd": 0.2032,
+    "cloud_usd": 0.0996
+   },
+   "bu2-036": {
+    "score": 86.0,
+    "minutes": 8.377,
+    "model_usd": 1.0748,
+    "cloud_usd": 0.1134
+   },
+   "bu2-037": {
+    "score": 84.0,
+    "minutes": 13.219,
+    "model_usd": 0.6137,
+    "cloud_usd": 0.4814
+   },
+   "bu2-038": {
+    "score": 35.0,
+    "minutes": 0.639,
+    "model_usd": 0.0481,
+    "cloud_usd": 0.0003
+   },
+   "bu2-039": {
+    "score": 48.0,
+    "minutes": 1.877,
+    "model_usd": 0.0751,
+    "cloud_usd": 0.0459
+   },
+   "bu2-040": {
+    "score": 74.0,
+    "minutes": 11.758,
+    "model_usd": 0.9988,
+    "cloud_usd": 0.6721
+   },
+   "bu2-041": {
+    "score": 82.0,
+    "minutes": 8.797,
+    "model_usd": 0.5765,
+    "cloud_usd": 0.3776
+   },
+   "bu2-042": {
+    "score": 61.0,
+    "minutes": 12.337,
+    "model_usd": 0.6922,
+    "cloud_usd": 5.2468
+   },
+   "bu2-043": {
+    "score": 85.0,
+    "minutes": 6.537,
+    "model_usd": 0.4853,
+    "cloud_usd": 0.3249
+   },
+   "bu2-044": {
+    "score": 0.0,
+    "minutes": 1.095,
+    "model_usd": 0.0476,
+    "cloud_usd": 0.002
+   },
+   "bu2-045": {
+    "score": 0.0,
+    "minutes": 10.612,
+    "model_usd": 0.6227,
+    "cloud_usd": 0.6921
+   },
+   "bu2-046": {
+    "score": 92.0,
+    "minutes": 6.515,
+    "model_usd": 0.621,
+    "cloud_usd": 0.1602
+   },
+   "bu2-047": {
+    "score": 0.0,
+    "minutes": 2.129,
+    "model_usd": 0.0633,
+    "cloud_usd": 0.003
+   },
+   "bu2-048": {
+    "score": 28.0,
+    "minutes": 5.657,
+    "model_usd": 0.5159,
+    "cloud_usd": 0.2422
+   },
+   "bu2-049": {
+    "score": 70.0,
+    "minutes": 14.182,
+    "model_usd": 0.7255,
+    "cloud_usd": 0.1274
+   },
+   "bu2-050": {
+    "score": 46.0,
+    "minutes": 10.176,
+    "model_usd": 1.3817,
+    "cloud_usd": 0.2244
+   },
+   "bu2-051": {
+    "score": 72.0,
+    "minutes": 22.769,
+    "model_usd": 1.2667,
+    "cloud_usd": 0.1766
+   },
+   "bu2-052": {
+    "score": 86.0,
+    "minutes": 5.558,
+    "model_usd": 0.231,
+    "cloud_usd": 0.2426
+   },
+   "bu2-053": {
+    "score": 88.0,
+    "minutes": 12.699,
+    "model_usd": 0.863,
+    "cloud_usd": 0.3999
+   },
+   "bu2-054": {
+    "score": 69.0,
+    "minutes": 8.152,
+    "model_usd": 0.8579,
+    "cloud_usd": 0.2809
+   },
+   "bu2-055": {
+    "score": 28.0,
+    "minutes": 12.832,
+    "model_usd": 1.2471,
+    "cloud_usd": 0.3475
+   },
+   "bu2-056": {
+    "score": 96.0,
+    "minutes": 5.309,
+    "model_usd": 0.1643,
+    "cloud_usd": 0.011
+   },
+   "bu2-057": {
+    "score": 80.0,
+    "minutes": 2.988,
+    "model_usd": 0.1749,
+    "cloud_usd": 0.0535
+   },
+   "bu2-058": {
+    "score": 60.0,
+    "minutes": 6.049,
+    "model_usd": 0.3039,
+    "cloud_usd": 0.0429
+   },
+   "bu2-059": {
+    "score": 100.0,
+    "minutes": 8.954,
+    "model_usd": 0.8621,
+    "cloud_usd": 0.1778
+   },
+   "bu2-060": {
+    "score": 70.0,
+    "minutes": 5.324,
+    "model_usd": 0.2605,
+    "cloud_usd": 0.0725
+   },
+   "bu2-061": {
+    "score": 24.0,
+    "minutes": 1.525,
+    "model_usd": 0.1065,
+    "cloud_usd": 0.0079
+   },
+   "bu2-062": {
+    "score": 80.0,
+    "minutes": 2.828,
+    "model_usd": 0.1697,
+    "cloud_usd": 0.0519
+   },
+   "bu2-063": {
+    "score": 38.0,
+    "minutes": 5.872,
+    "model_usd": 0.3393,
+    "cloud_usd": 0.0327
+   },
+   "bu2-064": {
+    "score": 44.0,
+    "minutes": 0.376,
+    "model_usd": 0.0293,
+    "cloud_usd": 0.001
+   },
+   "bu2-065": {
+    "score": 74.0,
+    "minutes": 2.473,
+    "model_usd": 0.176,
+    "cloud_usd": 0.0999
+   },
+   "bu2-066": {
+    "score": 38.0,
+    "minutes": 2.806,
+    "model_usd": 0.1913,
+    "cloud_usd": 0.0553
+   },
+   "bu2-067": {
+    "score": 12.0,
+    "minutes": 0.402,
+    "model_usd": 0.0298,
+    "cloud_usd": 0.001
+   },
+   "bu2-068": {
+    "score": 100.0,
+    "minutes": 1.333,
+    "model_usd": 0.0659,
+    "cloud_usd": 0.0043
+   },
+   "bu2-069": {
+    "score": 24.0,
+    "minutes": 4.836,
+    "model_usd": 0.1019,
+    "cloud_usd": 0.022
+   },
+   "bu2-070": {
+    "score": 62.0,
+    "minutes": 1.233,
+    "model_usd": 0.0858,
+    "cloud_usd": 0.002
+   },
+   "bu2-071": {
+    "score": 66.0,
+    "minutes": 13.502,
+    "model_usd": 0.648,
+    "cloud_usd": 0.6375
+   },
+   "bu2-072": {
+    "score": 78.0,
+    "minutes": 8.172,
+    "model_usd": 0.6193,
+    "cloud_usd": 0.0842
+   },
+   "bu2-073": {
+    "score": 58.0,
+    "minutes": 4.964,
+    "model_usd": 0.2476,
+    "cloud_usd": 0.1616
+   },
+   "bu2-074": {
+    "score": 100.0,
+    "minutes": 3.741,
+    "model_usd": 0.2525,
+    "cloud_usd": 0.0138
+   },
+   "bu2-075": {
+    "score": 48.0,
+    "minutes": 2.65,
+    "model_usd": 0.0991,
+    "cloud_usd": 0.003
+   },
+   "bu2-076": {
+    "score": 65.0,
+    "minutes": 6.715,
+    "model_usd": 0.6239,
+    "cloud_usd": 0.4129
+   },
+   "bu2-077": {
+    "score": 48.0,
+    "minutes": 4.813,
+    "model_usd": 0.1542,
+    "cloud_usd": 0.0269
+   },
+   "bu2-078": {
+    "score": 85.0,
+    "minutes": 2.628,
+    "model_usd": 0.1258,
+    "cloud_usd": 0.0173
+   },
+   "bu2-079": {
+    "score": 60.0,
+    "minutes": 6.157,
+    "model_usd": 0.5324,
+    "cloud_usd": 0.1029
+   },
+   "bu2-080": {
+    "score": 39.0,
+    "minutes": 0.992,
+    "model_usd": 0.0383,
+    "cloud_usd": 0.001
+   },
+   "bu2-081": {
+    "score": 57.0,
+    "minutes": 1.29,
+    "model_usd": 0.0908,
+    "cloud_usd": 0.0221
+   },
+   "bu2-082": {
+    "score": 86.0,
+    "minutes": 3.13,
+    "model_usd": 0.1475,
+    "cloud_usd": 0.004
+   },
+   "bu2-083": {
+    "score": 75.0,
+    "minutes": 1.6,
+    "model_usd": 0.0945,
+    "cloud_usd": 0.0317
+   },
+   "bu2-084": {
+    "score": 100.0,
+    "minutes": 5.446,
+    "model_usd": 0.2077,
+    "cloud_usd": 0.0376
+   },
+   "bu2-085": {
+    "score": 100.0,
+    "minutes": 6.07,
+    "model_usd": 0.274,
+    "cloud_usd": 0.0719
+   },
+   "bu2-086": {
+    "score": 100.0,
+    "minutes": 3.137,
+    "model_usd": 0.1624,
+    "cloud_usd": 0.0985
+   },
+   "bu2-087": {
+    "score": 71.0,
+    "minutes": 5.042,
+    "model_usd": 0.2309,
+    "cloud_usd": 0.0576
+   },
+   "bu2-088": {
+    "score": 72.0,
+    "minutes": 3.656,
+    "model_usd": 0.2556,
+    "cloud_usd": 0.0371
+   },
+   "bu2-089": {
+    "score": 24.0,
+    "minutes": 10.584,
+    "model_usd": 0.2529,
+    "cloud_usd": 0.0501
+   },
+   "bu2-090": {
+    "score": 76.0,
+    "minutes": 1.401,
+    "model_usd": 0.1419,
+    "cloud_usd": 0.002
+   },
+   "bu2-091": {
+    "score": 18.0,
+    "minutes": 6.686,
+    "model_usd": 0.4195,
+    "cloud_usd": 0.5019
+   },
+   "bu2-092": {
+    "score": 19.0,
+    "minutes": 0.475,
+    "model_usd": 0.0355,
+    "cloud_usd": 0.001
+   },
+   "bu2-093": {
+    "score": 94.0,
+    "minutes": 2.218,
+    "model_usd": 0.1635,
+    "cloud_usd": 0.003
+   },
+   "bu2-094": {
+    "score": 20.0,
+    "minutes": 0.387,
+    "model_usd": 0.0352,
+    "cloud_usd": 0.001
+   },
+   "bu2-095": {
+    "score": 14.0,
+    "minutes": 6.881,
+    "model_usd": 0.2302,
+    "cloud_usd": 0.197
+   },
+   "bu2-096": {
+    "score": 74.0,
+    "minutes": 4.439,
+    "model_usd": 0.1419,
+    "cloud_usd": 0.05
+   },
+   "bu2-097": {
+    "score": 14.0,
+    "minutes": 3.501,
+    "model_usd": 0.0868,
+    "cloud_usd": 0.0497
+   },
+   "bu2-098": {
+    "score": 5.0,
+    "minutes": 3.753,
+    "model_usd": 0.1303,
+    "cloud_usd": 0.031
+   },
+   "bu2-099": {
+    "score": 64.0,
+    "minutes": 17.402,
+    "model_usd": 1.6057,
+    "cloud_usd": 1.5325
+   },
+   "bu2-100": {
+    "score": 100.0,
+    "minutes": 7.19,
+    "model_usd": 0.3583,
+    "cloud_usd": 0.0808
+   },
+   "bu2-101": {
+    "score": 88.0,
+    "minutes": 5.952,
+    "model_usd": 0.3491,
+    "cloud_usd": 0.0699
+   },
+   "bu2-102": {
+    "score": 38.0,
+    "minutes": 0.726,
+    "model_usd": 0.0359,
+    "cloud_usd": 0.0562
+   },
+   "bu2-103": {
+    "score": 100.0,
+    "minutes": 5.065,
+    "model_usd": 0.2686,
+    "cloud_usd": 0.052
+   },
+   "bu2-104": {
+    "score": 24.0,
+    "minutes": 3.529,
+    "model_usd": 0.2224,
+    "cloud_usd": 0.0533
+   },
+   "bu2-105": {
+    "score": 56.0,
+    "minutes": 9.172,
+    "model_usd": 0.6471,
+    "cloud_usd": 0.068
+   },
+   "bu2-106": {
+    "score": 35.0,
+    "minutes": 0.544,
+    "model_usd": 0.0346,
+    "cloud_usd": 0.001
+   },
+   "bu2-107": {
+    "score": 36.0,
+    "minutes": 9.226,
+    "model_usd": 0.981,
+    "cloud_usd": 0.3805
+   },
+   "bu2-108": {
+    "score": 100.0,
+    "minutes": 12.198,
+    "model_usd": 0.5284,
+    "cloud_usd": 0.3025
+   },
+   "bu2-109": {
+    "score": 100.0,
+    "minutes": 1.552,
+    "model_usd": 0.0542,
+    "cloud_usd": 0.002
+   },
+   "bu2-110": {
+    "score": 66.0,
+    "minutes": 5.528,
+    "model_usd": 0.2855,
+    "cloud_usd": 0.0884
+   },
+   "bu2-111": {
+    "score": 100.0,
+    "minutes": 2.228,
+    "model_usd": 0.2245,
+    "cloud_usd": 0.003
+   },
+   "bu2-112": {
+    "score": 100.0,
+    "minutes": 3.642,
+    "model_usd": 0.2373,
+    "cloud_usd": 0.004
+   },
+   "bu2-113": {
+    "score": 88.0,
+    "minutes": 3.153,
+    "model_usd": 0.2,
+    "cloud_usd": 0.1032
+   },
+   "bu2-114": {
+    "score": 100.0,
+    "minutes": 4.056,
+    "model_usd": 0.2411,
+    "cloud_usd": 0.0546
+   },
+   "bu2-115": {
+    "score": 80.0,
+    "minutes": 4.704,
+    "model_usd": 0.4321,
+    "cloud_usd": 0.225
+   },
+   "bu2-116": {
+    "score": 72.0,
+    "minutes": 10.416,
+    "model_usd": 0.3603,
+    "cloud_usd": 0.308
+   },
+   "bu2-117": {
+    "score": 74.0,
+    "minutes": 0.538,
+    "model_usd": 0.0311,
+    "cloud_usd": 0.001
+   },
+   "bu2-118": {
+    "score": 85.0,
+    "minutes": 7.902,
+    "model_usd": 0.3538,
+    "cloud_usd": 0.0893
+   },
+   "bu2-119": {
+    "score": 65.0,
+    "minutes": 6.847,
+    "model_usd": 0.1811,
+    "cloud_usd": 0.0627
+   },
+   "bu2-120": {
+    "score": 24.0,
+    "minutes": 5.6,
+    "model_usd": 0.2576,
+    "cloud_usd": 0.0759
+   },
+   "bu2-121": {
+    "score": 100.0,
+    "minutes": 3.852,
+    "model_usd": 0.2576,
+    "cloud_usd": 0.109
+   },
+   "bu2-122": {
+    "score": 66.0,
+    "minutes": 9.947,
+    "model_usd": 0.7239,
+    "cloud_usd": 0.0261
+   },
+   "bu2-123": {
+    "score": 100.0,
+    "minutes": 2.093,
+    "model_usd": 0.0783,
+    "cloud_usd": 0.0174
+   },
+   "bu2-124": {
+    "score": 9.0,
+    "minutes": 1.478,
+    "model_usd": 0.0399,
+    "cloud_usd": 0.002
+   },
+   "bu2-125": {
+    "score": 82.0,
+    "minutes": 6.627,
+    "model_usd": 0.5344,
+    "cloud_usd": 0.0317
+   },
+   "bu2-126": {
+    "score": 100.0,
+    "minutes": 7.606,
+    "model_usd": 0.7598,
+    "cloud_usd": 0.0799
+   },
+   "bu2-127": {
+    "score": 53.0,
+    "minutes": 3.13,
+    "model_usd": 0.2618,
+    "cloud_usd": 0.026
+   },
+   "bu2-128": {
+    "score": 50.0,
+    "minutes": 3.071,
+    "model_usd": 0.0904,
+    "cloud_usd": 0.004
+   },
+   "bu2-129": {
+    "score": 84.0,
+    "minutes": 10.02,
+    "model_usd": 0.6468,
+    "cloud_usd": 0.2055
+   },
+   "bu2-130": {
+    "score": 100.0,
+    "minutes": 3.547,
+    "model_usd": 0.1708,
+    "cloud_usd": 0.004
+   },
+   "bu2-131": {
+    "score": 46.0,
+    "minutes": 4.325,
+    "model_usd": 0.2987,
+    "cloud_usd": 0.0542
+   },
+   "bu2-132": {
+    "score": 58.0,
+    "minutes": 3.298,
+    "model_usd": 0.2317,
+    "cloud_usd": 0.004
+   },
+   "bu2-133": {
+    "score": 72.0,
+    "minutes": 2.55,
+    "model_usd": 0.1777,
+    "cloud_usd": 0.0507
+   },
+   "bu2-134": {
+    "score": 100.0,
+    "minutes": 4.399,
+    "model_usd": 0.3143,
+    "cloud_usd": 0.0569
+   },
+   "bu2-135": {
+    "score": 35.0,
+    "minutes": 1.611,
+    "model_usd": 0.108,
+    "cloud_usd": 0.0101
+   },
+   "bu2-136": {
+    "score": 72.0,
+    "minutes": 3.228,
+    "model_usd": 0.2621,
+    "cloud_usd": 0.1037
+   },
+   "bu2-137": {
+    "score": 92.0,
+    "minutes": 11.916,
+    "model_usd": 0.5971,
+    "cloud_usd": 0.3232
+   },
+   "bu2-138": {
+    "score": 90.0,
+    "minutes": 1.52,
+    "model_usd": 0.1442,
+    "cloud_usd": 0.002
+   },
+   "bu2-139": {
+    "score": 70.0,
+    "minutes": 3.569,
+    "model_usd": 0.194,
+    "cloud_usd": 0.004
+   },
+   "bu2-140": {
+    "score": 86.0,
+    "minutes": 2.604,
+    "model_usd": 0.1652,
+    "cloud_usd": 0.0519
+   },
+   "bu2-141": {
+    "score": 20.0,
+    "minutes": 5.303,
+    "model_usd": 0.1046,
+    "cloud_usd": 0.0465
+   },
+   "bu2-142": {
+    "score": 79.0,
+    "minutes": 9.349,
+    "model_usd": 0.5834,
+    "cloud_usd": 0.1504
+   },
+   "bu2-143": {
+    "score": 88.0,
+    "minutes": 19.383,
+    "model_usd": 1.2944,
+    "cloud_usd": 0.5191
+   },
+   "bu2-144": {
+    "score": 12.0,
+    "minutes": 0.815,
+    "model_usd": 0.0277,
+    "cloud_usd": 0.001
+   },
+   "bu2-145": {
+    "score": 18.0,
+    "minutes": 0.381,
+    "model_usd": 0.0315,
+    "cloud_usd": 0.0003
+   },
+   "bu2-146": {
+    "score": 88.0,
+    "minutes": 6.058,
+    "model_usd": 0.3469,
+    "cloud_usd": 0.1401
+   },
+   "bu2-147": {
+    "score": 100.0,
+    "minutes": 5.984,
+    "model_usd": 0.2328,
+    "cloud_usd": 0.0343
+   },
+   "bu2-148": {
+    "score": 19.0,
+    "minutes": 0.696,
+    "model_usd": 0.0329,
+    "cloud_usd": 0.0003
+   },
+   "bu2-149": {
+    "score": 100.0,
+    "minutes": 2.271,
+    "model_usd": 0.1064,
+    "cloud_usd": 0.0513
+   },
+   "bu2-150": {
+    "score": 90.0,
+    "minutes": 5.305,
+    "model_usd": 0.3058,
+    "cloud_usd": 0.0971
+   },
+   "bu2-151": {
+    "score": 60.0,
+    "minutes": 17.415,
+    "model_usd": 1.4252,
+    "cloud_usd": 0.2395
+   },
+   "bu2-152": {
+    "score": 100.0,
+    "minutes": 3.58,
+    "model_usd": 0.2227,
+    "cloud_usd": 0.0503
+   },
+   "bu2-153": {
+    "score": 57.0,
+    "minutes": 8.009,
+    "model_usd": 0.4376,
+    "cloud_usd": 0.0123
+   },
+   "bu2-154": {
+    "score": 52.0,
+    "minutes": 1.28,
+    "model_usd": 0.0385,
+    "cloud_usd": 0.0007
+   },
+   "bu2-155": {
+    "score": 88.0,
+    "minutes": 5.784,
+    "model_usd": 0.4113,
+    "cloud_usd": 0.0096
+   },
+   "bu2-156": {
+    "score": 100.0,
+    "minutes": 2.104,
+    "model_usd": 0.0995,
+    "cloud_usd": 0.0725
+   },
+   "bu2-157": {
+    "score": 10.0,
+    "minutes": 5.507,
+    "model_usd": 0.1563,
+    "cloud_usd": 0.0449
+   },
+   "bu2-158": {
+    "score": 40.0,
+    "minutes": 0.946,
+    "model_usd": 0.0696,
+    "cloud_usd": 0.0003
+   },
+   "bu2-159": {
+    "score": 92.0,
+    "minutes": 3.406,
+    "model_usd": 0.4231,
+    "cloud_usd": 0.0516
+   },
+   "bu2-160": {
+    "score": 100.0,
+    "minutes": 4.779,
+    "model_usd": 0.251,
+    "cloud_usd": 0.0094
+   },
+   "bu2-161": {
+    "score": 86.0,
+    "minutes": 8.811,
+    "model_usd": 0.7234,
+    "cloud_usd": 0.3335
+   },
+   "bu2-162": {
+    "score": 90.0,
+    "minutes": 14.78,
+    "model_usd": 0.525,
+    "cloud_usd": 0.531
+   },
+   "bu2-163": {
+    "score": 56.0,
+    "minutes": 10.85,
+    "model_usd": 1.1855,
+    "cloud_usd": 0.1252
+   },
+   "bu2-164": {
+    "score": 54.0,
+    "minutes": 13.665,
+    "model_usd": 1.6468,
+    "cloud_usd": 0.3617
+   },
+   "bu2-165": {
+    "score": 54.0,
+    "minutes": 5.332,
+    "model_usd": 0.3326,
+    "cloud_usd": 0.0494
+   },
+   "bu2-166": {
+    "score": 85.0,
+    "minutes": 2.385,
+    "model_usd": 0.1649,
+    "cloud_usd": 0.001
+   },
+   "bu2-167": {
+    "score": 50.0,
+    "minutes": 4.193,
+    "model_usd": 0.3585,
+    "cloud_usd": 0.0341
+   },
+   "bu2-168": {
+    "score": 64.0,
+    "minutes": 3.214,
+    "model_usd": 0.1975,
+    "cloud_usd": 0.0505
+   },
+   "bu2-169": {
+    "score": 50.0,
+    "minutes": 2.832,
+    "model_usd": 0.2337,
+    "cloud_usd": 0.0994
+   },
+   "bu2-170": {
+    "score": 55.0,
+    "minutes": 3.456,
+    "model_usd": 0.1809,
+    "cloud_usd": 0.0013
+   },
+   "bu2-171": {
+    "score": 100.0,
+    "minutes": 4.428,
+    "model_usd": 0.3508,
+    "cloud_usd": 0.0508
+   },
+   "bu2-172": {
+    "score": 72.0,
+    "minutes": 0.823,
+    "model_usd": 0.0604,
+    "cloud_usd": 0.0003
+   },
+   "bu2-173": {
+    "score": 56.0,
+    "minutes": 6.829,
+    "model_usd": 0.2668,
+    "cloud_usd": 0.0654
+   },
+   "bu2-174": {
+    "score": 16.0,
+    "minutes": 0.347,
+    "model_usd": 0.0288,
+    "cloud_usd": 0.0003
+   },
+   "bu2-175": {
+    "score": 16.0,
+    "minutes": 0.595,
+    "model_usd": 0.0511,
+    "cloud_usd": 0.0003
+   },
+   "bu2-176": {
+    "score": 60.0,
+    "minutes": 2.264,
+    "model_usd": 0.206,
+    "cloud_usd": 0.001
+   },
+   "bu2-177": {
+    "score": 20.0,
+    "minutes": 1.584,
+    "model_usd": 0.0429,
+    "cloud_usd": 0.0007
+   },
+   "bu2-178": {
+    "score": 88.0,
+    "minutes": 5.081,
+    "model_usd": 0.2494,
+    "cloud_usd": 0.1131
+   },
+   "bu2-179": {
+    "score": 86.0,
+    "minutes": 10.151,
+    "model_usd": 1.5593,
+    "cloud_usd": 0.1856
+   },
+   "bu2-180": {
+    "score": 64.0,
+    "minutes": 3.169,
+    "model_usd": 0.1105,
+    "cloud_usd": 0.0079
+   },
+   "bu2-181": {
+    "score": 100.0,
+    "minutes": 2.314,
+    "model_usd": 0.3014,
+    "cloud_usd": 0.001
+   },
+   "bu2-182": {
+    "score": 44.0,
+    "minutes": 3.555,
+    "model_usd": 0.2278,
+    "cloud_usd": 0.0504
+   },
+   "bu2-183": {
+    "score": 72.0,
+    "minutes": 13.522,
+    "model_usd": 0.866,
+    "cloud_usd": 0.2001
+   },
+   "bu2-184": {
+    "score": 92.0,
+    "minutes": 9.588,
+    "model_usd": 0.5587,
+    "cloud_usd": 0.0824
+   },
+   "bu2-185": {
+    "score": 40.0,
+    "minutes": 5.851,
+    "model_usd": 0.3581,
+    "cloud_usd": 0.0873
+   },
+   "bu2-186": {
+    "score": 100.0,
+    "minutes": 2.396,
+    "model_usd": 0.2141,
+    "cloud_usd": 0.001
+   },
+   "bu2-187": {
+    "score": 100.0,
+    "minutes": 3.481,
+    "model_usd": 0.267,
+    "cloud_usd": 0.0507
+   },
+   "bu2-188": {
+    "score": 75.0,
+    "minutes": 2.814,
+    "model_usd": 0.2858,
+    "cloud_usd": 0.001
+   },
+   "bu2-189": {
+    "score": 50.0,
+    "minutes": 3.348,
+    "model_usd": 0.0972,
+    "cloud_usd": 0.0454
+   },
+   "bu2-190": {
+    "score": 28.0,
+    "minutes": 6.088,
+    "model_usd": 0.3777,
+    "cloud_usd": 0.0434
+   },
+   "bu2-191": {
+    "score": 50.0,
+    "minutes": 4.2,
+    "model_usd": 0.2573,
+    "cloud_usd": 0.0183
+   },
+   "bu2-192": {
+    "score": 6.0,
+    "minutes": 0.658,
+    "model_usd": 0.039,
+    "cloud_usd": 0.0003
+   },
+   "bu2-193": {
+    "score": 20.0,
+    "minutes": 2.89,
+    "model_usd": 0.1512,
+    "cloud_usd": 0.026
+   },
+   "bu2-194": {
+    "score": 56.0,
+    "minutes": 7.898,
+    "model_usd": 0.3441,
+    "cloud_usd": 1.0566
+   },
+   "bu2-195": {
+    "score": 63.0,
+    "minutes": 2.501,
+    "model_usd": 0.1654,
+    "cloud_usd": 0.0502
+   },
+   "bu2-196": {
+    "score": 26.0,
+    "minutes": 3.248,
+    "model_usd": 0.2251,
+    "cloud_usd": 0.0013
+   },
+   "bu2-197": {
+    "score": 76.0,
+    "minutes": 6.195,
+    "model_usd": 0.2242,
+    "cloud_usd": 0.1415
+   },
+   "bu2-198": {
+    "score": 41.0,
+    "minutes": 3.695,
+    "model_usd": 0.149,
+    "cloud_usd": 0.0504
+   },
+   "bu2-199": {
+    "score": 88.0,
+    "minutes": 4.789,
+    "model_usd": 0.2103,
+    "cloud_usd": 0.0408
+   },
+   "bu2-200": {
+    "score": 46.0,
+    "minutes": 11.431,
+    "model_usd": 0.6617,
+    "cloud_usd": 0.0339
+   }
+  },
+  "codex-playwright-mcp": {
+   "bu2-001": {
+    "score": 73.0,
+    "minutes": 6.828,
+    "model_usd": 0.4887,
+    "cloud_usd": 0.1498
+   },
+   "bu2-002": {
+    "score": 54.0,
+    "minutes": 9.643,
+    "model_usd": 0.5015,
+    "cloud_usd": 2.6122
+   },
+   "bu2-003": {
+    "score": 68.0,
+    "minutes": 13.201,
+    "model_usd": 0.6408,
+    "cloud_usd": 0.7405
+   },
+   "bu2-004": {
+    "score": 52.0,
+    "minutes": 9.372,
+    "model_usd": 0.708,
+    "cloud_usd": 0.7498
+   },
+   "bu2-005": {
+    "score": 52.0,
+    "minutes": 2.69,
+    "model_usd": 0.1324,
+    "cloud_usd": 0.001
+   },
+   "bu2-006": {
+    "score": 86.0,
+    "minutes": 8.33,
+    "model_usd": 0.648,
+    "cloud_usd": 0.133
+   },
+   "bu2-007": {
+    "score": 70.0,
+    "minutes": 13.8,
+    "model_usd": 0.8946,
+    "cloud_usd": 0.2948
+   },
+   "bu2-008": {
+    "score": 50.0,
+    "minutes": 8.849,
+    "model_usd": 0.5807,
+    "cloud_usd": 0.1055
+   },
+   "bu2-009": {
+    "score": 70.0,
+    "minutes": 15.928,
+    "model_usd": 0.8581,
+    "cloud_usd": 1.0011
+   },
+   "bu2-010": {
+    "score": 38.0,
+    "minutes": 3.632,
+    "model_usd": 0.1682,
+    "cloud_usd": 0.106
+   },
+   "bu2-011": {
+    "score": 37.0,
+    "minutes": 7.792,
+    "model_usd": 0.4288,
+    "cloud_usd": 0.6764
+   },
+   "bu2-012": {
+    "score": 58.0,
+    "minutes": 6.606,
+    "model_usd": 0.3971,
+    "cloud_usd": 1.1205
+   },
+   "bu2-013": {
+    "score": 32.0,
+    "minutes": 12.961,
+    "model_usd": 0.8274,
+    "cloud_usd": 0.4741
+   },
+   "bu2-014": {
+    "score": 78.0,
+    "minutes": 14.721,
+    "model_usd": 1.0153,
+    "cloud_usd": 0.2684
+   },
+   "bu2-015": {
+    "score": 68.0,
+    "minutes": 13.394,
+    "model_usd": 1.6492,
+    "cloud_usd": 0.3397
+   },
+   "bu2-016": {
+    "score": 76.0,
+    "minutes": 6.974,
+    "model_usd": 0.3351,
+    "cloud_usd": 0.0391
+   },
+   "bu2-017": {
+    "score": 92.0,
+    "minutes": 11.772,
+    "model_usd": 0.6841,
+    "cloud_usd": 0.1028
+   },
+   "bu2-018": {
+    "score": 76.0,
+    "minutes": 14.388,
+    "model_usd": 1.2177,
+    "cloud_usd": 0.682
+   },
+   "bu2-019": {
+    "score": 72.0,
+    "minutes": 8.953,
+    "model_usd": 0.8152,
+    "cloud_usd": 0.1533
+   },
+   "bu2-020": {
+    "score": 90.0,
+    "minutes": 7.402,
+    "model_usd": 0.6333,
+    "cloud_usd": 0.2845
+   },
+   "bu2-021": {
+    "score": 44.0,
+    "minutes": 17.372,
+    "model_usd": 1.7242,
+    "cloud_usd": 0.5695
+   },
+   "bu2-022": {
+    "score": 92.0,
+    "minutes": 9.119,
+    "model_usd": 1.4083,
+    "cloud_usd": 0.4808
+   },
+   "bu2-023": {
+    "score": 100.0,
+    "minutes": 7.394,
+    "model_usd": 0.58,
+    "cloud_usd": 0.4087
+   },
+   "bu2-024": {
+    "score": 56.0,
+    "minutes": 11.164,
+    "model_usd": 0.6968,
+    "cloud_usd": 0.4174
+   },
+   "bu2-025": {
+    "score": 92.0,
+    "minutes": 8.405,
+    "model_usd": 0.4153,
+    "cloud_usd": 0.2731
+   },
+   "bu2-026": {
+    "score": 92.0,
+    "minutes": 6.63,
+    "model_usd": 0.5776,
+    "cloud_usd": 0.1726
+   },
+   "bu2-027": {
+    "score": 63.0,
+    "minutes": 8.569,
+    "model_usd": 0.541,
+    "cloud_usd": 0.6527
+   },
+   "bu2-028": {
+    "score": 100.0,
+    "minutes": 4.777,
+    "model_usd": 0.394,
+    "cloud_usd": 0.0516
+   },
+   "bu2-029": {
+    "score": 54.0,
+    "minutes": 8.027,
+    "model_usd": 0.6343,
+    "cloud_usd": 0.5124
+   },
+   "bu2-030": {
+    "score": 56.0,
+    "minutes": 11.064,
+    "model_usd": 0.8495,
+    "cloud_usd": 0.5193
+   },
+   "bu2-031": {
+    "score": 42.0,
+    "minutes": 4.797,
+    "model_usd": 0.5699,
+    "cloud_usd": 0.2483
+   },
+   "bu2-032": {
+    "score": 68.0,
+    "minutes": 16.319,
+    "model_usd": 1.3041,
+    "cloud_usd": 0.1023
+   },
+   "bu2-033": {
+    "score": 76.0,
+    "minutes": 5.89,
+    "model_usd": 0.3085,
+    "cloud_usd": 0.3428
+   },
+   "bu2-034": {
+    "score": 40.0,
+    "minutes": 10.053,
+    "model_usd": 0.7276,
+    "cloud_usd": 0.749
+   },
+   "bu2-035": {
+    "score": 56.0,
+    "minutes": 4.748,
+    "model_usd": 0.2676,
+    "cloud_usd": 0.2047
+   },
+   "bu2-036": {
+    "score": 86.0,
+    "minutes": 8.791,
+    "model_usd": 0.7875,
+    "cloud_usd": 0.1026
+   },
+   "bu2-037": {
+    "score": 78.0,
+    "minutes": 7.338,
+    "model_usd": 0.4261,
+    "cloud_usd": 0.8108
+   },
+   "bu2-038": {
+    "score": 100.0,
+    "minutes": 2.724,
+    "model_usd": 0.299,
+    "cloud_usd": 0.153
+   },
+   "bu2-039": {
+    "score": 70.0,
+    "minutes": 8.798,
+    "model_usd": 0.4651,
+    "cloud_usd": 0.1195
+   },
+   "bu2-040": {
+    "score": 56.0,
+    "minutes": 11.767,
+    "model_usd": 1.3431,
+    "cloud_usd": 1.3449
+   },
+   "bu2-041": {
+    "score": 54.0,
+    "minutes": 16.135,
+    "model_usd": 1.2018,
+    "cloud_usd": 1.2519
+   },
+   "bu2-042": {
+    "score": 61.0,
+    "minutes": 8.108,
+    "model_usd": 0.3925,
+    "cloud_usd": 0.1138
+   },
+   "bu2-043": {
+    "score": 79.0,
+    "minutes": 15.218,
+    "model_usd": 2.1967,
+    "cloud_usd": 1.2894
+   },
+   "bu2-044": {
+    "score": 88.0,
+    "minutes": 18.167,
+    "model_usd": 1.2314,
+    "cloud_usd": 0.308
+   },
+   "bu2-045": {
+    "score": 71.0,
+    "minutes": 11.674,
+    "model_usd": 0.7454,
+    "cloud_usd": 0.8923
+   },
+   "bu2-046": {
+    "score": 88.0,
+    "minutes": 6.687,
+    "model_usd": 0.741,
+    "cloud_usd": 0.2041
+   },
+   "bu2-047": {
+    "score": 29.0,
+    "minutes": 18.292,
+    "model_usd": 1.1251,
+    "cloud_usd": 0.7976
+   },
+   "bu2-048": {
+    "score": 44.0,
+    "minutes": 7.116,
+    "model_usd": 0.6283,
+    "cloud_usd": 0.3109
+   },
+   "bu2-049": {
+    "score": 70.0,
+    "minutes": 10.876,
+    "model_usd": 0.6555,
+    "cloud_usd": 0.1843
+   },
+   "bu2-050": {
+    "score": 74.0,
+    "minutes": 9.188,
+    "model_usd": 0.8133,
+    "cloud_usd": 0.5296
+   },
+   "bu2-051": {
+    "score": 88.0,
+    "minutes": 51.471,
+    "model_usd": 3.6072,
+    "cloud_usd": 9.9128
+   },
+   "bu2-052": {
+    "score": 60.0,
+    "minutes": 4.534,
+    "model_usd": 0.2087,
+    "cloud_usd": 0.3875
+   },
+   "bu2-053": {
+    "score": 70.0,
+    "minutes": 8.736,
+    "model_usd": 0.753,
+    "cloud_usd": 0.8164
+   },
+   "bu2-054": {
+    "score": 93.0,
+    "minutes": 5.998,
+    "model_usd": 0.4073,
+    "cloud_usd": 0.3346
+   },
+   "bu2-055": {
+    "score": 28.0,
+    "minutes": 12.597,
+    "model_usd": 1.8076,
+    "cloud_usd": 0.3148
+   },
+   "bu2-056": {
+    "score": 6.0,
+    "minutes": 0.407,
+    "model_usd": 0.0269,
+    "cloud_usd": 0.0003
+   },
+   "bu2-057": {
+    "score": 90.0,
+    "minutes": 2.229,
+    "model_usd": 0.1427,
+    "cloud_usd": 0.0519
+   },
+   "bu2-058": {
+    "score": 60.0,
+    "minutes": 3.25,
+    "model_usd": 0.1921,
+    "cloud_usd": 0.0013
+   },
+   "bu2-059": {
+    "score": 100.0,
+    "minutes": 3.887,
+    "model_usd": 0.3569,
+    "cloud_usd": 0.1498
+   },
+   "bu2-060": {
+    "score": 76.0,
+    "minutes": 3.359,
+    "model_usd": 0.1695,
+    "cloud_usd": 0.0149
+   },
+   "bu2-061": {
+    "score": 100.0,
+    "minutes": 1.465,
+    "model_usd": 0.1816,
+    "cloud_usd": 0.0079
+   },
+   "bu2-062": {
+    "score": 75.0,
+    "minutes": 2.898,
+    "model_usd": 0.267,
+    "cloud_usd": 0.6816
+   },
+   "bu2-063": {
+    "score": 38.0,
+    "minutes": 4.832,
+    "model_usd": 0.2862,
+    "cloud_usd": 0.0939
+   },
+   "bu2-064": {
+    "score": 76.0,
+    "minutes": 2.48,
+    "model_usd": 0.1332,
+    "cloud_usd": 0.1614
+   },
+   "bu2-065": {
+    "score": 62.0,
+    "minutes": 3.224,
+    "model_usd": 0.2774,
+    "cloud_usd": 0.1499
+   },
+   "bu2-066": {
+    "score": 0.0,
+    "minutes": 1.27,
+    "model_usd": 0.121,
+    "cloud_usd": 0.1677
+   },
+   "bu2-067": {
+    "score": 68.0,
+    "minutes": 9.452,
+    "model_usd": 1.0611,
+    "cloud_usd": 0.038
+   },
+   "bu2-068": {
+    "score": 100.0,
+    "minutes": 0.921,
+    "model_usd": 0.0564,
+    "cloud_usd": 0.0003
+   },
+   "bu2-069": {
+    "score": 74.0,
+    "minutes": 5.35,
+    "model_usd": 0.3076,
+    "cloud_usd": 0.115
+   },
+   "bu2-070": {
+    "score": 62.0,
+    "minutes": 1.558,
+    "model_usd": 0.1004,
+    "cloud_usd": 0.0007
+   },
+   "bu2-071": {
+    "score": 76.0,
+    "minutes": 11.077,
+    "model_usd": 0.7367,
+    "cloud_usd": 0.9245
+   },
+   "bu2-072": {
+    "score": 100.0,
+    "minutes": 2.9,
+    "model_usd": 0.227,
+    "cloud_usd": 0.0504
+   },
+   "bu2-073": {
+    "score": 58.0,
+    "minutes": 3.708,
+    "model_usd": 0.5211,
+    "cloud_usd": 0.3153
+   },
+   "bu2-074": {
+    "score": 100.0,
+    "minutes": 10.836,
+    "model_usd": 0.4739,
+    "cloud_usd": 0.0153
+   },
+   "bu2-075": {
+    "score": 48.0,
+    "minutes": 1.21,
+    "model_usd": 0.0784,
+    "cloud_usd": 0.0007
+   },
+   "bu2-076": {
+    "score": 65.0,
+    "minutes": 15.078,
+    "model_usd": 1.4488,
+    "cloud_usd": 0.4373
+   },
+   "bu2-077": {
+    "score": 40.0,
+    "minutes": 0.957,
+    "model_usd": 0.0597,
+    "cloud_usd": 0.0003
+   },
+   "bu2-078": {
+    "score": 59.0,
+    "minutes": 2.178,
+    "model_usd": 0.0976,
+    "cloud_usd": 0.003
+   },
+   "bu2-079": {
+    "score": 80.0,
+    "minutes": 2.632,
+    "model_usd": 0.2505,
+    "cloud_usd": 0.7115
+   },
+   "bu2-080": {
+    "score": 82.0,
+    "minutes": 1.212,
+    "model_usd": 0.0839,
+    "cloud_usd": 0.002
+   },
+   "bu2-081": {
+    "score": 47.0,
+    "minutes": 1.434,
+    "model_usd": 0.1009,
+    "cloud_usd": 0.0284
+   },
+   "bu2-082": {
+    "score": 100.0,
+    "minutes": 3.365,
+    "model_usd": 0.1829,
+    "cloud_usd": 0.1054
+   },
+   "bu2-083": {
+    "score": 100.0,
+    "minutes": 1.323,
+    "model_usd": 0.0,
+    "cloud_usd": 0.0666
+   },
+   "bu2-084": {
+    "score": 100.0,
+    "minutes": 3.324,
+    "model_usd": 0.1496,
+    "cloud_usd": 0.0373
+   },
+   "bu2-085": {
+    "score": 100.0,
+    "minutes": 2.233,
+    "model_usd": 0.1697,
+    "cloud_usd": 0.0129
+   },
+   "bu2-086": {
+    "score": 100.0,
+    "minutes": 3.36,
+    "model_usd": 0.1884,
+    "cloud_usd": 0.1235
+   },
+   "bu2-087": {
+    "score": 71.0,
+    "minutes": 3.353,
+    "model_usd": 0.3155,
+    "cloud_usd": 0.0529
+   },
+   "bu2-088": {
+    "score": 100.0,
+    "minutes": 5.431,
+    "model_usd": 0.493,
+    "cloud_usd": 0.0695
+   },
+   "bu2-089": {
+    "score": 100.0,
+    "minutes": 5.771,
+    "model_usd": 0.1186,
+    "cloud_usd": 0.0454
+   },
+   "bu2-090": {
+    "score": 76.0,
+    "minutes": 2.056,
+    "model_usd": 0.2359,
+    "cloud_usd": 0.1857
+   },
+   "bu2-091": {
+    "score": 60.0,
+    "minutes": 9.392,
+    "model_usd": 0.4793,
+    "cloud_usd": 0.5485
+   },
+   "bu2-092": {
+    "score": 3.0,
+    "minutes": 0.559,
+    "model_usd": 0.0337,
+    "cloud_usd": 0.001
+   },
+   "bu2-093": {
+    "score": 74.0,
+    "minutes": 1.933,
+    "model_usd": 0.1798,
+    "cloud_usd": 0.002
+   },
+   "bu2-094": {
+    "score": 20.0,
+    "minutes": 0.437,
+    "model_usd": 0.0309,
+    "cloud_usd": 0.001
+   },
+   "bu2-095": {
+    "score": 76.0,
+    "minutes": 9.836,
+    "model_usd": 0.9574,
+    "cloud_usd": 0.4909
+   },
+   "bu2-096": {
+    "score": 96.0,
+    "minutes": 5.501,
+    "model_usd": 0.4108,
+    "cloud_usd": 0.1149
+   },
+   "bu2-097": {
+    "score": 31.0,
+    "minutes": 10.303,
+    "model_usd": 0.419,
+    "cloud_usd": 0.1378
+   },
+   "bu2-098": {
+    "score": 100.0,
+    "minutes": 1.575,
+    "model_usd": 0.0986,
+    "cloud_usd": 0.002
+   },
+   "bu2-099": {
+    "score": 36.0,
+    "minutes": 18.042,
+    "model_usd": 1.599,
+    "cloud_usd": 1.924
+   },
+   "bu2-100": {
+    "score": 100.0,
+    "minutes": 3.147,
+    "model_usd": 0.2408,
+    "cloud_usd": 0.0699
+   },
+   "bu2-101": {
+    "score": 100.0,
+    "minutes": 5.037,
+    "model_usd": 0.3469,
+    "cloud_usd": 0.0549
+   },
+   "bu2-102": {
+    "score": 51.0,
+    "minutes": 2.926,
+    "model_usd": 0.2094,
+    "cloud_usd": 0.1505
+   },
+   "bu2-103": {
+    "score": 100.0,
+    "minutes": 4.056,
+    "model_usd": 0.2597,
+    "cloud_usd": 0.103
+   },
+   "bu2-104": {
+    "score": 24.0,
+    "minutes": 3.239,
+    "model_usd": 0.1938,
+    "cloud_usd": 0.1028
+   },
+   "bu2-105": {
+    "score": 32.0,
+    "minutes": 4.514,
+    "model_usd": 0.387,
+    "cloud_usd": 0.0539
+   },
+   "bu2-106": {
+    "score": 35.0,
+    "minutes": 0.448,
+    "model_usd": 0.0347,
+    "cloud_usd": 0.001
+   },
+   "bu2-107": {
+    "score": 60.0,
+    "minutes": 6.527,
+    "model_usd": 0.5074,
+    "cloud_usd": 0.2411
+   },
+   "bu2-108": {
+    "score": 71.0,
+    "minutes": 7.552,
+    "model_usd": 0.4026,
+    "cloud_usd": 0.1823
+   },
+   "bu2-109": {
+    "score": 100.0,
+    "minutes": 1.177,
+    "model_usd": 0.0662,
+    "cloud_usd": 0.002
+   },
+   "bu2-110": {
+    "score": 72.0,
+    "minutes": 5.617,
+    "model_usd": 0.5963,
+    "cloud_usd": 0.2657
+   },
+   "bu2-111": {
+    "score": 100.0,
+    "minutes": 1.797,
+    "model_usd": 0.1633,
+    "cloud_usd": 0.002
+   },
+   "bu2-112": {
+    "score": 100.0,
+    "minutes": 1.631,
+    "model_usd": 0.1298,
+    "cloud_usd": 0.002
+   },
+   "bu2-113": {
+    "score": 88.0,
+    "minutes": 2.832,
+    "model_usd": 0.2468,
+    "cloud_usd": 0.0529
+   },
+   "bu2-114": {
+    "score": 100.0,
+    "minutes": 2.064,
+    "model_usd": 0.1328,
+    "cloud_usd": 0.0518
+   },
+   "bu2-115": {
+    "score": 78.0,
+    "minutes": 5.199,
+    "model_usd": 0.5317,
+    "cloud_usd": 0.2894
+   },
+   "bu2-116": {
+    "score": 94.0,
+    "minutes": 8.168,
+    "model_usd": 0.3893,
+    "cloud_usd": 0.3074
+   },
+   "bu2-117": {
+    "score": 74.0,
+    "minutes": 0.512,
+    "model_usd": 0.0363,
+    "cloud_usd": 0.001
+   },
+   "bu2-118": {
+    "score": 97.0,
+    "minutes": 3.711,
+    "model_usd": 0.285,
+    "cloud_usd": 0.053
+   },
+   "bu2-119": {
+    "score": 73.0,
+    "minutes": 6.886,
+    "model_usd": 0.225,
+    "cloud_usd": 0.0869
+   },
+   "bu2-120": {
+    "score": 100.0,
+    "minutes": 1.492,
+    "model_usd": 0.1072,
+    "cloud_usd": 0.0512
+   },
+   "bu2-121": {
+    "score": 100.0,
+    "minutes": 9.468,
+    "model_usd": 0.2313,
+    "cloud_usd": 0.4367
+   },
+   "bu2-122": {
+    "score": 76.0,
+    "minutes": 5.135,
+    "model_usd": 0.7109,
+    "cloud_usd": 0.006
+   },
+   "bu2-123": {
+    "score": 100.0,
+    "minutes": 0.621,
+    "model_usd": 0.0573,
+    "cloud_usd": 0.001
+   },
+   "bu2-124": {
+    "score": 76.0,
+    "minutes": 6.349,
+    "model_usd": 0.3274,
+    "cloud_usd": 0.1849
+   },
+   "bu2-125": {
+    "score": 82.0,
+    "minutes": 3.232,
+    "model_usd": 0.4828,
+    "cloud_usd": 0.004
+   },
+   "bu2-126": {
+    "score": 78.0,
+    "minutes": 9.336,
+    "model_usd": 0.8446,
+    "cloud_usd": 0.0606
+   },
+   "bu2-127": {
+    "score": 65.0,
+    "minutes": 2.792,
+    "model_usd": 0.1811,
+    "cloud_usd": 0.0603
+   },
+   "bu2-128": {
+    "score": 68.0,
+    "minutes": 7.285,
+    "model_usd": 0.3772,
+    "cloud_usd": 0.0304
+   },
+   "bu2-129": {
+    "score": 100.0,
+    "minutes": 9.039,
+    "model_usd": 0.8308,
+    "cloud_usd": 0.2516
+   },
+   "bu2-130": {
+    "score": 43.0,
+    "minutes": 1.067,
+    "model_usd": 0.0729,
+    "cloud_usd": 0.002
+   },
+   "bu2-131": {
+    "score": 78.0,
+    "minutes": 7.237,
+    "model_usd": 0.6164,
+    "cloud_usd": 0.1383
+   },
+   "bu2-132": {
+    "score": 58.0,
+    "minutes": 2.902,
+    "model_usd": 0.2491,
+    "cloud_usd": 0.003
+   },
+   "bu2-133": {
+    "score": 100.0,
+    "minutes": 1.586,
+    "model_usd": 0.146,
+    "cloud_usd": 0.0516
+   },
+   "bu2-134": {
+    "score": 100.0,
+    "minutes": 2.278,
+    "model_usd": 0.202,
+    "cloud_usd": 0.054
+   },
+   "bu2-135": {
+    "score": 47.0,
+    "minutes": 2.361,
+    "model_usd": 0.1865,
+    "cloud_usd": 0.003
+   },
+   "bu2-136": {
+    "score": 90.0,
+    "minutes": 7.181,
+    "model_usd": 0.8795,
+    "cloud_usd": 0.3002
+   },
+   "bu2-137": {
+    "score": 70.0,
+    "minutes": 20.672,
+    "model_usd": 0.6642,
+    "cloud_usd": 0.1144
+   },
+   "bu2-138": {
+    "score": 93.0,
+    "minutes": 1.363,
+    "model_usd": 0.09,
+    "cloud_usd": 0.002
+   },
+   "bu2-139": {
+    "score": 76.0,
+    "minutes": 2.762,
+    "model_usd": 0.1624,
+    "cloud_usd": 0.85
+   },
+   "bu2-140": {
+    "score": 86.0,
+    "minutes": 1.1,
+    "model_usd": 0.1319,
+    "cloud_usd": 0.0609
+   },
+   "bu2-141": {
+    "score": 100.0,
+    "minutes": 1.143,
+    "model_usd": 0.0835,
+    "cloud_usd": 0.0534
+   },
+   "bu2-142": {
+    "score": 87.0,
+    "minutes": 8.869,
+    "model_usd": 0.3135,
+    "cloud_usd": 0.3805
+   },
+   "bu2-143": {
+    "score": 96.0,
+    "minutes": 8.654,
+    "model_usd": 0.5538,
+    "cloud_usd": 0.3072
+   },
+   "bu2-144": {
+    "score": 100.0,
+    "minutes": 4.872,
+    "model_usd": 0.6385,
+    "cloud_usd": 0.0545
+   },
+   "bu2-145": {
+    "score": 18.0,
+    "minutes": 0.335,
+    "model_usd": 0.0224,
+    "cloud_usd": 0.001
+   },
+   "bu2-146": {
+    "score": 88.0,
+    "minutes": 2.882,
+    "model_usd": 0.377,
+    "cloud_usd": 0.1638
+   },
+   "bu2-147": {
+    "score": 100.0,
+    "minutes": 1.921,
+    "model_usd": 0.1906,
+    "cloud_usd": 0.002
+   },
+   "bu2-148": {
+    "score": 88.0,
+    "minutes": 6.76,
+    "model_usd": 0.2386,
+    "cloud_usd": 0.1321
+   },
+   "bu2-149": {
+    "score": 100.0,
+    "minutes": 0.995,
+    "model_usd": 0.0842,
+    "cloud_usd": 0.0575
+   },
+   "bu2-150": {
+    "score": 90.0,
+    "minutes": 6.951,
+    "model_usd": 0.2974,
+    "cloud_usd": 0.1796
+   },
+   "bu2-151": {
+    "score": 68.0,
+    "minutes": 18.775,
+    "model_usd": 1.153,
+    "cloud_usd": 0.2931
+   },
+   "bu2-152": {
+    "score": 100.0,
+    "minutes": 1.497,
+    "model_usd": 0.1403,
+    "cloud_usd": 0.0527
+   },
+   "bu2-153": {
+    "score": 57.0,
+    "minutes": 3.385,
+    "model_usd": 0.3475,
+    "cloud_usd": 0.0137
+   },
+   "bu2-154": {
+    "score": 100.0,
+    "minutes": 0.768,
+    "model_usd": 0.0581,
+    "cloud_usd": 0.001
+   },
+   "bu2-155": {
+    "score": 88.0,
+    "minutes": 3.027,
+    "model_usd": 0.3767,
+    "cloud_usd": 0.0969
+   },
+   "bu2-156": {
+    "score": 100.0,
+    "minutes": 1.38,
+    "model_usd": 0.1404,
+    "cloud_usd": 0.0606
+   },
+   "bu2-157": {
+    "score": 100.0,
+    "minutes": 1.625,
+    "model_usd": 0.0898,
+    "cloud_usd": 0.0512
+   },
+   "bu2-158": {
+    "score": 48.0,
+    "minutes": 1.023,
+    "model_usd": 0.0817,
+    "cloud_usd": 0.001
+   },
+   "bu2-159": {
+    "score": 100.0,
+    "minutes": 2.049,
+    "model_usd": 0.2013,
+    "cloud_usd": 0.1031
+   },
+   "bu2-160": {
+    "score": 100.0,
+    "minutes": 3.191,
+    "model_usd": 0.268,
+    "cloud_usd": 0.004
+   },
+   "bu2-161": {
+    "score": 64.0,
+    "minutes": 4.395,
+    "model_usd": 0.4167,
+    "cloud_usd": 0.2087
+   },
+   "bu2-162": {
+    "score": 90.0,
+    "minutes": 4.117,
+    "model_usd": 0.6168,
+    "cloud_usd": 0.1579
+   },
+   "bu2-163": {
+    "score": 46.0,
+    "minutes": 7.224,
+    "model_usd": 0.5984,
+    "cloud_usd": 0.087
+   },
+   "bu2-164": {
+    "score": 61.0,
+    "minutes": 12.408,
+    "model_usd": 3.2555,
+    "cloud_usd": 0.7175
+   },
+   "bu2-165": {
+    "score": 54.0,
+    "minutes": 0.93,
+    "model_usd": 0.158,
+    "cloud_usd": 0.001
+   },
+   "bu2-166": {
+    "score": 100.0,
+    "minutes": 1.968,
+    "model_usd": 0.1424,
+    "cloud_usd": 0.002
+   },
+   "bu2-167": {
+    "score": 50.0,
+    "minutes": 2.328,
+    "model_usd": 0.1605,
+    "cloud_usd": 0.003
+   },
+   "bu2-168": {
+    "score": 100.0,
+    "minutes": 2.442,
+    "model_usd": 0.1986,
+    "cloud_usd": 0.052
+   },
+   "bu2-169": {
+    "score": 66.0,
+    "minutes": 7.202,
+    "model_usd": 0.3371,
+    "cloud_usd": 0.5383
+   },
+   "bu2-170": {
+    "score": 85.0,
+    "minutes": 3.275,
+    "model_usd": 0.352,
+    "cloud_usd": 0.004
+   },
+   "bu2-171": {
+    "score": 100.0,
+    "minutes": 2.432,
+    "model_usd": 0.3836,
+    "cloud_usd": 0.074
+   },
+   "bu2-172": {
+    "score": 62.0,
+    "minutes": 0.948,
+    "model_usd": 0.0646,
+    "cloud_usd": 0.2875
+   },
+   "bu2-173": {
+    "score": 90.0,
+    "minutes": 5.731,
+    "model_usd": 0.5269,
+    "cloud_usd": 0.1186
+   },
+   "bu2-174": {
+    "score": 78.0,
+    "minutes": 6.575,
+    "model_usd": 0.3674,
+    "cloud_usd": 0.1849
+   },
+   "bu2-175": {
+    "score": 16.0,
+    "minutes": 0.468,
+    "model_usd": 0.0262,
+    "cloud_usd": 0.001
+   },
+   "bu2-176": {
+    "score": 100.0,
+    "minutes": 2.118,
+    "model_usd": 0.1737,
+    "cloud_usd": 0.0399
+   },
+   "bu2-177": {
+    "score": 87.0,
+    "minutes": 1.837,
+    "model_usd": 0.1987,
+    "cloud_usd": 0.002
+   },
+   "bu2-178": {
+    "score": 78.0,
+    "minutes": 5.764,
+    "model_usd": 0.3256,
+    "cloud_usd": 0.3984
+   },
+   "bu2-179": {
+    "score": 75.0,
+    "minutes": 9.756,
+    "model_usd": 0.7195,
+    "cloud_usd": 0.3217
+   },
+   "bu2-180": {
+    "score": 100.0,
+    "minutes": 1.35,
+    "model_usd": 0.1204,
+    "cloud_usd": 0.0509
+   },
+   "bu2-181": {
+    "score": 100.0,
+    "minutes": 1.332,
+    "model_usd": 0.115,
+    "cloud_usd": 0.002
+   },
+   "bu2-182": {
+    "score": 88.0,
+    "minutes": 20.885,
+    "model_usd": 1.4789,
+    "cloud_usd": 0.1853
+   },
+   "bu2-183": {
+    "score": 72.0,
+    "minutes": 7.731,
+    "model_usd": 0.4855,
+    "cloud_usd": 1.4671
+   },
+   "bu2-184": {
+    "score": 68.0,
+    "minutes": 17.041,
+    "model_usd": 0.8509,
+    "cloud_usd": 0.5847
+   },
+   "bu2-185": {
+    "score": 100.0,
+    "minutes": 7.963,
+    "model_usd": 0.3601,
+    "cloud_usd": 0.4464
+   },
+   "bu2-186": {
+    "score": 100.0,
+    "minutes": 2.556,
+    "model_usd": 0.1631,
+    "cloud_usd": 0.003
+   },
+   "bu2-187": {
+    "score": 100.0,
+    "minutes": 1.698,
+    "model_usd": 0.1649,
+    "cloud_usd": 0.0522
+   },
+   "bu2-188": {
+    "score": 69.0,
+    "minutes": 2.642,
+    "model_usd": 0.3112,
+    "cloud_usd": 0.0553
+   },
+   "bu2-189": {
+    "score": 37.0,
+    "minutes": 1.821,
+    "model_usd": 0.0751,
+    "cloud_usd": 0.002
+   },
+   "bu2-190": {
+    "score": 36.0,
+    "minutes": 3.79,
+    "model_usd": 0.1377,
+    "cloud_usd": 1.6845
+   },
+   "bu2-191": {
+    "score": 60.0,
+    "minutes": 3.989,
+    "model_usd": 0.4546,
+    "cloud_usd": 0.032
+   },
+   "bu2-192": {
+    "score": 62.0,
+    "minutes": 5.944,
+    "model_usd": 0.4238,
+    "cloud_usd": 0.0946
+   },
+   "bu2-193": {
+    "score": 19.0,
+    "minutes": 1.847,
+    "model_usd": 0.1276,
+    "cloud_usd": 0.1036
+   },
+   "bu2-194": {
+    "score": 76.0,
+    "minutes": 11.399,
+    "model_usd": 0.2973,
+    "cloud_usd": 3.9235
+   },
+   "bu2-195": {
+    "score": 75.0,
+    "minutes": 2.767,
+    "model_usd": 0.205,
+    "cloud_usd": 0.0521
+   },
+   "bu2-196": {
+    "score": 92.0,
+    "minutes": 1.785,
+    "model_usd": 0.1781,
+    "cloud_usd": 0.0151
+   },
+   "bu2-197": {
+    "score": 100.0,
+    "minutes": 4.128,
+    "model_usd": 0.1226,
+    "cloud_usd": 0.716
+   },
+   "bu2-198": {
+    "score": 83.0,
+    "minutes": 3.451,
+    "model_usd": 0.3433,
+    "cloud_usd": 0.104
+   },
+   "bu2-199": {
+    "score": 70.0,
+    "minutes": 2.827,
+    "model_usd": 0.4063,
+    "cloud_usd": 0.0545
+   },
+   "bu2-200": {
+    "score": 30.0,
+    "minutes": 6.447,
+    "model_usd": 0.2349,
+    "cloud_usd": 0.1327
+   }
+  },
+  "codex-stagehand": {
+   "bu2-001": {
+    "score": 38.0,
+    "minutes": 39.195,
+    "model_usd": 3.2429,
+    "cloud_usd": 0.2638
+   },
+   "bu2-002": {
+    "score": 46.0,
+    "minutes": 27.051,
+    "model_usd": 0.8451,
+    "cloud_usd": 0.4252
+   },
+   "bu2-003": {
+    "score": 40.0,
+    "minutes": 8.748,
+    "model_usd": 0.2554,
+    "cloud_usd": 0.1353
+   },
+   "bu2-004": {
+    "score": 74.0,
+    "minutes": 23.428,
+    "model_usd": 1.7087,
+    "cloud_usd": 0.5062
+   },
+   "bu2-005": {
+    "score": 70.0,
+    "minutes": 10.884,
+    "model_usd": 2.6669,
+    "cloud_usd": 0.0422
+   },
+   "bu2-006": {
+    "score": 28.0,
+    "minutes": 8.839,
+    "model_usd": 0.2408,
+    "cloud_usd": 0.0772
+   },
+   "bu2-007": {
+    "score": 66.0,
+    "minutes": 12.532,
+    "model_usd": 1.5131,
+    "cloud_usd": 0.247
+   },
+   "bu2-008": {
+    "score": 58.0,
+    "minutes": 54.809,
+    "model_usd": 3.1339,
+    "cloud_usd": 0.2306
+   },
+   "bu2-009": {
+    "score": 86.0,
+    "minutes": 37.534,
+    "model_usd": 3.9684,
+    "cloud_usd": 1.5502
+   },
+   "bu2-010": {
+    "score": 38.0,
+    "minutes": 0.712,
+    "model_usd": 0.0348,
+    "cloud_usd": 0.0003
+   },
+   "bu2-011": {
+    "score": 62.0,
+    "minutes": 13.909,
+    "model_usd": 1.6607,
+    "cloud_usd": 0.2876
+   },
+   "bu2-012": {
+    "score": 42.0,
+    "minutes": 2.495,
+    "model_usd": 0.1874,
+    "cloud_usd": 0.1664
+   },
+   "bu2-013": {
+    "score": 24.0,
+    "minutes": 17.709,
+    "model_usd": 1.5401,
+    "cloud_usd": 0.4131
+   },
+   "bu2-014": {
+    "score": 75.0,
+    "minutes": 39.997,
+    "model_usd": 2.5706,
+    "cloud_usd": 0.1559
+   },
+   "bu2-015": {
+    "score": 72.0,
+    "minutes": 23.78,
+    "model_usd": 2.9496,
+    "cloud_usd": 0.3965
+   },
+   "bu2-016": {
+    "score": 78.0,
+    "minutes": 25.225,
+    "model_usd": 1.0414,
+    "cloud_usd": 0.0959
+   },
+   "bu2-017": {
+    "score": 65.0,
+    "minutes": 18.164,
+    "model_usd": 1.7546,
+    "cloud_usd": 0.2608
+   },
+   "bu2-018": {
+    "score": 88.0,
+    "minutes": 26.909,
+    "model_usd": 1.526,
+    "cloud_usd": 0.4925
+   },
+   "bu2-019": {
+    "score": 54.0,
+    "minutes": 16.664,
+    "model_usd": 1.4487,
+    "cloud_usd": 0.1614
+   },
+   "bu2-020": {
+    "score": 90.0,
+    "minutes": 11.038,
+    "model_usd": 0.9651,
+    "cloud_usd": 0.1291
+   },
+   "bu2-021": {
+    "score": 58.0,
+    "minutes": 32.219,
+    "model_usd": 2.6811,
+    "cloud_usd": 0.514
+   },
+   "bu2-022": {
+    "score": 0.0,
+    "minutes": 61.514,
+    "model_usd": 1.4476,
+    "cloud_usd": 0.0
+   },
+   "bu2-023": {
+    "score": 100.0,
+    "minutes": 25.185,
+    "model_usd": 1.3457,
+    "cloud_usd": 0.3991
+   },
+   "bu2-024": {
+    "score": 36.0,
+    "minutes": 28.282,
+    "model_usd": 1.1849,
+    "cloud_usd": 0.5712
+   },
+   "bu2-025": {
+    "score": 0.0,
+    "minutes": 61.52,
+    "model_usd": 4.6284,
+    "cloud_usd": 0.0
+   },
+   "bu2-026": {
+    "score": 92.0,
+    "minutes": 29.355,
+    "model_usd": 2.2865,
+    "cloud_usd": 0.2001
+   },
+   "bu2-027": {
+    "score": 75.0,
+    "minutes": 8.995,
+    "model_usd": 0.8024,
+    "cloud_usd": 0.0831
+   },
+   "bu2-028": {
+    "score": 78.0,
+    "minutes": 25.975,
+    "model_usd": 1.2978,
+    "cloud_usd": 0.1415
+   },
+   "bu2-029": {
+    "score": 66.0,
+    "minutes": 21.033,
+    "model_usd": 1.0258,
+    "cloud_usd": 0.1903
+   },
+   "bu2-030": {
+    "score": 90.0,
+    "minutes": 33.537,
+    "model_usd": 1.4542,
+    "cloud_usd": 0.5099
+   },
+   "bu2-031": {
+    "score": 47.0,
+    "minutes": 8.874,
+    "model_usd": 0.6672,
+    "cloud_usd": 0.2141
+   },
+   "bu2-032": {
+    "score": 68.0,
+    "minutes": 23.343,
+    "model_usd": 2.328,
+    "cloud_usd": 0.0922
+   },
+   "bu2-033": {
+    "score": 86.0,
+    "minutes": 40.145,
+    "model_usd": 1.3475,
+    "cloud_usd": 0.4634
+   },
+   "bu2-034": {
+    "score": 62.0,
+    "minutes": 60.2,
+    "model_usd": 1.7351,
+    "cloud_usd": 0.3018
+   },
+   "bu2-035": {
+    "score": 64.0,
+    "minutes": 7.291,
+    "model_usd": 0.3996,
+    "cloud_usd": 0.2055
+   },
+   "bu2-036": {
+    "score": 32.0,
+    "minutes": 23.263,
+    "model_usd": 3.7121,
+    "cloud_usd": 0.1869
+   },
+   "bu2-037": {
+    "score": 66.0,
+    "minutes": 14.35,
+    "model_usd": 0.9806,
+    "cloud_usd": 0.236
+   },
+   "bu2-038": {
+    "score": 100.0,
+    "minutes": 3.574,
+    "model_usd": 0.1697,
+    "cloud_usd": 0.1652
+   },
+   "bu2-039": {
+    "score": 43.0,
+    "minutes": 6.857,
+    "model_usd": 0.1265,
+    "cloud_usd": 0.0451
+   },
+   "bu2-040": {
+    "score": 70.0,
+    "minutes": 54.075,
+    "model_usd": 3.1409,
+    "cloud_usd": 0.7438
+   },
+   "bu2-041": {
+    "score": 44.0,
+    "minutes": 13.158,
+    "model_usd": 0.8369,
+    "cloud_usd": 0.1798
+   },
+   "bu2-042": {
+    "score": 27.0,
+    "minutes": 5.735,
+    "model_usd": 0.2253,
+    "cloud_usd": 0.0288
+   },
+   "bu2-043": {
+    "score": 100.0,
+    "minutes": 45.094,
+    "model_usd": 3.8966,
+    "cloud_usd": 1.5277
+   },
+   "bu2-044": {
+    "score": 69.0,
+    "minutes": 23.265,
+    "model_usd": 1.7533,
+    "cloud_usd": 0.1959
+   },
+   "bu2-045": {
+    "score": 36.0,
+    "minutes": 39.561,
+    "model_usd": 1.342,
+    "cloud_usd": 0.5349
+   },
+   "bu2-046": {
+    "score": 78.0,
+    "minutes": 11.245,
+    "model_usd": 0.642,
+    "cloud_usd": 0.203
+   },
+   "bu2-047": {
+    "score": 0.0,
+    "minutes": 61.522,
+    "model_usd": 1.4775,
+    "cloud_usd": 0.0
+   },
+   "bu2-048": {
+    "score": 32.0,
+    "minutes": 20.84,
+    "model_usd": 0.9751,
+    "cloud_usd": 0.1558
+   },
+   "bu2-049": {
+    "score": 10.0,
+    "minutes": 4.796,
+    "model_usd": 0.1045,
+    "cloud_usd": 0.04
+   },
+   "bu2-050": {
+    "score": 68.0,
+    "minutes": 38.663,
+    "model_usd": 3.5614,
+    "cloud_usd": 0.9286
+   },
+   "bu2-051": {
+    "score": 56.0,
+    "minutes": 15.87,
+    "model_usd": 1.1768,
+    "cloud_usd": 0.0944
+   },
+   "bu2-052": {
+    "score": 82.0,
+    "minutes": 9.738,
+    "model_usd": 0.6574,
+    "cloud_usd": 0.212
+   },
+   "bu2-053": {
+    "score": 42.0,
+    "minutes": 27.219,
+    "model_usd": 3.1926,
+    "cloud_usd": 1.726
+   },
+   "bu2-054": {
+    "score": 57.0,
+    "minutes": 31.966,
+    "model_usd": 1.3117,
+    "cloud_usd": 0.2913
+   },
+   "bu2-055": {
+    "score": 20.0,
+    "minutes": 17.639,
+    "model_usd": 2.8651,
+    "cloud_usd": 0.1466
+   },
+   "bu2-056": {
+    "score": 96.0,
+    "minutes": 7.522,
+    "model_usd": 0.2811,
+    "cloud_usd": 0.0126
+   },
+   "bu2-057": {
+    "score": 65.0,
+    "minutes": 12.21,
+    "model_usd": 0.8268,
+    "cloud_usd": 0.1134
+   },
+   "bu2-058": {
+    "score": 36.0,
+    "minutes": 3.94,
+    "model_usd": 0.5275,
+    "cloud_usd": 0.004
+   },
+   "bu2-059": {
+    "score": 100.0,
+    "minutes": 11.24,
+    "model_usd": 0.7704,
+    "cloud_usd": 0.1967
+   },
+   "bu2-060": {
+    "score": 88.0,
+    "minutes": 18.457,
+    "model_usd": 3.058,
+    "cloud_usd": 0.0329
+   },
+   "bu2-061": {
+    "score": 24.0,
+    "minutes": 4.004,
+    "model_usd": 0.1022,
+    "cloud_usd": 0.0104
+   },
+   "bu2-062": {
+    "score": 88.0,
+    "minutes": 6.658,
+    "model_usd": 0.7642,
+    "cloud_usd": 0.4373
+   },
+   "bu2-063": {
+    "score": 49.0,
+    "minutes": 3.852,
+    "model_usd": 0.1696,
+    "cloud_usd": 0.0194
+   },
+   "bu2-064": {
+    "score": 68.0,
+    "minutes": 2.16,
+    "model_usd": 0.1419,
+    "cloud_usd": 0.0523
+   },
+   "bu2-065": {
+    "score": 42.0,
+    "minutes": 4.488,
+    "model_usd": 0.2005,
+    "cloud_usd": 0.0539
+   },
+   "bu2-066": {
+    "score": 32.0,
+    "minutes": 4.079,
+    "model_usd": 0.4371,
+    "cloud_usd": 0.116
+   },
+   "bu2-067": {
+    "score": 40.0,
+    "minutes": 1.063,
+    "model_usd": 0.051,
+    "cloud_usd": 0.0024
+   },
+   "bu2-068": {
+    "score": 56.0,
+    "minutes": 2.229,
+    "model_usd": 0.1093,
+    "cloud_usd": 0.008
+   },
+   "bu2-069": {
+    "score": 74.0,
+    "minutes": 3.131,
+    "model_usd": 0.2181,
+    "cloud_usd": 0.0533
+   },
+   "bu2-070": {
+    "score": 62.0,
+    "minutes": 4.368,
+    "model_usd": 0.1873,
+    "cloud_usd": 0.005
+   },
+   "bu2-071": {
+    "score": 46.0,
+    "minutes": 13.873,
+    "model_usd": 1.1295,
+    "cloud_usd": 0.1053
+   },
+   "bu2-072": {
+    "score": 88.0,
+    "minutes": 9.336,
+    "model_usd": 0.637,
+    "cloud_usd": 0.0776
+   },
+   "bu2-073": {
+    "score": 58.0,
+    "minutes": 7.5,
+    "model_usd": 0.4071,
+    "cloud_usd": 0.4179
+   },
+   "bu2-074": {
+    "score": 12.0,
+    "minutes": 8.186,
+    "model_usd": 0.2365,
+    "cloud_usd": 0.0135
+   },
+   "bu2-075": {
+    "score": 48.0,
+    "minutes": 3.175,
+    "model_usd": 0.1165,
+    "cloud_usd": 0.004
+   },
+   "bu2-076": {
+    "score": 60.0,
+    "minutes": 7.396,
+    "model_usd": 0.2667,
+    "cloud_usd": 0.2311
+   },
+   "bu2-077": {
+    "score": 48.0,
+    "minutes": 4.033,
+    "model_usd": 0.4396,
+    "cloud_usd": 0.0267
+   },
+   "bu2-078": {
+    "score": 100.0,
+    "minutes": 3.73,
+    "model_usd": 0.289,
+    "cloud_usd": 0.0332
+   },
+   "bu2-079": {
+    "score": 90.0,
+    "minutes": 16.834,
+    "model_usd": 6.1793,
+    "cloud_usd": 0.4236
+   },
+   "bu2-080": {
+    "score": 32.0,
+    "minutes": 0.753,
+    "model_usd": 0.0406,
+    "cloud_usd": 0.0502
+   },
+   "bu2-081": {
+    "score": 62.0,
+    "minutes": 2.178,
+    "model_usd": 0.1384,
+    "cloud_usd": 0.0229
+   },
+   "bu2-082": {
+    "score": 86.0,
+    "minutes": 4.049,
+    "model_usd": 0.3047,
+    "cloud_usd": 0.2611
+   },
+   "bu2-083": {
+    "score": 100.0,
+    "minutes": 3.88,
+    "model_usd": 0.5948,
+    "cloud_usd": 0.2627
+   },
+   "bu2-084": {
+    "score": 100.0,
+    "minutes": 4.608,
+    "model_usd": 0.2585,
+    "cloud_usd": 0.005
+   },
+   "bu2-085": {
+    "score": 88.0,
+    "minutes": 17.984,
+    "model_usd": 0.9549,
+    "cloud_usd": 1.3448
+   },
+   "bu2-086": {
+    "score": 100.0,
+    "minutes": 16.204,
+    "model_usd": 0.391,
+    "cloud_usd": 4.5096
+   },
+   "bu2-087": {
+    "score": 64.0,
+    "minutes": 4.825,
+    "model_usd": 0.4967,
+    "cloud_usd": 0.0557
+   },
+   "bu2-088": {
+    "score": 86.0,
+    "minutes": 10.042,
+    "model_usd": 0.9648,
+    "cloud_usd": 0.1054
+   },
+   "bu2-089": {
+    "score": 80.0,
+    "minutes": 21.77,
+    "model_usd": 0.519,
+    "cloud_usd": 0.0616
+   },
+   "bu2-090": {
+    "score": 76.0,
+    "minutes": 3.876,
+    "model_usd": 0.5262,
+    "cloud_usd": 0.1054
+   },
+   "bu2-091": {
+    "score": 58.0,
+    "minutes": 9.92,
+    "model_usd": 1.2799,
+    "cloud_usd": 0.1835
+   },
+   "bu2-092": {
+    "score": 100.0,
+    "minutes": 2.752,
+    "model_usd": 0.155,
+    "cloud_usd": 0.003
+   },
+   "bu2-093": {
+    "score": 100.0,
+    "minutes": 3.152,
+    "model_usd": 0.1629,
+    "cloud_usd": 0.004
+   },
+   "bu2-094": {
+    "score": 20.0,
+    "minutes": 0.407,
+    "model_usd": 0.0245,
+    "cloud_usd": 0.001
+   },
+   "bu2-095": {
+    "score": 82.0,
+    "minutes": 22.911,
+    "model_usd": 1.8157,
+    "cloud_usd": 1.5131
+   },
+   "bu2-096": {
+    "score": 76.0,
+    "minutes": 5.641,
+    "model_usd": 0.132,
+    "cloud_usd": 0.0684
+   },
+   "bu2-097": {
+    "score": 100.0,
+    "minutes": 4.79,
+    "model_usd": 0.3394,
+    "cloud_usd": 0.1091
+   },
+   "bu2-098": {
+    "score": 100.0,
+    "minutes": 2.01,
+    "model_usd": 0.1017,
+    "cloud_usd": 0.002
+   },
+   "bu2-099": {
+    "score": 50.0,
+    "minutes": 32.805,
+    "model_usd": 2.7619,
+    "cloud_usd": 1.0734
+   },
+   "bu2-100": {
+    "score": 66.0,
+    "minutes": 5.225,
+    "model_usd": 0.427,
+    "cloud_usd": 0.0775
+   },
+   "bu2-101": {
+    "score": 88.0,
+    "minutes": 51.42,
+    "model_usd": 3.9456,
+    "cloud_usd": 0.2025
+   },
+   "bu2-102": {
+    "score": 51.0,
+    "minutes": 4.042,
+    "model_usd": 0.3613,
+    "cloud_usd": 0.1122
+   },
+   "bu2-103": {
+    "score": 100.0,
+    "minutes": 7.404,
+    "model_usd": 0.4458,
+    "cloud_usd": 0.0748
+   },
+   "bu2-104": {
+    "score": 24.0,
+    "minutes": 5.814,
+    "model_usd": 0.2849,
+    "cloud_usd": 0.082
+   },
+   "bu2-105": {
+    "score": 32.0,
+    "minutes": 18.571,
+    "model_usd": 3.8768,
+    "cloud_usd": 0.1142
+   },
+   "bu2-106": {
+    "score": 35.0,
+    "minutes": 0.464,
+    "model_usd": 0.0295,
+    "cloud_usd": 0.001
+   },
+   "bu2-107": {
+    "score": 54.0,
+    "minutes": 17.4,
+    "model_usd": 1.7635,
+    "cloud_usd": 0.4074
+   },
+   "bu2-108": {
+    "score": 82.0,
+    "minutes": 10.324,
+    "model_usd": 1.6858,
+    "cloud_usd": 0.1369
+   },
+   "bu2-109": {
+    "score": 100.0,
+    "minutes": 2.098,
+    "model_usd": 0.0931,
+    "cloud_usd": 0.003
+   },
+   "bu2-110": {
+    "score": 86.0,
+    "minutes": 34.693,
+    "model_usd": 1.7638,
+    "cloud_usd": 0.332
+   },
+   "bu2-111": {
+    "score": 12.0,
+    "minutes": 8.108,
+    "model_usd": 0.6778,
+    "cloud_usd": 0.0311
+   },
+   "bu2-112": {
+    "score": 100.0,
+    "minutes": 3.979,
+    "model_usd": 0.2316,
+    "cloud_usd": 0.004
+   },
+   "bu2-113": {
+    "score": 58.0,
+    "minutes": 8.094,
+    "model_usd": 0.5387,
+    "cloud_usd": 0.0546
+   },
+   "bu2-114": {
+    "score": 30.0,
+    "minutes": 24.551,
+    "model_usd": 0.4568,
+    "cloud_usd": 0.2879
+   },
+   "bu2-115": {
+    "score": 72.0,
+    "minutes": 21.019,
+    "model_usd": 1.1545,
+    "cloud_usd": 0.6272
+   },
+   "bu2-116": {
+    "score": 58.0,
+    "minutes": 2.849,
+    "model_usd": 0.3085,
+    "cloud_usd": 0.003
+   },
+   "bu2-117": {
+    "score": 80.0,
+    "minutes": 17.32,
+    "model_usd": 1.2609,
+    "cloud_usd": 0.1074
+   },
+   "bu2-118": {
+    "score": 67.0,
+    "minutes": 7.854,
+    "model_usd": 0.3484,
+    "cloud_usd": 0.0434
+   },
+   "bu2-119": {
+    "score": 70.0,
+    "minutes": 14.56,
+    "model_usd": 0.9168,
+    "cloud_usd": 0.495
+   },
+   "bu2-120": {
+    "score": 100.0,
+    "minutes": 2.257,
+    "model_usd": 0.1693,
+    "cloud_usd": 0.0523
+   },
+   "bu2-121": {
+    "score": 100.0,
+    "minutes": 13.07,
+    "model_usd": 1.1889,
+    "cloud_usd": 0.0993
+   },
+   "bu2-122": {
+    "score": 64.0,
+    "minutes": 14.041,
+    "model_usd": 1.099,
+    "cloud_usd": 0.0556
+   },
+   "bu2-123": {
+    "score": 100.0,
+    "minutes": 1.504,
+    "model_usd": 0.102,
+    "cloud_usd": 0.002
+   },
+   "bu2-124": {
+    "score": 9.0,
+    "minutes": 3.171,
+    "model_usd": 0.0363,
+    "cloud_usd": 0.004
+   },
+   "bu2-125": {
+    "score": 100.0,
+    "minutes": 6.179,
+    "model_usd": 1.0389,
+    "cloud_usd": 0.0347
+   },
+   "bu2-126": {
+    "score": 62.0,
+    "minutes": 5.159,
+    "model_usd": 0.3424,
+    "cloud_usd": 0.024
+   },
+   "bu2-127": {
+    "score": 75.0,
+    "minutes": 9.996,
+    "model_usd": 1.4909,
+    "cloud_usd": 0.0966
+   },
+   "bu2-128": {
+    "score": 50.0,
+    "minutes": 2.878,
+    "model_usd": 0.1327,
+    "cloud_usd": 0.0105
+   },
+   "bu2-129": {
+    "score": 100.0,
+    "minutes": 17.144,
+    "model_usd": 1.2567,
+    "cloud_usd": 0.2856
+   },
+   "bu2-130": {
+    "score": 60.0,
+    "minutes": 4.296,
+    "model_usd": 0.2702,
+    "cloud_usd": 0.005
+   },
+   "bu2-131": {
+    "score": 28.0,
+    "minutes": 7.854,
+    "model_usd": 0.4619,
+    "cloud_usd": 0.0883
+   },
+   "bu2-132": {
+    "score": 70.0,
+    "minutes": 17.003,
+    "model_usd": 2.2811,
+    "cloud_usd": 0.0705
+   },
+   "bu2-133": {
+    "score": 43.0,
+    "minutes": 3.513,
+    "model_usd": 0.2756,
+    "cloud_usd": 0.0525
+   },
+   "bu2-134": {
+    "score": 46.0,
+    "minutes": 9.75,
+    "model_usd": 0.8422,
+    "cloud_usd": 0.1067
+   },
+   "bu2-135": {
+    "score": 23.0,
+    "minutes": 17.471,
+    "model_usd": 2.0381,
+    "cloud_usd": 0.1153
+   },
+   "bu2-136": {
+    "score": 34.0,
+    "minutes": 10.267,
+    "model_usd": 0.4596,
+    "cloud_usd": 0.1745
+   },
+   "bu2-137": {
+    "score": 12.0,
+    "minutes": 11.95,
+    "model_usd": 0.3593,
+    "cloud_usd": 0.0458
+   },
+   "bu2-138": {
+    "score": 73.0,
+    "minutes": 4.071,
+    "model_usd": 0.2163,
+    "cloud_usd": 0.0281
+   },
+   "bu2-139": {
+    "score": 22.0,
+    "minutes": 6.153,
+    "model_usd": 0.4996,
+    "cloud_usd": 0.6387
+   },
+   "bu2-140": {
+    "score": 100.0,
+    "minutes": 6.14,
+    "model_usd": 0.3684,
+    "cloud_usd": 0.5423
+   },
+   "bu2-141": {
+    "score": 100.0,
+    "minutes": 1.587,
+    "model_usd": 0.0934,
+    "cloud_usd": 0.0511
+   },
+   "bu2-142": {
+    "score": 79.0,
+    "minutes": 40.204,
+    "model_usd": 1.6641,
+    "cloud_usd": 0.3641
+   },
+   "bu2-143": {
+    "score": 88.0,
+    "minutes": 19.101,
+    "model_usd": 1.5101,
+    "cloud_usd": 0.3058
+   },
+   "bu2-144": {
+    "score": 72.0,
+    "minutes": 12.348,
+    "model_usd": 0.8819,
+    "cloud_usd": 0.0854
+   },
+   "bu2-145": {
+    "score": 18.0,
+    "minutes": 0.377,
+    "model_usd": 0.0214,
+    "cloud_usd": 0.001
+   },
+   "bu2-146": {
+    "score": 88.0,
+    "minutes": 9.692,
+    "model_usd": 0.8727,
+    "cloud_usd": 0.2026
+   },
+   "bu2-147": {
+    "score": 84.0,
+    "minutes": 21.445,
+    "model_usd": 2.1976,
+    "cloud_usd": 0.0777
+   },
+   "bu2-148": {
+    "score": 19.0,
+    "minutes": 2.187,
+    "model_usd": 0.2082,
+    "cloud_usd": 0.0514
+   },
+   "bu2-149": {
+    "score": 100.0,
+    "minutes": 2.533,
+    "model_usd": 0.2224,
+    "cloud_usd": 0.003
+   },
+   "bu2-150": {
+    "score": 10.0,
+    "minutes": 24.509,
+    "model_usd": 0.7529,
+    "cloud_usd": 1.2827
+   },
+   "bu2-151": {
+    "score": 16.0,
+    "minutes": 9.355,
+    "model_usd": 0.5929,
+    "cloud_usd": 0.1217
+   },
+   "bu2-152": {
+    "score": 100.0,
+    "minutes": 3.912,
+    "model_usd": 0.2012,
+    "cloud_usd": 0.1004
+   },
+   "bu2-153": {
+    "score": 57.0,
+    "minutes": 7.753,
+    "model_usd": 0.5684,
+    "cloud_usd": 0.0189
+   },
+   "bu2-154": {
+    "score": 100.0,
+    "minutes": 1.398,
+    "model_usd": 0.0734,
+    "cloud_usd": 0.002
+   },
+   "bu2-155": {
+    "score": 56.0,
+    "minutes": 24.677,
+    "model_usd": 3.7619,
+    "cloud_usd": 0.0375
+   },
+   "bu2-156": {
+    "score": 100.0,
+    "minutes": 4.481,
+    "model_usd": 0.2505,
+    "cloud_usd": 0.0949
+   },
+   "bu2-157": {
+    "score": 50.0,
+    "minutes": 6.903,
+    "model_usd": 0.1571,
+    "cloud_usd": 0.0842
+   },
+   "bu2-158": {
+    "score": 48.0,
+    "minutes": 1.742,
+    "model_usd": 0.113,
+    "cloud_usd": 0.002
+   },
+   "bu2-159": {
+    "score": 92.0,
+    "minutes": 4.691,
+    "model_usd": 0.3754,
+    "cloud_usd": 0.1038
+   },
+   "bu2-160": {
+    "score": 100.0,
+    "minutes": 2.955,
+    "model_usd": 0.1658,
+    "cloud_usd": 0.003
+   },
+   "bu2-161": {
+    "score": 76.0,
+    "minutes": 43.372,
+    "model_usd": 3.1334,
+    "cloud_usd": 0.427
+   },
+   "bu2-162": {
+    "score": 48.0,
+    "minutes": 23.138,
+    "model_usd": 4.6839,
+    "cloud_usd": 0.2796
+   },
+   "bu2-163": {
+    "score": 78.0,
+    "minutes": 24.448,
+    "model_usd": 2.6302,
+    "cloud_usd": 0.1085
+   },
+   "bu2-164": {
+    "score": 23.0,
+    "minutes": 5.825,
+    "model_usd": 0.5389,
+    "cloud_usd": 0.0314
+   },
+   "bu2-165": {
+    "score": 69.0,
+    "minutes": 4.257,
+    "model_usd": 0.3747,
+    "cloud_usd": 0.005
+   },
+   "bu2-166": {
+    "score": 85.0,
+    "minutes": 7.563,
+    "model_usd": 0.598,
+    "cloud_usd": 0.0178
+   },
+   "bu2-167": {
+    "score": 26.0,
+    "minutes": 4.174,
+    "model_usd": 0.2321,
+    "cloud_usd": 0.005
+   },
+   "bu2-168": {
+    "score": 54.0,
+    "minutes": 11.513,
+    "model_usd": 0.5722,
+    "cloud_usd": 0.1639
+   },
+   "bu2-169": {
+    "score": 66.0,
+    "minutes": 8.572,
+    "model_usd": 1.6911,
+    "cloud_usd": 0.3195
+   },
+   "bu2-170": {
+    "score": 85.0,
+    "minutes": 9.092,
+    "model_usd": 1.0301,
+    "cloud_usd": 0.0415
+   },
+   "bu2-171": {
+    "score": 95.0,
+    "minutes": 7.348,
+    "model_usd": 0.8131,
+    "cloud_usd": 0.1921
+   },
+   "bu2-172": {
+    "score": 62.0,
+    "minutes": 2.685,
+    "model_usd": 0.1019,
+    "cloud_usd": 0.3501
+   },
+   "bu2-173": {
+    "score": 56.0,
+    "minutes": 7.643,
+    "model_usd": 0.2233,
+    "cloud_usd": 0.1091
+   },
+   "bu2-174": {
+    "score": 78.0,
+    "minutes": 34.879,
+    "model_usd": 3.7537,
+    "cloud_usd": 0.3383
+   },
+   "bu2-175": {
+    "score": 20.0,
+    "minutes": 9.183,
+    "model_usd": 0.9479,
+    "cloud_usd": 0.1456
+   },
+   "bu2-176": {
+    "score": 100.0,
+    "minutes": 2.956,
+    "model_usd": 0.1826,
+    "cloud_usd": 0.003
+   },
+   "bu2-177": {
+    "score": 57.0,
+    "minutes": 4.457,
+    "model_usd": 0.2418,
+    "cloud_usd": 0.0191
+   },
+   "bu2-178": {
+    "score": 70.0,
+    "minutes": 12.209,
+    "model_usd": 2.1099,
+    "cloud_usd": 0.2466
+   },
+   "bu2-179": {
+    "score": 71.0,
+    "minutes": 22.867,
+    "model_usd": 2.7095,
+    "cloud_usd": 0.2362
+   },
+   "bu2-180": {
+    "score": 86.0,
+    "minutes": 5.658,
+    "model_usd": 0.4068,
+    "cloud_usd": 0.0719
+   },
+   "bu2-181": {
+    "score": 52.0,
+    "minutes": 2.41,
+    "model_usd": 0.1182,
+    "cloud_usd": 0.0331
+   },
+   "bu2-182": {
+    "score": 72.0,
+    "minutes": 33.491,
+    "model_usd": 2.7327,
+    "cloud_usd": 0.2168
+   },
+   "bu2-183": {
+    "score": 72.0,
+    "minutes": 6.122,
+    "model_usd": 0.2762,
+    "cloud_usd": 0.0522
+   },
+   "bu2-184": {
+    "score": 48.0,
+    "minutes": 5.775,
+    "model_usd": 0.6993,
+    "cloud_usd": 0.0531
+   },
+   "bu2-185": {
+    "score": 25.0,
+    "minutes": 24.117,
+    "model_usd": 0.8929,
+    "cloud_usd": 3.8169
+   },
+   "bu2-186": {
+    "score": 100.0,
+    "minutes": 5.759,
+    "model_usd": 2.0883,
+    "cloud_usd": 0.0088
+   },
+   "bu2-187": {
+    "score": 74.0,
+    "minutes": 17.107,
+    "model_usd": 2.1104,
+    "cloud_usd": 0.1932
+   },
+   "bu2-188": {
+    "score": 87.0,
+    "minutes": 6.967,
+    "model_usd": 0.5995,
+    "cloud_usd": 0.3631
+   },
+   "bu2-189": {
+    "score": 87.0,
+    "minutes": 4.329,
+    "model_usd": 0.0868,
+    "cloud_usd": 0.0563
+   },
+   "bu2-190": {
+    "score": 36.0,
+    "minutes": 2.317,
+    "model_usd": 0.1773,
+    "cloud_usd": 0.2546
+   },
+   "bu2-191": {
+    "score": 34.0,
+    "minutes": 7.703,
+    "model_usd": 0.9349,
+    "cloud_usd": 0.0455
+   },
+   "bu2-192": {
+    "score": 50.0,
+    "minutes": 13.473,
+    "model_usd": 0.8392,
+    "cloud_usd": 0.2153
+   },
+   "bu2-193": {
+    "score": 36.0,
+    "minutes": 9.549,
+    "model_usd": 0.4667,
+    "cloud_usd": 0.2335
+   },
+   "bu2-194": {
+    "score": 76.0,
+    "minutes": 21.124,
+    "model_usd": 1.0126,
+    "cloud_usd": 2.8581
+   },
+   "bu2-195": {
+    "score": 67.0,
+    "minutes": 28.027,
+    "model_usd": 2.7947,
+    "cloud_usd": 0.2412
+   },
+   "bu2-196": {
+    "score": 8.0,
+    "minutes": 4.051,
+    "model_usd": 0.4878,
+    "cloud_usd": 0.0181
+   },
+   "bu2-197": {
+    "score": 100.0,
+    "minutes": 20.025,
+    "model_usd": 14.8415,
+    "cloud_usd": 0.6931
+   },
+   "bu2-198": {
+    "score": 41.0,
+    "minutes": 4.089,
+    "model_usd": 0.2283,
+    "cloud_usd": 0.0541
+   },
+   "bu2-199": {
+    "score": 74.0,
+    "minutes": 4.769,
+    "model_usd": 0.4556,
+    "cloud_usd": 0.0646
+   },
+   "bu2-200": {
+    "score": 30.0,
+    "minutes": 23.487,
+    "model_usd": 0.868,
+    "cloud_usd": 0.3316
+   }
+  }
+ }
+}

@@ -6,6 +6,7 @@ with `agent-env run <name>`, on agent-env's own environments, against the agents
 | Benchmark | Bundle | Tasks | Arms | Source |
 | --- | --- | --- | --- | --- |
 | [Online-Mind2Web](src/agentenv_benchmarks/bundles/online-mind2web/README.md) | `online-mind2web` | 300 live-web tasks on 147 sites | Browser Use over CDP; Claude Code with Playwright MCP | [`osunlp/Online-Mind2Web`](https://huggingface.co/datasets/osunlp/Online-Mind2Web) @ `eacad896` |
+| [BU Bench V2.1](src/agentenv_benchmarks/bundles/bu-bench/README.md) | `bu-bench` | 200 live-web tasks, encrypted | 8 harnesses: browser-use 1.0.4rc1; Codex with 7 browser tools, each on a Browser Use Cloud browser | [`browser-use/benchmark`](https://github.com/browser-use/benchmark) @ `1e0e2f1e` |
 
 ## Install and run
 

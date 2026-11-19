@@ -1,0 +1,353 @@
+{
+ "rule": "Pick the mini-20 subset of BU Bench V2.1 and record the matched reference scores.\n\nRule (deterministic, from the two reference runs on all 200 tasks, same model/judge):\n  1. Drop tasks the judge marked infra-error (page did not load / browser failure) in either reference run.\n  2. Rank the rest by mean wall time of the two runs, split into 4 equal-count duration quartiles.\n  3. In each quartile take the 5 tasks with the smallest sha256(\"agentenv-mini20:\" + task_id).\n\nReferences: Codex 0.166.0 + Browser Use CLI (browser-harness) arm of the harness bake-off (codex-browser-tools,\nbake-off r2) and browser-use 1.0.4rc1 (eval a1487b98, two judge crashes rejudged in e089dc24).",
+ "eligible": 182,
+ "excluded_infra": 18,
+ "tasks": [
+  "bu2-034",
+  "bu2-046",
+  "bu2-047",
+  "bu2-051",
+  "bu2-055",
+  "bu2-058",
+  "bu2-061",
+  "bu2-095",
+  "bu2-103",
+  "bu2-104",
+  "bu2-129",
+  "bu2-140",
+  "bu2-159",
+  "bu2-161",
+  "bu2-164",
+  "bu2-165",
+  "bu2-167",
+  "bu2-177",
+  "bu2-183",
+  "bu2-193"
+ ],
+ "reference": {
+  "bu2-034": {
+   "duration_quartile": 4,
+   "codex-bu-cli": {
+    "score": 70.0,
+    "minutes": 14.47715,
+    "model_usd": 1.8714962000000002,
+    "cloud_usd": 0.5850277786329389,
+    "infra": false
+   },
+   "browser-use-104rc1": {
+    "score": 70.0,
+    "minutes": 7.118356858783334,
+    "model_usd": 0.4076419,
+    "infra": false
+   }
+  },
+  "bu2-046": {
+   "duration_quartile": 3,
+   "codex-bu-cli": {
+    "score": 82.0,
+    "minutes": 7.1927666666666665,
+    "model_usd": 0.698497,
+    "cloud_usd": 0.15468822469065588,
+    "infra": false
+   },
+   "browser-use-104rc1": {
+    "score": 92.0,
+    "minutes": 5.9011128594,
+    "model_usd": 0.2335285,
+    "infra": false
+   }
+  },
+  "bu2-047": {
+   "duration_quartile": 4,
+   "codex-bu-cli": {
+    "score": 40.0,
+    "minutes": 18.526349999999997,
+    "model_usd": 1.4980904000000002,
+    "cloud_usd": 0.43405173801382385,
+    "infra": false
+   },
+   "browser-use-104rc1": {
+    "score": 28.000000000000004,
+    "minutes": 9.996265337999999,
+    "model_usd": 0.35358980000000007,
+    "infra": false
+   }
+  },
+  "bu2-051": {
+   "duration_quartile": 4,
+   "codex-bu-cli": {
+    "score": 66.0,
+    "minutes": 61.316050000000004,
+    "model_usd": 3.9874818000000003,
+    "cloud_usd": 2.157672345044712,
+    "infra": false
+   },
+   "browser-use-104rc1": {
+    "score": 44.0,
+    "minutes": 7.203860972566667,
+    "model_usd": 0.173981,
+    "infra": false
+   }
+  },
+  "bu2-055": {
+   "duration_quartile": 3,
+   "codex-bu-cli": {
+    "score": 86.0,
+    "minutes": 10.622983333333334,
+    "model_usd": 1.1070898999999998,
+    "cloud_usd": 0.43917953814814487,
+    "infra": false
+   },
+   "browser-use-104rc1": {
+    "score": 52.0,
+    "minutes": 4.784533840699999,
+    "model_usd": 0.2837172,
+    "infra": false
+   }
+  },
+  "bu2-058": {
+   "duration_quartile": 2,
+   "codex-bu-cli": {
+    "score": 26.0,
+    "minutes": 3.0454,
+    "model_usd": 0.2023706,
+    "cloud_usd": 0.004,
+    "infra": false
+   },
+   "browser-use-104rc1": {
+    "score": 70.0,
+    "minutes": 1.7052856743833333,
+    "model_usd": 0.0676932,
+    "infra": false
+   }
+  },
+  "bu2-061": {
+   "duration_quartile": 1,
+   "codex-bu-cli": {
+    "score": 100.0,
+    "minutes": 1.3807833333333333,
+    "model_usd": 0.1273728,
+    "cloud_usd": 0.007982290022075176,
+    "infra": false
+   },
+   "browser-use-104rc1": {
+    "score": 24.0,
+    "minutes": 1.1450768439999999,
+    "model_usd": 0.0774337,
+    "infra": false
+   }
+  },
+  "bu2-095": {
+   "duration_quartile": 4,
+   "codex-bu-cli": {
+    "score": 54.0,
+    "minutes": 14.51135,
+    "model_usd": 1.034135,
+    "cloud_usd": 0.3361724106222391,
+    "infra": false
+   },
+   "browser-use-104rc1": {
+    "score": 86.0,
+    "minutes": 5.075571796933334,
+    "model_usd": 0.20599440000000002,
+    "infra": false
+   }
+  },
+  "bu2-103": {
+   "duration_quartile": 2,
+   "codex-bu-cli": {
+    "score": 100.0,
+    "minutes": 4.617216666666667,
+    "model_usd": 0.2105129,
+    "cloud_usd": 0.053875361680984495,
+    "infra": false
+   },
+   "browser-use-104rc1": {
+    "score": 100.0,
+    "minutes": 3.2569110034333333,
+    "model_usd": 0.11864740000000001,
+    "infra": false
+   }
+  },
+  "bu2-104": {
+   "duration_quartile": 2,
+   "codex-bu-cli": {
+    "score": 16.0,
+    "minutes": 3.2041166666666667,
+    "model_usd": 0.1426181,
+    "cloud_usd": 0.05478161600977183,
+    "infra": false
+   },
+   "browser-use-104rc1": {
+    "score": 76.0,
+    "minutes": 2.0243861572666666,
+    "model_usd": 0.052048800000000006,
+    "infra": false
+   }
+  },
+  "bu2-129": {
+   "duration_quartile": 3,
+   "codex-bu-cli": {
+    "score": 76.0,
+    "minutes": 7.226133333333333,
+    "model_usd": 0.5081093000000001,
+    "cloud_usd": 0.14728800821304322,
+    "infra": false
+   },
+   "browser-use-104rc1": {
+    "score": 84.0,
+    "minutes": 6.554692125383332,
+    "model_usd": 0.24597170000000002,
+    "infra": false
+   }
+  },
+  "bu2-140": {
+   "duration_quartile": 1,
+   "codex-bu-cli": {
+    "score": 100.0,
+    "minutes": 1.0358500000000002,
+    "model_usd": 0.0657226,
+    "cloud_usd": 0.05104023837298155,
+    "infra": false
+   },
+   "browser-use-104rc1": {
+    "score": 100.0,
+    "minutes": 2.405533929533333,
+    "model_usd": 0.1626246,
+    "infra": false
+   }
+  },
+  "bu2-159": {
+   "duration_quartile": 1,
+   "codex-bu-cli": {
+    "score": 100.0,
+    "minutes": 2.4688,
+    "model_usd": 0.13612590000000002,
+    "cloud_usd": 0.051831049352884295,
+    "infra": false
+   },
+   "browser-use-104rc1": {
+    "score": 92.0,
+    "minutes": 2.0803128268499997,
+    "model_usd": 0.0558527,
+    "infra": false
+   }
+  },
+  "bu2-161": {
+   "duration_quartile": 3,
+   "codex-bu-cli": {
+    "score": 68.0,
+    "minutes": 8.076533333333334,
+    "model_usd": 0.696316,
+    "cloud_usd": 0.21743854174017907,
+    "infra": false
+   },
+   "browser-use-104rc1": {
+    "score": 86.0,
+    "minutes": 7.31668316455,
+    "model_usd": 0.3273342,
+    "infra": false
+   }
+  },
+  "bu2-164": {
+   "duration_quartile": 4,
+   "codex-bu-cli": {
+    "score": 73.0,
+    "minutes": 9.619666666666665,
+    "model_usd": 1.0061042,
+    "cloud_usd": 0.4547097610682249,
+    "infra": false
+   },
+   "browser-use-104rc1": {
+    "score": 88.0,
+    "minutes": 10.128413464133333,
+    "model_usd": 0.818236,
+    "infra": false
+   }
+  },
+  "bu2-165": {
+   "duration_quartile": 1,
+   "codex-bu-cli": {
+    "score": 69.0,
+    "minutes": 1.5205333333333333,
+    "model_usd": 0.1544641,
+    "cloud_usd": 0.002,
+    "infra": false
+   },
+   "browser-use-104rc1": {
+    "score": 69.0,
+    "minutes": 1.2380799010833334,
+    "model_usd": 0.0590219,
+    "infra": false
+   }
+  },
+  "bu2-167": {
+   "duration_quartile": 2,
+   "codex-bu-cli": {
+    "score": 72.0,
+    "minutes": 2.98045,
+    "model_usd": 0.1896711,
+    "cloud_usd": 0.003,
+    "infra": false
+   },
+   "browser-use-104rc1": {
+    "score": 70.0,
+    "minutes": 2.44292719545,
+    "model_usd": 0.1079543,
+    "infra": false
+   }
+  },
+  "bu2-177": {
+   "duration_quartile": 2,
+   "codex-bu-cli": {
+    "score": 90.0,
+    "minutes": 3.1616,
+    "model_usd": 0.24628270000000002,
+    "cloud_usd": 0.024069293677806854,
+    "infra": false
+   },
+   "browser-use-104rc1": {
+    "score": 100.0,
+    "minutes": 3.1939780611999997,
+    "model_usd": 0.11930620000000002,
+    "infra": false
+   }
+  },
+  "bu2-183": {
+   "duration_quartile": 3,
+   "codex-bu-cli": {
+    "score": 57.99999999999999,
+    "minutes": 10.946416666666666,
+    "model_usd": 0.8278021,
+    "cloud_usd": 0.153844095826149,
+    "infra": false
+   },
+   "browser-use-104rc1": {
+    "score": 72.0,
+    "minutes": 4.067371122016667,
+    "model_usd": 0.1208813,
+    "infra": false
+   }
+  },
+  "bu2-193": {
+   "duration_quartile": 1,
+   "codex-bu-cli": {
+    "score": 0.0,
+    "minutes": 2.2578166666666664,
+    "model_usd": 0.16394579999999997,
+    "cloud_usd": 0.003,
+    "infra": false
+   },
+   "browser-use-104rc1": {
+    "score": 39.0,
+    "minutes": 2.093780510016667,
+    "model_usd": 0.1159351,
+    "infra": false
+   }
+  }
+ },
+ "full_200_means": {
+  "codex-bu-cli": 70.455,
+  "browser-use-104rc1": 76.13
+ }
+}
