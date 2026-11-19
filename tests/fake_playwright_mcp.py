@@ -1,7 +1,8 @@
 """A stand-in for Playwright MCP in tests/test_bu_browser.py: an MCP server on loopback ``--port`` whose tools say
-which CDP endpoint it was given and which environment variables it has, as the real one would be given them, link a
-page snapshot as the real one's actions do, fail as a tool does, or end the server. With ``--ignore-term`` it outlives
-a SIGTERM, as a hung Playwright MCP would."""
+which CDP endpoint it was given (PLAYWRIGHT_MCP_CDP_ENDPOINT) and which environment variables it has, as the real one
+would be given them, link a page snapshot as the real one's actions do, fail as a tool does, never answer, or end the
+server. With ``--ignore-term`` it outlives a SIGTERM, as a hung Playwright MCP would."""
+import asyncio
 import contextlib
 import json
 import os
@@ -21,7 +22,7 @@ async def lifespan(app):
     yield
 
 
-endpoint = sys.argv[sys.argv.index("--cdp-endpoint") + 1]
+endpoint = os.environ["PLAYWRIGHT_MCP_CDP_ENDPOINT"]
 server = FastMCP("fake-playwright-mcp", host="127.0.0.1", port=int(sys.argv[sys.argv.index("--port") + 1]),
                  lifespan=lifespan)
 
@@ -43,6 +44,13 @@ def browser_environment() -> str:
 @server.tool()
 def browser_click(ref: str) -> str:
     raise RuntimeError(f"Target page, context or browser has been closed (clicking {ref})")
+
+
+@server.tool()
+async def browser_hang() -> str:
+    """Never answers, as a Playwright MCP stuck on a page would."""
+    await asyncio.sleep(3600)
+    return "late"
 
 
 @server.tool()

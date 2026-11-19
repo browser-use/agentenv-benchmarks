@@ -72,6 +72,8 @@ def test_each_episode_starts_its_browser_at_its_first_call_and_teardown_stops_it
     # Playwright MCP runs as pw, not as the site's PID 1 (root), which holds the key.
     assert running["mcp_uids"] and running["pid1_uid"] is not None
     assert running["pid1_uid"] not in running["mcp_uids"]
+    # Its browser's CDP address, a credential, is in its environment, not on its command line.
+    assert running["mcp_args_name_cdp"] is False
     both = ["e2e1-0123456789abcdef", "e2e2-0123456789abcdef"]
     assert seen["episode 2 abandoned"]["created"] == seen["episode 2 abandoned"]["stopped"] == both
     assert seen["session closed"]["created"] == seen["session closed"]["stopped"] == both

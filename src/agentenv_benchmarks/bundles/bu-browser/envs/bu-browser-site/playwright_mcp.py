@@ -35,6 +35,7 @@ import httpx
 from agentenv_protocol import ForwardedTool
 from mcp import ClientSession
 from mcp.client.streamable_http import streamable_http_client
+from mcp.shared.exceptions import McpError
 from mcp.types import CallToolResult, TextContent
 
 #: The Playwright MCP the image installs, the same pin as BU Bench's codex-browser-tools image.
@@ -75,17 +76,19 @@ def manifest() -> list[dict]:
     return json.loads(TOOLS.read_text(encoding="utf-8"))["tools"]
 
 
-def command(endpoint: str, port: int) -> list[str]:
-    """Playwright MCP on loopback ``port``, attached to the browser at ``endpoint`` and never one of its own, as ``pw``
-    with no groups, ended by the kernel if the site dies first. Its other flags are BU Bench's Playwright MCP arm's."""
+def command(port: int) -> list[str]:
+    """Playwright MCP on loopback ``port``, as ``pw`` with no groups, ended by the kernel if the site dies first. Its
+    other flags are BU Bench's Playwright MCP arm's; the browser it attaches to is in its environment."""
     return ["setpriv", f"--reuid={USER}", f"--regid={USER}", "--clear-groups", "--pdeathsig", "TERM", "--",
-            shutil.which("node") or "node", str(CLI), "--cdp-endpoint", endpoint, "--host", "127.0.0.1",
-            "--port", str(port), "--ignore-roots", "--output-dir", str(OUTPUT)]
+            shutil.which("node") or "node", str(CLI), "--host", "127.0.0.1", "--port", str(port), "--ignore-roots",
+            "--output-dir", str(OUTPUT)]
 
 
-def environment() -> dict[str, str]:
+def environment(endpoint: str) -> dict[str, str]:
+    """The browser at ``endpoint`` to attach to, never one of its own, as --cdp-endpoint would name it: a credential,
+    which a command line shows any user (ps, /proc/<pid>/cmdline) and an environment only its own."""
     return {**{name: os.environ[name] for name in KEPT_ENVIRONMENT if name in os.environ},
-            "HOME": str(OUTPUT.parent), "USER": USER}
+            "HOME": str(OUTPUT.parent), "USER": USER, "PLAYWRIGHT_MCP_CDP_ENDPOINT": endpoint}
 
 
 class PlaywrightMcp:
@@ -128,6 +131,8 @@ class PlaywrightMcp:
         async with self._lock:
             if held is not None and self._session is not held:
                 return
+            if cloud.UNSTOPPED:  # alongside the rest, so close's time goes to both at once
+                self._orphans.append(asyncio.ensure_future(_stop_unstopped()))
             starting, self._starting = self._starting, None
             if starting is not None:
                 starting.cancel()
@@ -173,6 +178,11 @@ class PlaywrightMcp:
         try:
             result = _inlined(called.result())
         except Exception as e:  # noqa: BLE001 - the call may have acted: refused, not retried
+            if _timed_out(e):  # Playwright MCP is stuck on it, and every later call on it would wait as long
+                await self.stop(held)
+                return _refused(f"Playwright MCP didn't answer {tool} within {CALL_TIMEOUT_S:.0f} s, which may have "
+                                "acted; the browser was stopped, its pages are gone, and the next browser tool call "
+                                "starts a fresh browser")
             return _refused(cloud.scrub(f"Playwright MCP didn't answer {tool}: {type(e).__name__}: {e}", held.secrets))
         if result.isError and await _ended(held.browser):
             await self.stop(held)
@@ -206,7 +216,7 @@ class PlaywrightMcp:
             log = os.open(LOG, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)  # it can name the CDP address
             try:
                 self._process = await asyncio.create_subprocess_exec(
-                    *command(self.browser.ws_url, port), cwd=OUTPUT, env=environment(),
+                    *command(port), cwd=OUTPUT, env=environment(self.browser.ws_url),
                     stdin=asyncio.subprocess.DEVNULL, stdout=asyncio.subprocess.DEVNULL, stderr=log)
             finally:
                 os.close(log)
@@ -223,7 +233,7 @@ class PlaywrightMcp:
         goes to the stop, which BU bills until, and not to waiting on a process before it is sent."""
         session, process, browser = self._session, self._process, self.browser
         self._session, self._process, self.browser = None, None, None
-        stopping = asyncio.ensure_future(browser.stop()) if browser is not None else None
+        stopping = asyncio.ensure_future(_stop(browser)) if browser is not None else None
         try:
             if session is not None:
                 session.close.set()
@@ -245,7 +255,6 @@ class PlaywrightMcp:
                 except asyncio.CancelledError:  # the stop goes on: ``stop`` waits for it with the other orphans
                     self._orphans.append(stopping)
                     raise
-                logger.info("cloud browser %s stopped", browser.label)
 
 
 def _succeeded(task: asyncio.Task) -> bool:
@@ -283,6 +292,12 @@ async def _ended(browser: Any) -> bool:
     return bool(state) and state != "active"
 
 
+def _timed_out(error: Exception) -> bool:
+    """Whether a call failed waiting for its answer: mcp's request timeout (408), or the HTTP read under it."""
+    return (isinstance(error, McpError) and error.error.code == httpx.codes.REQUEST_TIMEOUT
+            or isinstance(error, (TimeoutError, httpx.TimeoutException)))
+
+
 def _refused_connection(error: BaseException) -> bool:
     while error is not None:
         if isinstance(error, ConnectionRefusedError):
@@ -296,8 +311,26 @@ async def _stop_once_started(browser_start: asyncio.Future) -> None:
         browser = await browser_start
     except Exception:  # noqa: BLE001 - a start that failed stopped what it had made (cloud.CloudBrowser.start)
         return
+    await _stop(browser)
+
+
+async def _stop(browser: Any) -> None:
+    """Stop ``browser``; one whose stops all failed goes to cloud.UNSTOPPED, which every ``PlaywrightMcp.stop`` tries
+    again, close's last."""
     await browser.stop()
-    logger.info("cloud browser %s, started as it was stopped, stopped", browser.label)
+    if browser.stopped:
+        logger.info("cloud browser %s stopped", browser.label)
+    else:
+        cloud.UNSTOPPED.append(browser)
+
+
+async def _stop_unstopped() -> None:
+    """Stop again each browser whose stops all failed, as a failed start or an earlier stop left it, and drop those
+    that went through."""
+    await asyncio.gather(*(browser.stop() for browser in list(cloud.UNSTOPPED)))
+    for browser in [browser for browser in cloud.UNSTOPPED if browser.stopped]:
+        cloud.UNSTOPPED.remove(browser)
+        logger.info("cloud browser %s stopped", browser.label)
 
 
 class _Session:

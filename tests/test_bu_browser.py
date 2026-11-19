@@ -63,6 +63,7 @@ TOOLS = [{"name": name, "description": name, "inputSchema": schema, "annotations
              ("browser_evaluate", {"type": "object", "properties": {"function": {"type": "string"}}}),
              ("browser_click", {"type": "object", "properties": {"ref": {"type": "string"}}}),
              ("browser_crash", {"type": "object", "properties": {}}),
+             ("browser_hang", {"type": "object", "properties": {}}),
              ("browser_close", {"type": "object", "properties": {}}),
              ("browser_run_code_unsafe", {"type": "object", "properties": {"code": {"type": "string"}}}))]
 HASH = "3721b75f6c501523694ef58cd7a3911c032cdabddbb38bca02709a249465c68f"
@@ -147,9 +148,14 @@ def test_closing_gives_up_on_a_stop_that_hangs_and_still_closes(monkeypatch):
     assert calls == [("invoke", browser_site.CLOSE_URI, "close", "bu-browser-site"), ("close",)]
 
 
-def test_playwright_mcp_runs_as_pw_with_no_groups():
-    """Not as the site's root, which holds the Browser Use key in its settings."""
-    assert playwright_mcp.command("ws://browser", 9000)[:4] == ["setpriv", "--reuid=pw", "--regid=pw", "--clear-groups"]
+def test_playwright_mcp_runs_as_pw_with_no_groups_and_its_browser_off_its_command_line():
+    """Not as the site's root, which holds the Browser Use key in its settings; and the browser's CDP address, a
+    credential, not where any user can read it (ps, /proc/<pid>/cmdline): in its environment."""
+    command = playwright_mcp.command(9000)
+
+    assert command[:4] == ["setpriv", "--reuid=pw", "--regid=pw", "--clear-groups"]
+    assert "--cdp-endpoint" not in command
+    assert playwright_mcp.environment("ws://browser")["PLAYWRIGHT_MCP_CDP_ENDPOINT"] == "ws://browser"
 
 
 def test_closing_an_env_never_deployed_only_closes(monkeypatch):
@@ -183,7 +189,7 @@ def test_the_site_starts_its_browser_at_the_first_call_serves_its_tools_and_stop
     # browser_evaluate is listed hidden, which the gateway hides until tool access names it; browser_close, which can
     # end the cloud browser, and run_code_unsafe aren't listed.
     assert listed == {"browser_navigate": False, "browser_environment": False, "browser_evaluate": True,
-                      "browser_click": False, "browser_crash": False}
+                      "browser_click": False, "browser_crash": False, "browser_hang": False}
     assert navigated.startswith("navigated to https://pypi.org/ over <cdp>") and first not in navigated
     assert "cdp.test" not in navigated
     assert {"AGENTENV_WEBSITE_SETTINGS", "BROWSER_USE_API_KEY"}.isdisjoint(environment) and "USER" in environment
@@ -290,8 +296,8 @@ def test_an_actions_result_carries_the_page_it_left_not_a_link_to_a_file_the_mod
 
 def test_a_reset_sends_the_browsers_stop_before_waiting_on_playwright_mcp_to_exit(site, browser_use, monkeypatch):
     monkeypatch.setattr(playwright_mcp, "STOP_S", 2.0)
-    monkeypatch.setattr(playwright_mcp, "command", lambda endpoint, port: [
-        sys.executable, str(FAKE_PLAYWRIGHT_MCP), "--cdp-endpoint", endpoint, "--port", str(port), "--ignore-term"])
+    monkeypatch.setattr(playwright_mcp, "command", lambda port: [
+        sys.executable, str(FAKE_PLAYWRIGHT_MCP), "--port", str(port), "--ignore-term"])
     with TestClient(site.create_app()) as client:
         _call(client, _mcp(client), "browser_navigate", url="https://pypi.org/")
         asked = time.monotonic()
@@ -301,6 +307,42 @@ def test_a_reset_sends_the_browsers_stop_before_waiting_on_playwright_mcp_to_exi
     [(browser, stopped_at)] = browser_use.stopped_at
     # Playwright MCP ignores SIGTERM, so the reset waits STOP_S for it; the stop was sent before that wait.
     assert answered - asked >= 2.0 and stopped_at - asked < 1.0 and browser == browser_use.created[0][0]
+
+
+def test_a_browser_whose_stops_failed_during_a_reset_is_stopped_by_close(site, browser_use, monkeypatch):
+    """Browser Use's API was down for the reset's three stops: the browser is not forgotten, and close, with the API
+    back, stops it."""
+    monkeypatch.setattr(site_cloud, "STOP_REQUEST_S", 0.3)
+    monkeypatch.setattr(site_cloud, "STOP_RETRY_S", 0.0)
+    with TestClient(site.create_app()) as client:
+        _call(client, _mcp(client), "browser_navigate", url="https://pypi.org/")
+        [(browser, _)] = browser_use.created
+        browser_use.hanging_stops = site_cloud.STOP_ATTEMPTS
+        client.post("/agentenv", json={"jsonrpc": "2.0", "id": 1, "method": "data/reset", "params": {}})
+        unstopped_after_reset = [b.id for b in site_cloud.UNSTOPPED]
+        client.portal.call(site.playwright.close)
+        stopped_by_close = list(browser_use.stopped)
+
+    assert unstopped_after_reset == [browser]
+    assert stopped_by_close == [browser] and site_cloud.UNSTOPPED == []
+
+
+def test_a_call_playwright_mcp_never_answers_is_refused_and_the_next_gets_a_fresh_browser(site, browser_use,
+                                                                                          monkeypatch):
+    """Playwright MCP stuck on a call would hold every later call as long: it goes, with its browser, and the call that
+    may have acted is not replayed."""
+    monkeypatch.setattr(playwright_mcp, "CALL_TIMEOUT_S", 1.0)
+    monkeypatch.setattr(playwright_mcp, "STOP_S", 1.0)
+    with TestClient(site.create_app()) as client:
+        mcp = _mcp(client)
+        _call(client, mcp, "browser_navigate", url="https://pypi.org/")
+        hung = _call(client, mcp, "browser_hang")
+        stopped_by_the_hang = list(browser_use.stopped)
+        again = _text(_call(client, mcp, "browser_navigate", url="https://pypi.org/"))
+
+    [(first, _), _] = browser_use.created  # the call after it ran on a second browser
+    assert hung["isError"] and "didn't answer browser_hang within 1 s" in hung["content"][0]["text"]
+    assert stopped_by_the_hang == [first] and again.startswith("navigated to https://pypi.org/ over <cdp>")
 
 
 def test_a_browser_that_fails_to_start_is_refused_to_the_call_and_leaves_nothing(site, browser_use):
@@ -324,7 +366,7 @@ def test_an_empty_key_fails_readiness(site, browser_use, monkeypatch):
 
 
 def test_playwright_mcp_failing_to_start_stops_the_browser_it_was_given(site, browser_use, monkeypatch):
-    monkeypatch.setattr(playwright_mcp, "command", lambda endpoint, port: [sys.executable, "-c", "raise SystemExit(3)"])
+    monkeypatch.setattr(playwright_mcp, "command", lambda port: [sys.executable, "-c", "raise SystemExit(3)"])
     with TestClient(site.create_app()) as client:
         refused = _call(client, _mcp(client), "browser_navigate", url="https://pypi.org/")
 
@@ -547,8 +589,9 @@ def site(browser_use, tmp_path, monkeypatch):
     monkeypatch.setattr(playwright_mcp, "TOOLS", manifest)
     monkeypatch.setattr(playwright_mcp, "OUTPUT", tmp_path / "output")
     monkeypatch.setattr(playwright_mcp, "LOG", tmp_path / "playwright-mcp.log")
-    monkeypatch.setattr(playwright_mcp, "command", lambda endpoint, port: [
-        sys.executable, str(FAKE_PLAYWRIGHT_MCP), "--cdp-endpoint", endpoint, "--port", str(port)])
+    monkeypatch.setattr(playwright_mcp, "command", lambda port: [
+        sys.executable, str(FAKE_PLAYWRIGHT_MCP), "--port", str(port)])
+    monkeypatch.setattr(site_cloud, "UNSTOPPED", [])
     monkeypatch.setattr(site_cloud, "API", site_cloud.API)  # the site sets both from its settings
     monkeypatch.setattr(site_cloud, "api_key", site_cloud.api_key)
     monkeypatch.setenv("AGENTENV_WEBSITE_SETTINGS", json.dumps({"api_key": "bu-test-key", "api_url": browser_use.url}))

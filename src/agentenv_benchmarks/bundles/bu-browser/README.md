@@ -52,7 +52,7 @@ One episode uses one browser. The browser is stopped when:
 - the site's server gets SIGTERM.
 
 A failed stop request is retried twice. Each request waits at most 20 s, and the run's teardown waits up to 115 s for
-the stop. A browser still being created at teardown is waited for and then stopped; if its create and stop together
+the stop. A browser whose three stop requests all failed is stopped again by the next reset or close. A browser still being created at teardown is waited for and then stopped; if its create and stop together
 take longer than that, it runs to its timeout. If none of these happens, Browser Use ends the browser after
 `timeout_minutes` (30 by default), counted from the first tool call. That is the case when:
 
@@ -65,6 +65,10 @@ Keep `timeout_minutes` at or above the task's turn timeouts.
 your Browser Use account's concurrency limit before you scale.
 
 The site's container must reach `api.browser-use.com` and `*.cdp.browser-use.com`.
+
+Rollback: end every running bu-browser episode before you revert or uninstall this package. Teardown stops a
+deployment's browser through the `bu_browser` env type this package registers; a deployment torn down without it is
+not closed through the site, and its browser runs to `timeout_minutes`.
 
 ## Example task
 

@@ -156,7 +156,7 @@ class CloudBrowser:
         except BaseException:
             UNSTOPPED.append(browser)  # listed first: a stop cancelled midway leaves it to the exit hook
             await browser.stop()
-            if browser.stopped:
+            if browser.stopped and browser in UNSTOPPED:  # else whoever stopped it meanwhile dropped it
                 UNSTOPPED.remove(browser)
             raise
         return browser

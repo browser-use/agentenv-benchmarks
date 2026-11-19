@@ -31,7 +31,8 @@ def checkpoint(label: str, **seen) -> None:
 
 
 def playwright_mcp_users() -> dict:
-    """The uid Playwright MCP runs as, and that of PID 1 of its container (the site's), as the host's ps sees them."""
+    """The uid Playwright MCP runs as, that of PID 1 of its container (the site's), and whether its command line names
+    the browser's CDP address, as the host's ps sees them."""
     def docker(*args: str) -> str:
         return subprocess.run(["docker", *args], capture_output=True, text=True, check=True).stdout
 
@@ -40,8 +41,9 @@ def playwright_mcp_users() -> dict:
         mcp = [uid for _, uid, args in rows if "@playwright/mcp" in args]
         if mcp:
             init = docker("inspect", "-f", "{{.State.Pid}}", container).strip()
-            return {"mcp_uids": mcp, "pid1_uid": next((uid for pid, uid, _ in rows if pid == init), None)}
-    return {"mcp_uids": [], "pid1_uid": None}
+            return {"mcp_uids": mcp, "pid1_uid": next((uid for pid, uid, _ in rows if pid == init), None),
+                    "mcp_args_name_cdp": any("/devtools/" in args for _, _, args in rows if "@playwright/mcp" in args)}
+    return {"mcp_uids": [], "pid1_uid": None, "mcp_args_name_cdp": None}
 
 
 def step(ws, data: dict) -> dict:
