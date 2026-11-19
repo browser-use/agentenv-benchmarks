@@ -192,14 +192,16 @@ def test_the_site_starts_its_browser_at_the_first_call_serves_its_tools_and_stop
     assert browser_use.stopped == [first, second] and not site.playwright.running
 
 
-def test_a_browser_browser_use_ended_is_said_to_have_ended_and_the_next_call_gets_a_fresh_one(site, browser_use):
+@pytest.mark.parametrize("how", ["discovery 404", "discovery 502, API stopped"])
+def test_a_browser_browser_use_ended_is_said_to_have_ended_and_the_next_call_gets_a_fresh_one(site, browser_use, how):
     with TestClient(site.create_app()) as client:
         mcp = _mcp(client)
         _call(client, mcp, "browser_navigate", url="https://pypi.org/")
         [(first, _)] = browser_use.created
         failed_while_running = _call(client, mcp, "browser_click", ref="e1")
         stopped_while_running = list(browser_use.stopped)
-        browser_use.ended.add(first)  # its timeout_minutes ran out, say
+        # its timeout_minutes ran out, say
+        (browser_use.ended if how == "discovery 404" else browser_use.stopped_by_browser_use).add(first)
         failed_once_ended = _call(client, mcp, "browser_click", ref="e1")
         stopped_once_ended = list(browser_use.stopped)
         again = _text(_call(client, mcp, "browser_navigate", url="https://pypi.org/"))
@@ -398,6 +400,8 @@ class FakeBrowserUse:
         self.keys: set[str] = set()
         self.stopped_at: list[tuple[str, float]] = []
         self.ended: set[str] = set()
+        #: Browsers Browser Use stopped itself: CDP discovery 502, the API's status "stopped" (seen live, Nov 19).
+        self.stopped_by_browser_use: set[str] = set()
         self.refuse = False
         self.delay_s = 0.0
         #: Stop requests still to hang (answered after the client gave up), and how many did.
@@ -418,6 +422,8 @@ class FakeBrowserUse:
             return JSONResponse({"id": browser, "cdpUrl": f"{self.url}/cdp/{browser}"})
 
         async def version(request):
+            if request.path_params["id"] in self.stopped_by_browser_use:
+                return JSONResponse({"detail": "bad gateway"}, 502)  # what Browser Use's CDP gateway answers then
             if request.path_params["id"] in self.ended:
                 return JSONResponse({"detail": "not found"}, 404)
             if self.probe == "hang":
@@ -425,6 +431,11 @@ class FakeBrowserUse:
             elif self.probe:
                 return JSONResponse({"detail": "unavailable"}, self.probe)
             return JSONResponse({"webSocketDebuggerUrl": f"ws://cdp.test/devtools/{request.path_params['id']}"})
+
+        async def status(request):
+            browser = request.path_params["id"]
+            return JSONResponse({"id": browser, "status": "stopped" if browser in self.stopped_by_browser_use
+                                 else "active"})
 
         async def stop(request):
             if self.hanging_stops:
@@ -438,7 +449,8 @@ class FakeBrowserUse:
 
         return Starlette(routes=[Route("/browsers", create, methods=["POST"]),
                                  Route("/cdp/{id}/json/version", version),
-                                 Route("/browsers/{id}", stop, methods=["PATCH"])])
+                                 Route("/browsers/{id}", stop, methods=["PATCH"]),
+                                 Route("/browsers/{id}", status, methods=["GET"])])
 
 
 @pytest.fixture

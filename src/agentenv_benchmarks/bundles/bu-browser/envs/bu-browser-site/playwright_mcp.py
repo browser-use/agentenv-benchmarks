@@ -240,20 +240,34 @@ def _succeeded(task: asyncio.Task) -> bool:
 
 
 async def _ended(browser: Any) -> bool:
-    """Whether Browser Use no longer runs ``browser``: its CDP discovery, which needs no key, answers 404 or 410, or
-    refuses the connection twice. Anything else (a timeout, a 5xx) is no answer: the browser is left running."""
+    """Whether Browser Use no longer runs ``browser``. Its CDP discovery, which needs no key, settles it when it answers
+    (404 or 410: ended; a success: running) or refuses the connection twice. Anything else, a timeout or a 5xx (Browser
+    Use's CDP gateway answers 502 for a browser it stopped), is settled by Browser Use's API: the browser's status. When
+    that fails too, the browser is left running."""
     for attempt in range(2):
         if attempt:
             await asyncio.sleep(PROBE_RETRY_S)
         try:
             async with httpx.AsyncClient(timeout=PROBE_S) as client:
-                return (await client.get(f"{browser.cdp_url}/json/version")).status_code in (404, 410)
+                status = (await client.get(f"{browser.cdp_url}/json/version")).status_code
         except httpx.ConnectError as error:
-            if not _refused_connection(error):
-                return False
+            if _refused_connection(error):
+                continue
+            break
         except httpx.HTTPError:
+            break
+        if status in (404, 410):
+            return True
+        if status < 400:
             return False
-    return True
+        break
+    else:
+        return True
+    try:
+        state = str((await browser.session()).get("status") or "").lower()
+    except Exception:  # noqa: BLE001 - no answer either way: the browser is left running
+        return False
+    return bool(state) and state != "active"
 
 
 def _refused_connection(error: BaseException) -> bool:
