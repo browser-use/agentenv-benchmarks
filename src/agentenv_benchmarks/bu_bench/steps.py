@@ -161,24 +161,29 @@ class BuCloudBrowserTaskStep(TaskStep):
         if cdp_config is None or not agent.a2a_url:
             raise RuntimeError(f"agent {agent.agent_name!r} can't take a browser: its card has no "
                                f"{A2AAgent.EXT_CDP_CONFIG}")
-        browser = await cloud.CloudBrowser.start(proxy_country_code=self.proxy_country_code,
-                                                 timeout_minutes=self.timeout_minutes,
-                                                 enable_recording=self.enable_recording)
-        handle = uuid.uuid4().hex
+        handle, browser = uuid.uuid4().hex, None
+        shots_dir = Path(tempfile.mkdtemp(prefix=f"bu-shots-{self.task_id}-"))
         try:
+            browser = await cloud.CloudBrowser.start(proxy_country_code=self.proxy_country_code,
+                                                     timeout_minutes=self.timeout_minutes,
+                                                     enable_recording=self.enable_recording)
+            # Held for the exit hook before the handoff: a browser this step fails to stop is still stopped at exit.
+            screenshots = cloud.Screenshots(browser.ws_url, shots_dir, interval=self.screenshot_interval_seconds,
+                                            seconds=self.timeout_minutes * 60)
+            _LIVE[handle] = _Live(browser, screenshots, shots_dir, time.time())
             async with httpx.AsyncClient(timeout=60) as client:
                 added = await client.post(agent.a2a_url + cdp_config["params"]["endpoint"],
                                           headers=_control_headers(agent), json={
                     "name": self.name, "http_url": browser.cdp_url, "ws_url": browser.ws_url,
                     "metadata": {"browser": "browser-use-cloud", "browser_label": browser.label}})
             added.raise_for_status()
-            shots_dir = Path(tempfile.mkdtemp(prefix=f"bu-shots-{self.task_id}-"))
-            screenshots = cloud.Screenshots(browser.ws_url, shots_dir, interval=self.screenshot_interval_seconds,
-                                            seconds=self.timeout_minutes * 60)
             screenshots.start()
-            _LIVE[handle] = _Live(browser, screenshots, shots_dir, time.time())
         except BaseException:
-            await browser.stop()
+            if browser is not None:
+                await browser.stop()
+            if browser is None or browser.stopped:  # else the exit hook tries again
+                _LIVE.pop(handle, None)
+                shutil.rmtree(shots_dir, ignore_errors=True)
             raise
         context.metadata[STATE_KEY] = {"handle": handle, "browser": browser.label, "task_id": self.task_id,
                                        "started_at": time.time()}

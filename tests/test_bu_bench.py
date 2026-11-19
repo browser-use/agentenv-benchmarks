@@ -637,6 +637,43 @@ def test_a_judge_error_is_asked_again_before_the_task_is_given_up(monkeypatch, t
     step = steps.BuFindingsVerifierTaskStep("grade", 1, "bu2-140", "solve")
 
     assert step._judge(tmp_path)["status"] == status and len(ran) == runs
+@pytest.mark.parametrize("answer, failing_stops, left", [(401, 0, False), (500, 0, False), (500, 3, True)],
+                         ids=["handoff 401", "handoff 500", "handoff 500, every stop fails"])
+def test_a_failed_browser_handoff_stops_the_browser_or_leaves_it_to_the_exit_hook(monkeypatch, answer, failing_stops,
+                                                                                  left):
+    from types import SimpleNamespace
+
+    from agent_env.a2a_agent.a2a_agent import A2AAgent
+
+    real = httpx.AsyncClient
+    monkeypatch.setattr(steps.httpx, "AsyncClient", lambda **kw: real(
+        transport=httpx.MockTransport(lambda request: httpx.Response(answer, request=request)), **kw))
+    browser = cloud.CloudBrowser(id=BROWSER_ID, ws_url=WS, cdp_url=f"https://{BROWSER_ID}.cdp.browser-use.com")
+
+    async def start(**kwargs):
+        return browser
+
+    monkeypatch.setattr(steps.cloud.CloudBrowser, "start", start)
+    api = FakeBrowserUseApi(failing_stops)
+    monkeypatch.setattr(cloud, "request", api)
+    real_sleep = asyncio.sleep
+    monkeypatch.setattr(asyncio, "sleep", lambda seconds: real_sleep(0))
+    monkeypatch.setattr(steps, "_LIVE", {})
+    patched = []
+    monkeypatch.setattr(steps.httpx, "patch", lambda url, **kwargs: patched.append((url, kwargs["json"])))
+    monkeypatch.setattr(cloud, "api_key", lambda: "k")
+    card = {"capabilities": {"extensions": [{"uri": A2AAgent.EXT_CDP_CONFIG, "params": {"endpoint": "/ext/cdp"}}]}}
+    step = steps.BuCloudBrowserTaskStep("b", 1, "bu2-140")
+    agent = SimpleNamespace(agent_name=step.agent_name, a2a_url="http://agent", a2a_card=card, control_headers={})
+
+    with pytest.raises(httpx.HTTPStatusError):
+        asyncio.run(step.execute(SimpleNamespace(metadata={}, deployed_agents=[agent])))
+    steps._stop_leftovers()
+
+    assert api.stops == (cloud.STOP_ATTEMPTS if left else 1) and bool(steps._LIVE) is left
+    assert patched == ([(f"{cloud.API}/browsers/{BROWSER_ID}", {"action": "stop"})] if left else [])
+
+
 def test_httpx_request_logs_name_no_browser_and_no_signed_link(monkeypatch, caplog):
     """httpx logs each request's URL at INFO, which agent-env up logs at: a browser's id or CDP host there reaches it."""
     import logging
