@@ -23,7 +23,7 @@ agent-env run bu-bench --eval mini-20 --model gpt-6.1-terra --agent browser-use-
 agent-env run bu-bench --eval bu-bench-v21 --model gpt-6.1-terra --agent codex-playwright-mcp   # all 200
 ```
 
-Evals: `smoke-2` (bu2-140, bu2-149), `mini-20` (20 tasks, the rule in `tools/bu_bench/reference/mini20.json`),
+Evals: `smoke-2` (bu2-140, bu2-149), `mini-20` (20 tasks spread over task length),
 `bu-bench-v21` (all 200). Any agent that takes a browser over `cdp-config/v1` runs with `--agent`.
 
 ## What every task does
@@ -65,8 +65,7 @@ the bake-off did, and sends the bake-off's prompt with that tool's rule line.
 All 8 arms on all 200 tasks, run by `agent-env run` (agentenv-framework 0.9.1536) on GitHub Actions, Nov 17-18 2026:
 GPT-6.1 Terra at medium effort, the findings judge on gpt-5.6-luna xhigh, one run per arm, **1600/1600 scored**. Infra
 failures (a model rate limit inside the stream, a stalled turn) were rerun by task id; judge errors were rejudged on the
-run's saved evidence, never scored 0. The reference is the same 200 tasks on Browser Use's own eval platform
-(`tools/bu_bench/reference/bakeoff-full.json`); the diff is paired by task with a bootstrap 95% CI.
+run's saved evidence, never scored 0. The reference is the same 200 tasks on Browser Use's own eval platform; the diff is paired by task with a bootstrap 95% CI.
 
 | harness | score [95% CI] | reference | paired diff [95% CI] | model $/task | cloud $/task | min/task |
 |---|---|---|---|---|---|---|
@@ -86,16 +85,4 @@ and `codex-playwright-mcp`.
 
 ## Tools
 
-From a checkout of this repository (they aren't in the installed package), in `tools/bu_bench/`:
-
-- `model_proxy.py`: a model endpoint without LiteLLM. It forwards `<base>/v1/*` (and paths without `/v1`) to OpenAI
-  with a per-run token and spend cap, retries upstream rate limits before the agent sees them, and logs usage to
-  `model-usage.jsonl`, which `summarize.py` reads for cost. The full run above went through it.
-- `run_eval.py BUNDLE_FOLDER --eval NAME --agent NAME --model MODEL --out DIR`: `agent-env run` with a cap on tasks at
-  once (agent-env fixes it at 4), keeping each task's judge evidence. `BUNDLE_FOLDER` is the folder,
-  `src/agentenv_benchmarks/bundles/bu-bench`, since `--tasks` writes an eval into it.
-- `summarize.py OUT...`: the results table and per-task CSV from runs, paired against `reference/bakeoff-full.json`.
-- `rejudge.py EVIDENCE...`: regrades saved evidence, for a judge error.
-- `make_bundle.py`: writes the task files and evals from the benchmark (a test checks they match).
-- `release.py RESULTS_CSV OUT --pass NAME`: the Hugging Face dataset card and `runs.jsonl`: scores only, never task
-  text, answers or trajectories.
+`tools/bu_bench/make_bundle.py` writes the task files and evals from the benchmark; a test checks they match.

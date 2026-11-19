@@ -34,7 +34,7 @@ src/agentenv_benchmarks/
   bundles/<name>/          a benchmark's bundle: envs, agents, artifacts, tasks/ and evals/, as agent-env reads them
   <name with underscores>/ the code that generates its tasks from its source dataset, when they're generated, and
                            any task steps or graders the bundle registers (bu_bench: its two steps and frozen judge)
-tools/<name>/              scripts that run, summarize and publish a benchmark from a checkout
+tools/<name>/              scripts a benchmark keeps out of the package, such as its task generator
 tests/                     checks every bundle parses and its tasks are what its generator makes
 ```
 

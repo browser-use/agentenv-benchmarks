@@ -1,6 +1,7 @@
 import asyncio
 import importlib.util
 import json
+import re
 from pathlib import Path
 
 import httpx
@@ -25,7 +26,7 @@ def test_tasks_decrypt_the_frozen_benchmark():
 
 
 def test_bundle_tasks_carry_no_instruction_text():
-    mini = json.loads((TOOLS / "reference" / "mini20.json").read_text())["tasks"]
+    mini = re.findall(r'"(bu2-\d+)"', (BUNDLE / "evals" / "mini-20.toml").read_text())
     assert len(mini) == 20
     full = (BUNDLE / "evals" / "bu-bench-v21.toml").read_text()
     assert sorted(p.stem for p in BUNDLE.glob("tasks/*.json")) == tasks.task_ids()
@@ -92,46 +93,6 @@ def test_output_files_split_the_judge_cap():
 
 BROWSER_ID = "0f6c1a52-9d0e-4b8a-a1f7-3c2d5e6f7a8b"
 WS = f"wss://{BROWSER_ID}.cdp.browser-use.com/devtools/browser/11111111-2222-3333-4444-555555555555"
-
-
-def test_proxy_reads_responses_and_chat_usage():
-    proxy = load_script("model_proxy")
-    completed = {"type": "response.completed", "response": {"model": "m", "usage": {
-        "input_tokens": 100, "input_tokens_details": {"cached_tokens": 40}, "output_tokens": 3}}}
-    assert proxy.usage_of(completed)["cached_tokens"] == 40
-    assert proxy.usage_of({"usage": {"prompt_tokens": 9, "completion_tokens": 1}})["output_tokens"] == 1
-    assert proxy.usage_of({"type": "response.created"}) is None
-
-
-def test_proxy_retries_upstream_rate_limits_before_the_agent_sees_them(monkeypatch, tmp_path):
-    from starlette.testclient import TestClient
-
-    class Body(httpx.AsyncByteStream):
-        def __init__(self, payload):
-            self.data = json.dumps(payload).encode()
-
-        async def __aiter__(self):
-            yield self.data
-
-    proxy = load_script("model_proxy")
-    ok = {"model": "m", "usage": {"prompt_tokens": 10, "completion_tokens": 2}}
-    replies = iter([httpx.Response(429, headers={"retry-after": "1"}, stream=Body({"error": "rate"})),
-                    httpx.Response(200, headers={"content-type": "application/json"}, stream=Body(ok))])
-    proxy.client = httpx.AsyncClient(transport=httpx.MockTransport(lambda request: next(replies)))
-    waits = []
-
-    async def no_sleep(seconds):
-        waits.append(seconds)
-
-    monkeypatch.setattr(proxy.asyncio, "sleep", no_sleep)
-    log = tmp_path / "usage.jsonl"
-    monkeypatch.setenv("PROXY_TOKEN", "t")
-    monkeypatch.setenv("OPENAI_API_KEY", "k")
-    monkeypatch.setenv("PROXY_USAGE_LOG", str(log))
-    reply = TestClient(proxy.app).post("/v1/chat/completions", json={}, headers={"authorization": "Bearer t"})
-    assert reply.status_code == 200 and waits == [2.0]
-    statuses = [json.loads(line)["status"] for line in log.read_text().splitlines()]
-    assert statuses == [429, 200] and proxy.state["rate_limited"] == 1
 
 
 def test_scrub_removes_every_form_of_the_cdp_address():
