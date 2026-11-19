@@ -29,16 +29,17 @@ HASH = "3721b75f6c501523694ef58cd7a3911c032cdabddbb38bca02709a249465c68f"
 def test_each_episode_starts_its_browser_at_its_first_call_and_teardown_stops_it(tmp_path):
     if shutil.which("docker") is None or shutil.which("uv") is None:
         pytest.skip("needs docker and uv")
-    with socket.socket() as probe:
-        if probe.connect_ex(("127.0.0.1", 9222)) == 0:
-            pytest.skip("port 9222, which the local Chromium listens on, is taken")
     bridge = _docker("network", "inspect", "bridge", "-f", "{{(index .IPAM.Config 0).Gateway}}").strip()
+    with socket.socket() as probe:
+        if probe.connect_ex((bridge, 9222)) == 0:
+            pytest.skip(f"port 9222 on {bridge}, which the local Chromium listens on, is taken")
     port, calls, chromium = _free_port(), tmp_path / "calls.jsonl", f"bu-browser-e2e-{os.getpid()}"
     bundle = tmp_path / "bu-browser"
     shutil.copytree(BUNDLE, bundle, ignore=shutil.ignore_patterns("__pycache__"))
     settings = bundle / "envs" / "bu-browser-site" / "env.toml"
     settings.write_text(settings.read_text() + f'api_url = "http://{bridge}:{port}"\n')
-    _docker("run", "-d", "--rm", "--name", chromium, "--network", "host", CHROMIUM)
+    # Its CDP port, which needs no credential, only on Docker's bridge, where the site's container reaches it.
+    _docker("run", "-d", "--rm", "--name", chromium, "-p", f"{bridge}:9222:9222", CHROMIUM)
     fake = subprocess.Popen([sys.executable, str(HERE / "e2e" / "fake_browser_use.py"), str(calls), str(port),
                              f"http://{bridge}:9222"])
     try:
