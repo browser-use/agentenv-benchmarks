@@ -21,6 +21,7 @@ import os
 import re
 import shutil
 import socket
+import stat
 import subprocess
 import sys
 import tempfile
@@ -398,11 +399,16 @@ async def _listening(port: int, process: asyncio.subprocess.Process) -> None:
 
 def _inlined(result: CallToolResult) -> CallToolResult:
     """``result`` with each page snapshot Playwright MCP linked to in place of its link, as it renders one inline, and
-    the file deleted: the model sees the page it acted on, and OUTPUT doesn't grow with every action."""
+    the file deleted: the model sees the page it acted on, and OUTPUT doesn't grow with every action. Only a regular
+    file is read, never what a link in OUTPUT, which the pw user writes, points at: this root process reads it."""
     def snapshot(link: re.Match) -> str:
         path = OUTPUT / link.group(1)
         try:
-            page = path.read_text(encoding="utf-8")
+            # No link followed, and no wait on a FIFO's writer.
+            with open(os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK), encoding="utf-8") as file:
+                if not stat.S_ISREG(os.fstat(file.fileno()).st_mode):
+                    return link.group(0)
+                page = file.read()
         except OSError:
             return link.group(0)
         path.unlink(missing_ok=True)

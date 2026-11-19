@@ -7,6 +7,7 @@ import asyncio
 import contextlib
 import importlib.util
 import json
+import os
 import socket
 import sys
 import threading
@@ -317,6 +318,24 @@ def test_an_actions_result_carries_the_page_it_left_not_a_link_to_a_file_the_mod
     # The page's text is scrubbed of the CDP address too, and its file is gone.
     assert "cdp.test" not in navigated and navigated.count("<cdp>") == 2
     assert list((tmp_path / "output").iterdir()) == []
+
+
+def test_a_snapshot_link_that_is_a_symlink_or_fifo_is_left_as_a_link_and_not_read(monkeypatch, tmp_path):
+    """OUTPUT is the pw user's: the root site must not inline what a link there points at (its settings hold the key),
+    nor wait on a FIFO."""
+    from mcp.types import CallToolResult, TextContent
+
+    output, secret = tmp_path / "output", tmp_path / "settings.json"
+    output.mkdir()
+    secret.write_text("bu-test-key")
+    (output / "page-1.yml").symlink_to(secret)
+    os.mkfifo(output / "page-2.yml")
+    monkeypatch.setattr(playwright_mcp, "OUTPUT", output)
+    text = "- [Snapshot](./page-1.yml)\n- [Snapshot](./page-2.yml)"
+
+    inlined = playwright_mcp._inlined(CallToolResult(content=[TextContent(type="text", text=text)]))
+
+    assert inlined.content[0].text == text and sorted(p.name for p in output.iterdir()) == ["page-1.yml", "page-2.yml"]
 
 
 def test_a_reset_sends_the_browsers_stop_before_waiting_on_playwright_mcp_to_exit(site, browser_use, monkeypatch):
