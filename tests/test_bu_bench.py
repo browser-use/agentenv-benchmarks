@@ -403,16 +403,23 @@ class FakeBrowserUseApi:
         return sum(method == "PATCH" for method, _ in self.calls)
 
 
-def verifying(monkeypatch, tmp_path, judgment, failing_stops=0, evidence_dir=None, handle="h1", artifacts=None):
+#: A Codex turn's trajectory of one step, its answer.
+TRAJECTORY = json.dumps([{"type": "item.completed", "item": {"type": "agent_message", "text": "FINAL ANSWER: done"}}]
+                        ).encode()
+
+
+def verifying(monkeypatch, tmp_path, judgment, failing_stops=0, evidence_dir=None, handle="h1", artifacts=None,
+              trajectory=TRAJECTORY):
     """A live browser as bu_cloud_browser leaves it, the agent's answered turn, its delivered files (``artifacts``,
     name: bytes, or None for one whose download fails) in a faked object store, Browser Use's API faked, the judge
-    answering ``judgment``, and the verifier step with the context it runs in."""
+    answering ``judgment``, and the verifier step with the context it runs in. The stored ``trajectory`` is None
+    for one whose read fails."""
     from types import SimpleNamespace
 
     import agent_env.config
     from agent_env.task_step.context import PromptResponse
 
-    objects = {"mem://trajectory": b"[]", **{f"mem://out/{name}": raw for name, raw in (artifacts or {}).items()}}
+    objects = {"mem://trajectory": trajectory, **{f"mem://out/{name}": raw for name, raw in (artifacts or {}).items()}}
 
     class Store:
         def open(self, url):
@@ -558,12 +565,13 @@ def test_a_failed_collect_is_not_judged_as_no_files_and_a_failed_turn_is_judged_
     assert api.stops == 1
 
 
-def test_a_turn_whose_trajectory_cant_be_read_is_not_judged_as_zero_steps(monkeypatch, tmp_path):
-    """Neither the stored copy nor the agent (gone here) gives the trajectory: the judge would see no steps at all."""
-    step, context, api, judged = verifying(monkeypatch, tmp_path, SCORED)
-    context.prompt_responses[0].agent_trajectory_object_url = "mem://lost"
+@pytest.mark.parametrize("stored", [None, b"[]"], ids=["lost", "empty"])
+def test_a_turn_whose_trajectory_cant_be_read_or_is_empty_is_not_judged_as_zero_steps(monkeypatch, tmp_path, stored):
+    """Neither the stored copy nor the agent (gone here) gives the trajectory, or the one stored has no step: the judge
+    would see no steps at all. No published run had none."""
+    step, context, api, judged = verifying(monkeypatch, tmp_path, SCORED, trajectory=stored)
 
-    with pytest.raises(RuntimeError, match="neither the stored trajectory nor the agent's could be read"):
+    with pytest.raises(RuntimeError, match="no trajectory with a step in it could be read"):
         asyncio.run(step.execute(context))
 
     assert judged == [] and api.stops == 1 and "verifications" not in context.metadata
@@ -585,7 +593,7 @@ def test_the_verifiers_object_store_reads_leave_other_tasks_running(monkeypatch,
             started = time.monotonic()
             time.sleep(0.3)
             reads.append((started, time.monotonic()))
-            return io.BytesIO(b"[]" if url == "mem://trajectory" else b"1,2")
+            return io.BytesIO(TRAJECTORY if url == "mem://trajectory" else b"1,2")
 
         def get(self, url):
             return self.open(url).read()
