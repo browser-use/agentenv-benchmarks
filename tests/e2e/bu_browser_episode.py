@@ -24,10 +24,26 @@ assert HASH not in PAGE
 root, calls = Path(sys.argv[1]), Path(sys.argv[2])
 
 
-def checkpoint(label: str, **seen) -> None:
+def browsers() -> dict:
     entries = [json.loads(line) for line in calls.read_text().splitlines()] if calls.exists() else []
-    print(json.dumps({"at": label, "created": [e["id"] for e in entries if e["call"] == "create"],
-                      "stopped": [e["id"] for e in entries if e["call"] == "stop"], **seen}), flush=True)
+    return {"created": [e["id"] for e in entries if e["call"] == "create"],
+            "stopped": [e["id"] for e in entries if e["call"] == "stop"]}
+
+
+def checkpoint(label: str, **seen) -> None:
+    print(json.dumps({"at": label, **browsers(), **seen}), flush=True)
+
+
+def settled(label: str, **seen) -> None:
+    """checkpoint once every browser created so far is stopped, or after 60 s: OpenEnv tears an episode down in the
+    background."""
+    deadline = time.monotonic() + 60
+    while time.monotonic() < deadline:
+        seen_so_far = browsers()
+        if sorted(seen_so_far["stopped"]) == sorted(seen_so_far["created"]):
+            break
+        time.sleep(0.5)
+    checkpoint(label, **seen)
 
 
 def playwright_mcp_users() -> dict:
@@ -64,14 +80,11 @@ with TestClient(build_app(root)) as client, client.websocket_connect("/ws") as w
                           "arguments": {"url": PAGE}})
     navigated_text = json.dumps(navigated["data"]["observation"].get("result"))
     ended = step(ws, {"type": "call_tool", "tool_name": "end_turn", "arguments": {"response": HASH}})
-    time.sleep(2)
-    checkpoint("episode 1 ended", tools=tools, saw_page=HASH in navigated_text, linked="[Snapshot](" in navigated_text,
-               done=ended["data"].get("done"), reward=ended["data"].get("reward"))
+    settled("episode 1 ended", tools=tools, saw_page=HASH in navigated_text, linked="[Snapshot](" in navigated_text,
+            done=ended["data"].get("done"), reward=ended["data"].get("reward"))
     reset(ws)
     step(ws, {"type": "call_tool", "tool_name": "browser_navigate", "arguments": {"url": "data:text/html,x"}})
     checkpoint("episode 2 running", **playwright_mcp_users())
     reset(ws)  # abandons episode 2 mid-turn; episode 3 calls no tool
-    time.sleep(2)
-    checkpoint("episode 2 abandoned")
-time.sleep(5)
-checkpoint("session closed")
+    settled("episode 2 abandoned")
+settled("session closed")
