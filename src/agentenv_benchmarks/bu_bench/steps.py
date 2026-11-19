@@ -23,6 +23,7 @@ import os
 import shutil
 import sys
 import tempfile
+import threading
 import time
 import uuid
 from dataclasses import dataclass
@@ -275,14 +276,15 @@ class BuFindingsVerifierTaskStep(TaskStep):
                                   "message": cloud.scrub(response.error_message or "", secrets)[:2000]}
                                  if response.error_type else None)
         trajectory, report["trajectory_source"] = await self._trajectory(context, response)
-        if not evidence.events(trajectory):
-            # Lost, or empty: no turn that answered took no step at all, so the judge would see steps the run lost.
-            raise RuntimeError(f"{self.task_id}: no trajectory with a step in it could be read (source: "
-                               f"{report['trajectory_source']}), so nothing is judged (its screenshots are kept in "
-                               f"{workspace})")
         trajectory = cloud.scrub_json(trajectory, secrets)
         (workspace / "trajectory.json").write_text(json.dumps(trajectory, default=str))
         fmt, steps, usage = evidence.steps_and_usage(trajectory)
+        if not steps:
+            # Lost, empty or only control events: no turn that answered took no step at all, so the judge would see
+            # steps the run lost.
+            raise RuntimeError(f"{self.task_id}: no trajectory with a step in it could be read (source: "
+                               f"{report['trajectory_source']}), so nothing is judged (its screenshots are kept in "
+                               f"{workspace})")
         files = cloud.scrub_json(await asyncio.to_thread(self._delivered, context, response), secrets)
         report.update(trajectory_format=fmt, steps=len(steps), usage=usage, model_usd=evidence.model_usd(usage),
                       delivered_files=[f["name"] for f in files])
@@ -404,6 +406,7 @@ class BuFindingsVerifierTaskStep(TaskStep):
         if not urls:
             return {"available": bool(session.get("recordingAvailable")), "artifact_id": None}
         folder = Path(tempfile.mkdtemp(prefix=f"bu-recording-{self.task_id}-"))
+        uploading = threading.Event()
         try:
             # Streamed through a file both ways, never held whole in memory: a long task's MP4 is hundreds of MB.
             video = folder / "recording.mp4"
@@ -418,9 +421,19 @@ class BuFindingsVerifierTaskStep(TaskStep):
             # Under the run's instance id, so a local run keeps it in the local store, as collect_artifacts does.
             artifact_id = f"{context.instance_id}-recording" if context.instance_id else \
                 f"bu-bench-recording-{self.task_id}-{uuid.uuid4().hex[:8]}"
-            artifact = await asyncio.to_thread(FileArtifact.put, artifact_id, file_path=str(video),
-                                               description=f"Browser Use Cloud recording of {self.task_id}")
             size = video.stat().st_size
+
+            def upload() -> Any:
+                """Deletes the file once uploaded: a thread can't be cancelled, so a cancelled wait for it leaves it
+                reading the file."""
+                uploading.set()
+                try:
+                    return FileArtifact.put(artifact_id, file_path=str(video),
+                                            description=f"Browser Use Cloud recording of {self.task_id}")
+                finally:
+                    shutil.rmtree(folder, ignore_errors=True)
+
+            artifact = await asyncio.to_thread(upload)
             context.metadata.setdefault("recordings", {})[self.id] = [
                 {"name": "recording.mp4", "artifact_id": artifact.id, "version": artifact.version,
                  "bytes": size, "content_type": artifact.content_type}]
@@ -430,7 +443,8 @@ class BuFindingsVerifierTaskStep(TaskStep):
             logger.warning("keeping the recording of %s failed (%s)", self.task_id, type(error).__name__)
             return {"available": True, "artifact_id": None, "error": type(error).__name__}
         finally:
-            shutil.rmtree(folder, ignore_errors=True)
+            if not uploading.is_set():  # else the upload deletes it
+                shutil.rmtree(folder, ignore_errors=True)
 
     async def _judge(self, workspace: Path) -> dict[str, Any]:
         """The judge's judgment, asked up to JUDGE_ATTEMPTS times while it errs: one failed judge request must not

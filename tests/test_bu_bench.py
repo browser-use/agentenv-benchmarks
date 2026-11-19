@@ -586,7 +586,8 @@ def test_a_failed_collect_is_not_judged_as_no_files_and_a_failed_turn_is_judged_
     assert api.stops == 1
 
 
-@pytest.mark.parametrize("stored", [None, b"[]"], ids=["lost", "empty"])
+@pytest.mark.parametrize("stored", [None, b"[]", b'[{"type": "thread.started", "thread_id": "t"}]'],
+                         ids=["lost", "empty", "control events only"])
 def test_a_turn_whose_trajectory_cant_be_read_or_is_empty_is_not_judged_as_zero_steps(monkeypatch, tmp_path, stored):
     """Neither the stored copy nor the agent (gone here) gives the trajectory, or the one stored has no step: the judge
     would see no steps at all. No published run had none."""
@@ -924,3 +925,37 @@ def test_the_log_filter_leaves_requests_to_other_hosts_as_they_are():
     assert records[0].getMessage() == other
     assert records[1].getMessage() == 'HTTP Request: PATCH https://api.browser-use.com/api/v3/browsers/<id>?<redacted> ' \
                                       '"HTTP/1.1 200 OK"'
+
+
+def test_a_cancelled_recording_upload_keeps_its_file_until_the_upload_has_read_it(monkeypatch, tmp_path):
+    """The upload runs in a thread, which a cancelled wait for it leaves running."""
+    import threading
+    from types import SimpleNamespace
+
+    from agent_env.artifact.artifacts.file import FileArtifact
+
+    video = os.urandom(1 << 16)
+    release, read = threading.Event(), []
+
+    def put(artifact_id, file_path, description):
+        release.wait(10)
+        read.append(Path(file_path).read_bytes())
+        return SimpleNamespace(id=artifact_id, version=1, content_type="video/mp4")
+
+    real = httpx.AsyncClient
+    monkeypatch.setattr(steps.httpx, "AsyncClient", lambda **kw: real(
+        transport=httpx.MockTransport(lambda request: httpx.Response(200, content=video)), **kw))
+    monkeypatch.setattr(FileArtifact, "put", put)
+    monkeypatch.setattr(steps.tempfile, "tempdir", str(tmp_path))
+    step = steps.BuFindingsVerifierTaskStep("grade", 1, "bu2-140", "solve")
+
+    async def cancelled_while_uploading():
+        keeping = asyncio.ensure_future(step._keep_recording(
+            {"recordingUrl": "https://recordings.example/r.mp4"}, SimpleNamespace(metadata={}, instance_id=None)))
+        await asyncio.sleep(0.2)
+        keeping.cancel()
+        await asyncio.gather(keeping, return_exceptions=True)
+        release.set()
+
+    asyncio.run(cancelled_while_uploading())  # its end waits for the upload's thread
+    assert read == [video] and list(tmp_path.iterdir()) == []
