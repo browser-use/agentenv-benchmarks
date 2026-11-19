@@ -509,6 +509,80 @@ def test_a_delivered_file_that_cant_be_read_is_not_judged_as_missing(monkeypatch
     assert judged == [] and api.stops == 1 and "verifications" not in context.metadata
 
 
+@pytest.mark.parametrize("failed, judged_anyway", [("collect_artifacts", False), ("prompt_agent", True)],
+                         ids=["collect failed", "the turn failed"])
+def test_a_failed_collect_is_not_judged_as_no_files_and_a_failed_turn_is_judged_on_its_response(
+        monkeypatch, tmp_path, failed, judged_anyway):
+    """Both steps run with fail_task_on_error=false. A collect that failed (its sandbox died, an upload failed) kept only
+    the files it uploaded first; a turn that failed left the response it is judged on, as the published runs were."""
+    step, context, api, judged = verifying(monkeypatch, tmp_path, SCORED)
+    grade = json.loads((BUNDLE / "tasks" / "bu2-140.json").read_text())[-1]
+    step = steps.BuFindingsVerifierTaskStep.from_dict({**grade, "version": 1})
+    failed_id = {"collect_artifacts": "collect", "prompt_agent": "solve"}[failed]
+    context.metadata["failed_steps"] = [{"step_id": failed_id, "step_type": failed, "error": "sandbox gone",
+                                         "error_type": "RuntimeError", "is_fatal": False}]
+
+    if judged_anyway:
+        asyncio.run(step.execute(context))
+        assert context.metadata["verifications"]["findings"]["score"] == 0.75
+    else:
+        with pytest.raises(RuntimeError, match="step collect, which this verifier depends on, failed") as raised:
+            asyncio.run(step.execute(context))
+        assert judged == [] and "verifications" not in context.metadata
+        assert Path(re.search(r"kept in (\S+)\)", str(raised.value)).group(1)).is_dir()
+    assert api.stops == 1
+
+
+def test_a_turn_whose_trajectory_cant_be_read_is_not_judged_as_zero_steps(monkeypatch, tmp_path):
+    """Neither the stored copy nor the agent (gone here) gives the trajectory: the judge would see no steps at all."""
+    step, context, api, judged = verifying(monkeypatch, tmp_path, SCORED)
+    context.prompt_responses[0].agent_trajectory_object_url = "mem://lost"
+
+    with pytest.raises(RuntimeError, match="neither the stored trajectory nor the agent's could be read"):
+        asyncio.run(step.execute(context))
+
+    assert judged == [] and api.stops == 1 and "verifications" not in context.metadata
+
+
+def test_the_verifiers_object_store_reads_leave_other_tasks_running(monkeypatch, tmp_path):
+    """The runner runs every task's steps on one event loop: a slow store read must not stall the others."""
+    import time
+    from types import SimpleNamespace
+
+    import agent_env.config
+
+    step, context, _, _ = verifying(monkeypatch, tmp_path, SCORED, artifacts={"a.csv": b"1,2"})
+
+    reads = []
+
+    class SlowStore:
+        def open(self, url):
+            started = time.monotonic()
+            time.sleep(0.3)
+            reads.append((started, time.monotonic()))
+            return io.BytesIO(b"[]" if url == "mem://trajectory" else b"1,2")
+
+        def get(self, url):
+            return self.open(url).read()
+
+    monkeypatch.setattr(agent_env.config, "get_config",
+                        lambda: SimpleNamespace(get_object_store_at=lambda url: SlowStore()))
+    ticks = []
+
+    async def other_task():
+        while True:
+            ticks.append(time.monotonic())
+            await asyncio.sleep(0)
+
+    async def run():
+        other = asyncio.ensure_future(other_task())
+        await step.execute(context)
+        other.cancel()
+
+    asyncio.run(run())
+    assert len(reads) == 2 and all(any(start < tick < end for tick in ticks) for start, end in reads)
+
+
 def test_two_runs_of_a_task_in_one_run_group_keep_their_own_evidence(monkeypatch, tmp_path):
     """An explorer batch runs a task several times under one run group id."""
     for n, handle in enumerate(["a" * 32, "b" * 32]):

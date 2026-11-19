@@ -8,8 +8,9 @@ screenshot capture the judge reads, and puts the task's instruction into the see
 recording, builds the judge evidence from the agent's reply, its trajectory and the delivered files (scrubbed of the
 browser's CDP address, which is its credential), and runs the frozen BU Bench V2.1 findings judge unchanged, as a
 subprocess. The score is the judge's continuous one, 0 to 1. A judge
-error is asked again; one that persists, a turn that left no response and a delivered file it can't read fail the step
-and record no score: never a zero.
+error is asked again; one that persists, a turn that left no response, a failed step it depends on other than the
+turn's own (collect_artifacts), a trajectory it can't read and a delivered file it can't read fail the step and record
+no score: never a zero.
 """
 
 from __future__ import annotations
@@ -260,15 +261,23 @@ class BuFindingsVerifierTaskStep(TaskStep):
             # reply would score the agent on what the run lost, not on what it did.
             raise RuntimeError(f"{self.task_id}: the agent's turn {self.prompt_id!r} left no response, so nothing to "
                                f"judge (its screenshots are kept in {workspace})")
+        if lost := self._failed_dependencies(context):
+            # A failed collect_artifacts keeps only the files it uploaded before it failed: judging now would score the
+            # agent on files the run lost. The turn's own failure is judged on the response it left, as published.
+            raise RuntimeError(f"{self.task_id}: step {lost}, which this verifier depends on, failed, so nothing is "
+                               f"judged (its screenshots are kept in {workspace})")
         final_output = cloud.scrub(response.response or "", secrets)
         report["agent_error"] = ({"type": response.error_type, "code": response.error_code,
                                   "message": cloud.scrub(response.error_message or "", secrets)[:2000]}
                                  if response.error_type else None)
         trajectory, report["trajectory_source"] = await self._trajectory(context, response)
+        if report["trajectory_source"] == "none":
+            raise RuntimeError(f"{self.task_id}: neither the stored trajectory nor the agent's could be read, so nothing "
+                               f"is judged (its screenshots are kept in {workspace})")
         trajectory = cloud.scrub_json(trajectory, secrets)
         (workspace / "trajectory.json").write_text(json.dumps(trajectory, default=str))
         fmt, steps, usage = evidence.steps_and_usage(trajectory)
-        files = cloud.scrub_json(self._delivered(context), secrets)
+        files = cloud.scrub_json(await asyncio.to_thread(self._delivered, context), secrets)
         report.update(trajectory_format=fmt, steps=len(steps), usage=usage, model_usd=evidence.model_usd(usage),
                       delivered_files=[f["name"] for f in files])
         (workspace / "task.json").write_text(json.dumps({"task_id": self.task_id,
@@ -319,7 +328,7 @@ class BuFindingsVerifierTaskStep(TaskStep):
             from agent_env.config import get_config
 
             try:
-                return json.loads(get_config().get_object_store_at(url).get(url)), "stored"
+                return json.loads(await asyncio.to_thread(get_config().get_object_store_at(url).get, url)), "stored"
             except Exception:
                 logger.exception("reading the stored trajectory of %s failed", self.task_id)
         try:
@@ -334,6 +343,17 @@ class BuFindingsVerifierTaskStep(TaskStep):
         except Exception:
             logger.exception("fetching the trajectory of %s from the agent failed", self.task_id)
             return [], "none"
+
+    def _failed_dependencies(self, context: TaskStepContext) -> str:
+        """The steps this one depends on (every earlier one, with no ``depends_on``) that failed, other than a prompt
+        step, whose turn is judged on its response; a failure a retry recovered from is no failure."""
+        from agent_env.task_step.task_steps.prompt_agent import is_prompt_step
+
+        needed = None if self.depends_on is None else {dependency.task_step_id for dependency in self.depends_on}
+        return ", ".join(str(failure.get("step_id")) for failure in context.metadata.get("failed_steps") or []
+                         if isinstance(failure, dict) and not failure.get("retried")
+                         and (needed is None or failure.get("step_id") in needed)
+                         and not is_prompt_step({"type": failure.get("step_type")}))
 
     def _delivered(self, context: TaskStepContext) -> list[dict[str, Any]]:
         """The judge's share of the delivered files. One it can't read fails the step: judging without it would score
