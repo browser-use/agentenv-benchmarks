@@ -130,6 +130,10 @@ def test_closing_stops_the_sites_browser_for_good_then_closes_the_env(monkeypatc
     asyncio.run(env.close())
 
     assert calls == [("invoke", browser_site.CLOSE_URI, "close", "bu-browser-site"), ("close",)]
+    # The extension call waits for the site's slowest stop: every request timing out, with the waits between them.
+    slowest = site_cloud.STOP_ATTEMPTS * site_cloud.STOP_REQUEST_S + site_cloud.STOP_RETRY_S * sum(
+        range(1, site_cloud.STOP_ATTEMPTS))
+    assert deployed.timeouts == [int(bu_env.STOP_TIMEOUT_S)] and deployed.timeouts[0] >= slowest
 
 
 def test_closing_gives_up_on_a_stop_that_hangs_and_still_closes(monkeypatch):
@@ -327,14 +331,18 @@ def test_a_reset_while_the_browser_is_still_being_created_stops_it_once_created(
 def test_teardown_closing_a_deployed_bu_browser_stops_its_sites_browser_for_good(site, browser_use, monkeypatch):
     """agent-env's teardown closes the env a run's record names (``teardown._close``), as every run's teardown does
     before it terminates sandboxes, here with the real site served on loopback behind the record's card. Only Docker
-    is stood in for: the record's sandbox, which the env reattaches and terminates last."""
-    terminated: list[str] = []
+    is stood in for: the record's sandbox, which the env reattaches and terminates last. Browser Use's first two stop
+    requests hang past their wait, as a slow API's would: the third still goes through before the sandbox goes."""
+    terminated: list[tuple[str, list[str]]] = []
 
     class Sandbox:
         sandbox_id, mode = "sandbox-1", None
 
         async def terminate(self):
-            terminated.append(self.sandbox_id)
+            terminated.append((self.sandbox_id, list(browser_use.stopped)))
+
+    monkeypatch.setattr(site_cloud, "STOP_REQUEST_S", 0.5)
+    monkeypatch.setattr(site_cloud, "STOP_RETRY_S", 0.1)
 
     async def reattach(self, env, deployed):
         return Sandbox()
@@ -363,6 +371,7 @@ def test_teardown_closing_a_deployed_bu_browser_stops_its_sites_browser_for_good
         [(browser, _)] = browser_use.created
         running = list(browser_use.stopped)
 
+        browser_use.hanging_stops = 2
         asyncio.run(teardown._close(record, teardown.TERMINATE_TIMEOUT_SECONDS))
         # A call that comes after teardown's stop, before the container is removed, starts no browser that nothing
         # would stop; a reset_env's data/reset, by contrast, leaves the next call free to start one.
@@ -370,7 +379,7 @@ def test_teardown_closing_a_deployed_bu_browser_stops_its_sites_browser_for_good
 
         assert running == [] and browser_use.stopped == [browser] and not site.playwright.running
         assert late["isError"] and "the env has closed" in late["content"][0]["text"]
-        assert len(browser_use.created) == 1 and terminated == ["sandbox-1"]
+        assert len(browser_use.created) == 1 and browser_use.hung == 2 and terminated == [("sandbox-1", [browser])]
 
 
 class FakeBrowserUse:
@@ -386,6 +395,9 @@ class FakeBrowserUse:
         self.ended: set[str] = set()
         self.refuse = False
         self.delay_s = 0.0
+        #: Stop requests still to hang (answered after the client gave up), and how many did.
+        self.hanging_stops = 0
+        self.hung = 0
         #: What CDP discovery answers, once set: that status, or with "hang" nothing in time.
         self.probe: int | str | None = None
 
@@ -410,6 +422,11 @@ class FakeBrowserUse:
             return JSONResponse({"webSocketDebuggerUrl": f"ws://cdp.test/devtools/{request.path_params['id']}"})
 
         async def stop(request):
+            if self.hanging_stops:
+                self.hanging_stops -= 1
+                self.hung += 1
+                await asyncio.sleep(site_cloud.STOP_REQUEST_S * 2)
+                return JSONResponse({"detail": "too slow"}, 504)
             self.stopped.append(request.path_params["id"])
             self.stopped_at.append((request.path_params["id"], time.monotonic()))
             return JSONResponse({"id": request.path_params["id"]})
@@ -465,8 +482,12 @@ def _closing(monkeypatch, answer: BaseException | Awaitable | None = None) -> tu
     calls: list[tuple] = []
 
     class Deployed:
-        async def invoke(self, uri, method, *, environment_name):
+        def __init__(self) -> None:
+            self.timeouts: list[int] = []
+
+        async def invoke(self, uri, method, *, environment_name, timeout=30):  # agent-env's default timeout
             calls.append(("invoke", uri, method, environment_name))
+            self.timeouts.append(timeout)
             if isinstance(answer, BaseException):
                 raise answer
             if answer is not None:

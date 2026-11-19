@@ -31,8 +31,10 @@ logger = logging.getLogger(__name__)
 
 API = os.environ.get("BROWSER_USE_API_URL", "https://api.browser-use.com/api/v3")
 KEY_NAME = "BROWSER_USE_API_KEY"
-#: Stop requests per browser, and the wait before each retry (times the attempt): one 503 must not leave it billing.
+#: Stop requests per browser, the wait for each, and the wait before each retry (times the attempt): one 503 must not
+#: leave it billing. All of them take at most 63 s, inside bu-browser's 90 s close.
 STOP_ATTEMPTS = 3
+STOP_REQUEST_S = 20.0
 STOP_RETRY_S = 1.0
 
 
@@ -131,8 +133,7 @@ class CloudBrowser:
             if self.stopped:
                 return
             try:
-                # 20 s each: all attempts fit inside bu-browser's 90 s close.
-                await request("PATCH", f"/browsers/{self.id}", {"action": "stop"}, timeout=20)
+                await request("PATCH", f"/browsers/{self.id}", {"action": "stop"}, timeout=STOP_REQUEST_S)
                 self.stopped = True
             except Exception as error:  # noqa: BLE001
                 logger.warning("stopping cloud browser %s failed (%s), attempt %d of %d%s", self.label,

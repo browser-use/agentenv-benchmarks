@@ -48,8 +48,9 @@ One episode uses one browser. The browser is stopped when:
 - a `reset_env` step runs (`data/reset`: the next tool call starts a fresh browser);
 - the site's server gets SIGTERM.
 
-A failed stop request is retried twice. If none of these happens, Browser Use ends the browser after `timeout_minutes`
-(30 by default), counted from the first tool call. That is the case when:
+A failed stop request is retried twice. Each request waits at most 20 s, and the run's teardown waits up to 90 s for
+all three. If none of these happens, Browser Use ends the browser after `timeout_minutes` (30 by default), counted from
+the first tool call. That is the case when:
 
 - the server process or its container is killed outright;
 - the run's teardown skips `close()`: a retried `deploy_env` span's earlier deployment, and an env on a provider that
