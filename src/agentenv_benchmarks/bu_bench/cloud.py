@@ -168,11 +168,13 @@ class CloudBrowser:
             if self.stopped:
                 return
             try:
-                await request("PATCH", f"/browsers/{self.id}", {"action": "stop"}, timeout=STOP_REQUEST_S)
+                # httpx's timeout bounds each read, not the request: an answer that trickles in would outlast it.
+                async with asyncio.timeout(STOP_REQUEST_S):
+                    await request("PATCH", f"/browsers/{self.id}", {"action": "stop"}, timeout=STOP_REQUEST_S)
                 self.stopped = True
             except Exception as error:  # noqa: BLE001
                 logger.warning("stopping cloud browser %s failed (%s), attempt %d of %d%s", self.label,
-                               scrub(str(error), self.secrets), attempt, STOP_ATTEMPTS,
+                               scrub(str(error) or type(error).__name__, self.secrets), attempt, STOP_ATTEMPTS,
                                "" if attempt < STOP_ATTEMPTS else "; its timeout will end it")
                 if attempt < STOP_ATTEMPTS:
                     await asyncio.sleep(STOP_RETRY_S * attempt)

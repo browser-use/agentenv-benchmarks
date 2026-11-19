@@ -912,6 +912,29 @@ def test_a_browser_create_waits_minutes_for_its_answer_and_a_stop_does_not(monke
     assert read_timeouts["POST"] >= 300 and read_timeouts["PATCH"] == cloud.STOP_REQUEST_S
 
 
+def test_a_stop_whose_answer_trickles_in_still_ends_within_its_budget(monkeypatch):
+    """httpx's timeout bounds each read, not the request: an answer that keeps sending must not outlast the close."""
+    import time
+
+    async def trickle():
+        for _ in range(100):
+            await asyncio.sleep(0.05)
+            yield b" "
+
+    real = httpx.AsyncClient
+    monkeypatch.setattr(cloud.httpx, "AsyncClient", lambda **kw: real(
+        transport=httpx.MockTransport(lambda request: httpx.Response(200, content=trickle())), **kw))
+    monkeypatch.setenv(cloud.KEY_NAME, "k")
+    monkeypatch.setattr(cloud, "STOP_REQUEST_S", 0.3)
+    monkeypatch.setattr(cloud, "STOP_RETRY_S", 0.0)
+    browser = cloud.CloudBrowser(id=BROWSER_ID, ws_url=WS)
+
+    started = time.monotonic()
+    asyncio.run(browser.stop())
+
+    assert time.monotonic() - started < cloud.STOP_ATTEMPTS * 0.3 + 1 and not browser.stopped
+
+
 def test_the_log_filter_leaves_requests_to_other_hosts_as_they_are():
     """It is process-wide: a bundle run beside BU Bench keeps its own log lines."""
     import logging
