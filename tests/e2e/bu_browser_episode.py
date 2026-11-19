@@ -10,11 +10,17 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from urllib.parse import quote
 
 from agent_env.openenv import build_app
 from fastapi.testclient import TestClient
 
 HASH = "3721b75f6c501523694ef58cd7a3911c032cdabddbb38bca02709a249465c68f"
+#: A page whose text is the hash, which its URL doesn't hold: its script writes it reversed back, so only the page's
+#: own content in the result can show it.
+PAGE = "data:text/html," + quote(f"<title>pypi</title><p id=h></p><script>document.getElementById('h').textContent="
+                                 f"'{HASH[::-1]}'.split('').reverse().join('')</script>")
+assert HASH not in PAGE
 root, calls = Path(sys.argv[1]), Path(sys.argv[2])
 
 
@@ -53,11 +59,11 @@ with TestClient(build_app(root)) as client, client.websocket_connect("/ws") as w
     checkpoint("episode 1 reset")
     tools = sorted(t["name"] for t in step(ws, {"type": "list_tools"})["data"]["observation"]["tools"])
     navigated = step(ws, {"type": "call_tool", "tool_name": "browser_navigate",
-                          "arguments": {"url": f"data:text/html,<title>pypi</title><p>{HASH}</p>"}})
+                          "arguments": {"url": PAGE}})
     navigated_text = json.dumps(navigated["data"]["observation"].get("result"))
     ended = step(ws, {"type": "call_tool", "tool_name": "end_turn", "arguments": {"response": HASH}})
     time.sleep(2)
-    checkpoint("episode 1 ended", tools=tools, saw_page=HASH in navigated_text,
+    checkpoint("episode 1 ended", tools=tools, saw_page=HASH in navigated_text, linked="[Snapshot](" in navigated_text,
                done=ended["data"].get("done"), reward=ended["data"].get("reward"))
     reset(ws)
     step(ws, {"type": "call_tool", "tool_name": "browser_navigate", "arguments": {"url": "data:text/html,x"}})

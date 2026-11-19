@@ -23,6 +23,8 @@ browser of the run's own:
 - `browser_evaluate` is hidden until a task's tool access enables it. `browser_run_code_unsafe` is never served,
   because it would run the agent's code in the site's container, and neither is `browser_close`, which can end the
   Browser Use browser.
+- An action's result (navigate, click, type...) carries the page's snapshot inline: Playwright MCP writes it to a file
+  and answers with a link, which a model with no file tool can't open, so the site puts the file's text in its place.
 - Text in tool results is scrubbed of the browser's CDP address, which is itself a credential.
 
 In an OpenEnv episode (`agent_env.openenv.build_app`), the task's `deploy_agent` becomes a proxy, and the model gets

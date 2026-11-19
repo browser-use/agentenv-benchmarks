@@ -61,7 +61,8 @@ def test_each_episode_starts_its_browser_at_its_first_call_and_teardown_stops_it
 
     assert seen["episode 1 reset"]["created"] == []  # no browser before the first call
     first = seen["episode 1 ended"]
-    assert first["saw_page"] and first["done"] and first["reward"] == 1.0
+    # The navigate result holds the page's own text (its URL doesn't), inline, not a link to a snapshot file.
+    assert first["saw_page"] and not first["linked"] and first["done"] and first["reward"] == 1.0
     assert "browser_navigate" in first["tools"]
     # browser_evaluate is hidden until a task's tool access names it, which the example task's doesn't.
     assert {"browser_close", "browser_run_code_unsafe", "browser_evaluate"}.isdisjoint(first["tools"])

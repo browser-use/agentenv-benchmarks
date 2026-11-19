@@ -1,12 +1,15 @@
 """A stand-in for Playwright MCP in tests/test_bu_browser.py: an MCP server on loopback ``--port`` whose tools say
-which CDP endpoint it was given and which environment variables it has, as the real one would be given them, fail as
-a tool does, or end the server. With ``--ignore-term`` it outlives a SIGTERM, as a hung Playwright MCP would."""
+which CDP endpoint it was given and which environment variables it has, as the real one would be given them, link a
+page snapshot as the real one's actions do, fail as a tool does, or end the server. With ``--ignore-term`` it outlives
+a SIGTERM, as a hung Playwright MCP would."""
 import contextlib
 import json
 import os
 import signal
 import sys
 import threading
+import time
+from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 
@@ -25,7 +28,11 @@ server = FastMCP("fake-playwright-mcp", host="127.0.0.1", port=int(sys.argv[sys.
 
 @server.tool()
 def browser_navigate(url: str) -> str:
-    return f"navigated to {url} over {endpoint}"
+    """As Playwright MCP 0.0.85 answers an action: the page's snapshot written to a file in its working directory (its
+    output folder), and only a link to it."""
+    snapshot = f"page-{time.time_ns()}.yml"
+    Path(snapshot).write_text(f'- heading "Snapshot of the page" [level=1] [ref=e1]\n- paragraph [ref=e2]: {endpoint}\n')
+    return f"navigated to {url} over {endpoint}\n### Snapshot\n- [Snapshot](./{snapshot})"
 
 
 @server.tool()

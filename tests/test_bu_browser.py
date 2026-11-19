@@ -271,9 +271,21 @@ def test_the_first_result_on_the_browser_that_replaced_one_playwright_mcp_lost_s
         replaced = _call(client, mcp, "browser_navigate", url="https://pypi.org/")
         after = _call(client, mcp, "browser_navigate", url="https://pypi.org/")
 
-    assert [part["text"] for part in replaced["content"]] == [
+    assert [part["text"].split("\n")[0] for part in replaced["content"]] == [
         playwright_mcp.REPLACED, "navigated to https://pypi.org/ over <cdp>"]
     assert len(before["content"]) == len(after["content"]) == 1 and len(browser_use.created) == 2
+
+
+def test_an_actions_result_carries_the_page_it_left_not_a_link_to_a_file_the_model_cant_open(site, browser_use,
+                                                                                            tmp_path):
+    """Playwright MCP writes each action's page snapshot to a file and answers with a link; the model has no file tool."""
+    with TestClient(site.create_app()) as client:
+        navigated = _text(_call(client, _mcp(client), "browser_navigate", url="https://pypi.org/"))
+
+    assert 'heading "Snapshot of the page"' in navigated and "[Snapshot](" not in navigated
+    # The page's text is scrubbed of the CDP address too, and its file is gone.
+    assert "cdp.test" not in navigated and navigated.count("<cdp>") == 2
+    assert list((tmp_path / "output").iterdir()) == []
 
 
 def test_a_reset_sends_the_browsers_stop_before_waiting_on_playwright_mcp_to_exit(site, browser_use, monkeypatch):

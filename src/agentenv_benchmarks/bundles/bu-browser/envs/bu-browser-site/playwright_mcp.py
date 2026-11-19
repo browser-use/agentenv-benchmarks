@@ -18,6 +18,7 @@ import functools
 import json
 import logging
 import os
+import re
 import shutil
 import socket
 import subprocess
@@ -51,6 +52,9 @@ USER = "pw"
 KEPT_ENVIRONMENT = ("PATH", "LANG", "LC_ALL", "TZ")
 OUTPUT = Path("/home") / USER / "playwright-output"
 LOG = Path(tempfile.gettempdir()) / "bu-browser-playwright-mcp.log"
+#: How Playwright MCP answers an action (navigate, click, type...): the page's snapshot written to a file in OUTPUT and
+#: only a link to it, which a model with no file tool can't open. --snapshot-mode has no inline choice.
+SNAPSHOT_LINK = re.compile(r"^- \[Snapshot\]\(\./(page-[^/\\()]+\.yml)\)$", re.MULTILINE)
 START_S = 30.0
 CALL_TIMEOUT_S = 300.0
 STOP_S = 10.0
@@ -164,7 +168,7 @@ class PlaywrightMcp:
             called.cancel()
             return _refused(f"the browser was reset or Playwright MCP ended during {tool}, which may have acted")
         try:
-            result = called.result()
+            result = _inlined(called.result())
         except Exception as e:  # noqa: BLE001 - the call may have acted: refused, not retried
             return _refused(cloud.scrub(f"Playwright MCP didn't answer {tool}: {type(e).__name__}: {e}", held.secrets))
         if result.isError and await _ended(held.browser):
@@ -354,6 +358,23 @@ async def _listening(port: int, process: asyncio.subprocess.Process) -> None:
             return
         await asyncio.sleep(POLL_S)
     raise RuntimeError(f"Playwright MCP didn't listen within {START_S:.0f} s")
+
+
+def _inlined(result: CallToolResult) -> CallToolResult:
+    """``result`` with each page snapshot Playwright MCP linked to in place of its link, as it renders one inline, and
+    the file deleted: the model sees the page it acted on, and OUTPUT doesn't grow with every action."""
+    def snapshot(link: re.Match) -> str:
+        path = OUTPUT / link.group(1)
+        try:
+            page = path.read_text(encoding="utf-8")
+        except OSError:
+            return link.group(0)
+        path.unlink(missing_ok=True)
+        return f"```yaml\n{page.rstrip()}\n```"
+
+    content = [part.model_copy(update={"text": SNAPSHOT_LINK.sub(snapshot, part.text)})
+               if isinstance(part, TextContent) else part for part in result.content]
+    return result.model_copy(update={"content": content})
 
 
 def _scrubbed(result: CallToolResult, secrets: list[str]) -> CallToolResult:
