@@ -148,6 +148,31 @@ def test_closing_gives_up_on_a_stop_that_hangs_and_still_closes(monkeypatch):
     assert calls == [("invoke", browser_site.CLOSE_URI, "close", "bu-browser-site"), ("close",)]
 
 
+def test_a_deployed_env_is_not_deployed_again_until_closed(monkeypatch):
+    """A second deploy of one env object would leave close() reaching only the new site, and AgentEnv would end the
+    first deployment's sandbox without its close: its browser would bill to its timeout. deploy_env still sees the
+    arguments MultiEnv's deploy takes."""
+    from agent_env.task_step.task_steps.deploy_env import _takes
+
+    deploys = []
+
+    async def deploy(self, **kwargs):
+        deploys.append(kwargs)
+        self._env_provider = object()
+
+    monkeypatch.setattr(MultiEnv, "deploy", deploy)
+    calls, deployed = _closing(monkeypatch)
+    env = _env()
+
+    asyncio.run(env.deploy(ttl_seconds=60))
+    env._deployed = deployed
+    with pytest.raises(RuntimeError, match="already deployed"):
+        asyncio.run(env.deploy(ttl_seconds=60))
+
+    assert deploys == [{"ttl_seconds": 60}] and calls == []
+    assert _takes(env.deploy, "child_envs") and not _takes(env.deploy, "env_params")
+
+
 def test_playwright_mcp_runs_as_pw_with_no_groups_and_its_browser_off_its_command_line():
     """Not as the site's root, which holds the Browser Use key in its settings; and the browser's CDP address, a
     credential, not where any user can read it (ps, /proc/<pid>/cmdline): in its environment."""

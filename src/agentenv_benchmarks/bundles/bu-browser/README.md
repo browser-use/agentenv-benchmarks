@@ -60,8 +60,9 @@ take longer than that, it runs to its timeout. If none of these happens, Browser
 - the run's teardown skips `close()`: a retried `deploy_env` span's earlier deployment, and an env on a provider that
   is not one of agent-env's built-in env providers, are not closed by it.
 
-A trainer script that deploys one env object again: if that re-deploy fails, AgentEnv closes the env, which stops the
-earlier deployment's browser for good. Deploy a new env object instead.
+A trainer script that deploys one env object again before closing it gets an error: AgentEnv would end the earlier
+deployment's sandbox without its `close`, leaving its browser to its timeout. Close it first, or deploy a new env
+object.
 
 Keep `timeout_minutes` at or above the task's turn timeouts.
 `build_app` serves up to 8 episodes at once by default (`max_concurrent_envs`), so that is up to 8 browsers. Check

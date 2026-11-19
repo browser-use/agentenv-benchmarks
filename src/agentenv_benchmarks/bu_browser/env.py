@@ -6,10 +6,14 @@ the gateway with its ``close`` extension, which stops the browser for good, what
 container's teardown is ``docker rm -f``, which gives the site no SIGTERM to stop it on. Not ``data/reset``, which a
 ``reset_env`` step sends too and after which a late tool call starts a fresh browser that nothing would stop. It tries
 once, waiting at most STOP_TIMEOUT_S, and never raises: the browser's own timeout ends one it couldn't stop.
+
+One env object is deployed once until it is closed: a second deploy would leave ``close`` reaching only the new site,
+and AgentEnv would end the earlier one's sandbox without its ``close``, its browser billing to its timeout.
 """
 from __future__ import annotations
 
 import asyncio
+import functools
 import logging
 from typing import ClassVar
 
@@ -29,6 +33,13 @@ class BuBrowserEnv(MultiEnv):
     type: ClassVar[str] = "bu_browser"
     description = ("A multi env whose website serves Playwright MCP's tools on a Browser Use Cloud browser, which it "
                    "stops as it closes")
+
+    @functools.wraps(MultiEnv.deploy)  # its signature, which deploy_env reads to know which arguments it takes
+    async def deploy(self, *args, **kwargs):
+        if self._env_provider is not None:
+            raise RuntimeError(f"env {self.id} is already deployed: close it first, or deploy a new env object (a "
+                               "second deploy would leave the first deployment's browser running to its timeout)")
+        return await super().deploy(*args, **kwargs)
 
     async def close(self) -> None:
         if self._deployed is not None:
