@@ -678,6 +678,21 @@ def test_grading_cancelled_kills_the_judge_it_runs(monkeypatch, tmp_path):
     assert asyncio.run(grade_then_cancel())
 
 
+def test_the_real_judge_reads_the_verifiers_evidence_up_to_its_model_call(monkeypatch, tmp_path):
+    """No stand-in: the vendored judge checks its sources against SOURCE.json, finds the task, matches its instruction
+    and reads the evidence the verifier wrote, then fails only at the model, which nothing answers here."""
+    step, context, _, _ = verifying(monkeypatch, tmp_path, None)
+    monkeypatch.setenv("OPENAI_BASE_URL", "http://127.0.0.1:9")
+    monkeypatch.setenv("BU_BENCH_JUDGE_API_KEY", "dry-run")
+    monkeypatch.setattr(steps, "JUDGE_ATTEMPTS", 1)
+
+    with pytest.raises(RuntimeError, match="did not score"):
+        asyncio.run(step.execute(context))
+
+    judgment = context.metadata["verifications"]["findings"]["report"]["judgment"]
+    assert judgment["status"] == "error" and judgment["reason"].startswith("ModelProviderError: Connection error")
+
+
 @pytest.mark.parametrize("answer, failing_stops, left", [(401, 0, False), (500, 0, False), (500, 3, True)],
                          ids=["handoff 401", "handoff 500", "handoff 500, every stop fails"])
 def test_a_failed_browser_handoff_stops_the_browser_or_leaves_it_to_the_exit_hook(monkeypatch, answer, failing_stops,
