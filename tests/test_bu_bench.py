@@ -637,3 +637,32 @@ def test_a_judge_error_is_asked_again_before_the_task_is_given_up(monkeypatch, t
     step = steps.BuFindingsVerifierTaskStep("grade", 1, "bu2-140", "solve")
 
     assert step._judge(tmp_path)["status"] == status and len(ran) == runs
+def test_httpx_request_logs_name_no_browser_and_no_signed_link(monkeypatch, caplog):
+    """httpx logs each request's URL at INFO, which agent-env up logs at: a browser's id or CDP host there reaches it."""
+    import logging
+
+    recording = "https://recordings.example/r.mp4?X-Amz-Signature=s3cr3t"
+
+    def reply(request):
+        if request.method == "POST":
+            return httpx.Response(200, json={"id": BROWSER_ID, "cdpUrl": f"https://{BROWSER_ID}.cdp.browser-use.com"})
+        if request.url.path == "/json/version":
+            return httpx.Response(200, json={"webSocketDebuggerUrl": WS})
+        return httpx.Response(200, json={"id": BROWSER_ID, "recordingUrl": recording})
+
+    real = httpx.AsyncClient
+    monkeypatch.setattr(cloud.httpx, "AsyncClient", lambda **kw: real(transport=httpx.MockTransport(reply), **kw))
+    monkeypatch.setenv(cloud.KEY_NAME, "k")
+
+    async def browser_lifetime():
+        browser = await cloud.CloudBrowser.start()
+        await browser.stop()
+        session = await browser.session()
+        async with httpx.AsyncClient() as client:
+            await client.get(cloud.recording_urls(session)[0])
+
+    with caplog.at_level(logging.INFO, logger="httpx"):
+        asyncio.run(browser_lifetime())
+
+    assert len([record for record in caplog.records if record.name == "httpx"]) == 5
+    assert BROWSER_ID not in caplog.text and "cdp.browser-use.com" not in caplog.text and "s3cr3t" not in caplog.text

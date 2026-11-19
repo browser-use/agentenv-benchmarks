@@ -19,6 +19,7 @@ import itertools
 import json
 import logging
 import os
+import re
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -28,6 +29,24 @@ from urllib.parse import urlparse
 import httpx
 
 logger = logging.getLogger(__name__)
+
+#: What httpx's request log line (INFO, logger ``httpx``) must not keep: a browser's CDP host, its id in the API's
+#: path, and any query string, where a signed link such as the recording's carries its signature.
+LOGGED_URL_SECRETS = ((re.compile(r"[\w-]+\.cdp\.browser-use\.com"), "<cdp>"),
+                      (re.compile(r"/browsers/[^/?#\s\"]+"), "/browsers/<id>"),
+                      (re.compile(r"\?[^\s\"]*"), "?<redacted>"))
+
+
+def _scrub_logged_urls(record: logging.LogRecord) -> bool:
+    """httpx logs every request's URL at INFO, the level ``agent-env up`` logs at."""
+    message = record.getMessage()
+    for pattern, replacement in LOGGED_URL_SECRETS:
+        message = pattern.sub(replacement, message)
+    record.msg, record.args = message, None
+    return True
+
+
+logging.getLogger("httpx").addFilter(_scrub_logged_urls)
 
 API = os.environ.get("BROWSER_USE_API_URL", "https://api.browser-use.com/api/v3")
 KEY_NAME = "BROWSER_USE_API_KEY"
