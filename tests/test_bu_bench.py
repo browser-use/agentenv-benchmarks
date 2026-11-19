@@ -567,13 +567,19 @@ def test_a_delivered_file_that_cant_be_read_is_not_judged_as_missing(monkeypatch
 def test_a_failed_collect_is_not_judged_as_no_files_and_a_failed_turn_is_judged_on_its_response(
         monkeypatch, tmp_path, failed, judged_anyway):
     """Both steps run with fail_task_on_error=false. A collect that failed (its sandbox died, an upload failed) kept only
-    the files it uploaded first; a turn that failed left the response it is judged on, as the published runs were."""
+    the files it uploaded first; a turn that failed left the response it is judged on, as the published runs were. The
+    failure is recorded as AgentEnv's runner records it."""
+    from agent_env.task import Task
+    from agent_env.task.outcome import FailedStep
+
     step, context, api, judged = verifying(monkeypatch, tmp_path, SCORED)
-    grade = json.loads((BUNDLE / "tasks" / "bu2-140.json").read_text())[-1]
-    step = steps.BuFindingsVerifierTaskStep.from_dict({**grade, "version": 1})
-    failed_id = {"collect_artifacts": "collect", "prompt_agent": "solve"}[failed]
-    context.metadata["failed_steps"] = [{"step_id": failed_id, "step_type": failed, "error": "sandbox gone",
-                                         "error_type": "RuntimeError", "is_fatal": False}]
+    task = Task.from_dict({"id": "bu2-140", "version": None,
+                           "steps": json.loads((BUNDLE / "tasks" / "bu2-140.json").read_text())})
+    step = next(s for s in task.steps if s.type == steps.BuFindingsVerifierTaskStep.type)
+    failing = next(s for s in task.steps if s.type == failed)
+    context.metadata["failed_steps"] = [FailedStep.from_exception(
+        failing, RuntimeError("sandbox gone"), started_at_utc="2026-11-19T00:00:00Z", duration_seconds=1.0,
+        is_fatal=False).to_dict()]
 
     if judged_anyway:
         asyncio.run(step.execute(context))
