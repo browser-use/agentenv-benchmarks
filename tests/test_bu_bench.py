@@ -586,8 +586,9 @@ def test_a_failed_collect_is_not_judged_as_no_files_and_a_failed_turn_is_judged_
     assert api.stops == 1
 
 
-@pytest.mark.parametrize("stored", [None, b"[]", b'[{"type": "thread.started", "thread_id": "t"}]'],
-                         ids=["lost", "empty", "control events only"])
+@pytest.mark.parametrize("stored", [None, b"[]", b'[{"type": "thread.started", "thread_id": "t"}]',
+                                    b'[{"type": "agentenv.usage", "usage": {"input_tokens": 9}, "model_requests": 1}]'],
+                         ids=["lost", "empty", "control events only", "usage only (the CLI's events lost)"])
 def test_a_turn_whose_trajectory_cant_be_read_or_is_empty_is_not_judged_as_zero_steps(monkeypatch, tmp_path, stored):
     """Neither the stored copy nor the agent (gone here) gives the trajectory, or the one stored has no step: the judge
     would see no steps at all. No published run had none."""

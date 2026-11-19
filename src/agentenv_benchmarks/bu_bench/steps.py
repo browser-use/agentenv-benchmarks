@@ -347,7 +347,8 @@ class BuFindingsVerifierTaskStep(TaskStep):
                 fetched = await client.post(agent.a2a_url + path, headers=_control_headers(agent),
                                             json={"context_id": response.a2a_context_id})
             fetched.raise_for_status()
-            return fetched.json().get("trajectory") or [], "agent"
+            answer = fetched.json()  # with the format it declares, which the stored copy doesn't keep
+            return {"format": answer.get("format"), "trajectory": answer.get("trajectory") or []}, "agent"
         except Exception:
             logger.exception("fetching the trajectory of %s from the agent failed", self.task_id)
             return [], "none"

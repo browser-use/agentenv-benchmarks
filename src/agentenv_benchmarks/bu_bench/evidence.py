@@ -20,6 +20,8 @@ from typing import Any, BinaryIO
 BASE64_BLOB = re.compile(r'"[A-Za-z0-9+/=\\]{400,}"')
 TOOL_OUTPUT_CHARS = 20_000
 PRICES = {"input": 1.0, "cached": 0.10, "output": 5.0}  # $/1M tokens: the bake-off's cost basis
+#: Event types that are no step of the agent's: Codex's thread and turn events, AgentEnv's usage record.
+CONTROL_EVENTS = ("thread.", "turn.", "agentenv.")
 
 
 def clip(text: str, limit: int) -> str:
@@ -138,13 +140,18 @@ def browser_use_steps(messages: list[dict]) -> tuple[list[str], dict[str, int]]:
 
 
 def steps_and_usage(trajectory: Any) -> tuple[str, list[str], dict[str, int]]:
-    """(format, steps, usage) for a stored trajectory."""
+    """(format, steps, usage) for a stored trajectory: the format its envelope declares, else the one its events show.
+    Control events (Codex's thread and turn events, AgentEnv's usage record) are never steps."""
     items = events(trajectory)
-    if any("parts" in item and item.get("kind") in {"request", "response"} for item in items):
+    declared = trajectory.get("format") if isinstance(trajectory, dict) else None
+    if declared == "browser-use-messages/1" or declared is None and any(
+            "parts" in item and item.get("kind") in {"request", "response"} for item in items):
         return ("browser-use-messages/1", *browser_use_steps(items))
-    if any(str(item.get("type", "")).startswith(("item.", "turn.", "thread.")) for item in items):
+    if declared == "codex-exec-json/1" or declared is None and any(
+            str(item.get("type", "")).startswith(("item.", *CONTROL_EVENTS)) for item in items):
         return ("codex-exec-json/1", *codex_steps(items))
-    return ("unknown", [clip(text_of(item), TOOL_OUTPUT_CHARS) for item in items], _usage())
+    return (str(declared or "unknown"), [clip(text_of(item), TOOL_OUTPUT_CHARS) for item in items
+                                         if not str(item.get("type", "")).startswith(CONTROL_EVENTS)], _usage())
 
 
 def model_usd(usage: dict[str, int]) -> float:
