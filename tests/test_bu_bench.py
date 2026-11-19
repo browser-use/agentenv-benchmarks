@@ -251,6 +251,24 @@ def test_mcp_arms_name_the_server_their_prompt_names_and_parse_as_toml(monkeypat
         assert config[f"mcp_servers.{named.group(1)}.command"], tool
 
 
+@pytest.mark.parametrize("headers", ['{"x-litellm-customer-id": "c1", "x-team": "t\\"1"}', None], ids=["set", "unset"])
+def test_stagehands_model_calls_get_the_endpoints_extra_headers(monkeypatch, headers):
+    """Codex hands an MCP server only the environment its config names: AgentEnv's LITELLM_EXTRA_HEADERS reaches
+    Stagehand's model client only through it."""
+    import tomllib
+
+    agent = codex_tools_agent(monkeypatch)
+    if headers is None:
+        monkeypatch.delenv("LITELLM_EXTRA_HEADERS", raising=False)
+    else:
+        monkeypatch.setenv("LITELLM_EXTRA_HEADERS", headers)
+    [env] = [tomllib.loads(f"v = {override.split('=', 1)[1]}")["v"]
+             for override in agent.mcp_overrides(agent.mcp_server("stagehand", WS, "gpt-6.1-terra", "medium"))
+             if override.startswith("mcp_servers.stagehand.env=")]
+
+    assert env.get("STAGEHAND_HEADERS") == headers
+
+
 def test_codex_turn_keeps_mcp_config_and_scrubs_the_browser(monkeypatch):
     agent = codex_tools_agent(monkeypatch)
     seen = {}

@@ -6,7 +6,8 @@
 // Env: STAGEHAND_CDP_URL (CDP websocket), STAGEHAND_MODEL_KEY_FILE (file holding the model API key),
 // STAGEHAND_LOG_DIR (logs; stdout is the MCP channel), STAGEHAND_MODEL (default openai/gpt-6.1-terra),
 // STAGEHAND_REASONING_EFFORT (default medium), STAGEHAND_BASE_URL (optional OpenAI-compatible endpoint; AgentEnv's
-// model endpoint, `<LITELLM_BASE_URL>/openai/v1`). Otherwise as the bake-off ran it (harnesses/codex-browser-tools).
+// model endpoint, `<LITELLM_BASE_URL>/openai/v1`), STAGEHAND_HEADERS (optional JSON object of headers sent on each model
+// call: the endpoint's LITELLM_EXTRA_HEADERS). Otherwise as the bake-off ran it (harnesses/codex-browser-tools).
 import fs from "node:fs";
 import path from "node:path";
 import { format } from "node:util";
@@ -23,6 +24,7 @@ if (!apiKey) throw new Error("STAGEHAND_MODEL_KEY_FILE is empty");
 const modelName = process.env.STAGEHAND_MODEL || "openai/gpt-6.1-terra";
 const reasoningEffort = process.env.STAGEHAND_REASONING_EFFORT || "medium";
 const baseURL = process.env.STAGEHAND_BASE_URL || undefined;
+const headers = JSON.parse(process.env.STAGEHAND_HEADERS || "{}");
 
 // Everything except the MCP transport goes to the log file: Stagehand falls back to console.log outside an instance
 // context, and any stray stdout byte corrupts the protocol.
@@ -48,7 +50,8 @@ async function getStagehand() {
     localBrowserLaunchOptions: { cdpUrl },
     // keepAlive skips every browser cleanup path; attaching via cdpUrl already never launches or kills Chrome.
     keepAlive: true,
-    model: { modelName, apiKey, reasoningEffort, ...(baseURL ? { baseURL } : {}) },
+    model: { modelName, apiKey, reasoningEffort, ...(baseURL ? { baseURL } : {}),
+             ...(Object.keys(headers).length ? { headers } : {}) },
     verbose: 1,
     disablePino: true,
     logger: (line) => write(`stagehand.${line.level ?? 1}`, JSON.stringify(line)),

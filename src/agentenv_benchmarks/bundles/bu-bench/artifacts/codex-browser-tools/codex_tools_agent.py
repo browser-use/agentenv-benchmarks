@@ -125,6 +125,8 @@ def mcp_server(tool: str, ws_url: str, model: str = "", effort: str = "") -> dic
                "STAGEHAND_REASONING_EFFORT": effort}
         if base := os.environ.get("LITELLM_BASE_URL", ""):
             env["STAGEHAND_BASE_URL"] = base.rstrip("/") + "/openai/v1"
+        if headers := os.environ.get("LITELLM_EXTRA_HEADERS", ""):  # Codex hands an MCP server only what env names
+            env["STAGEHAND_HEADERS"] = headers
         return {"name": "stagehand", "command": NODE, "args": [str(TOOLS_DIR / "stagehand" / "stagehand_mcp.mjs")],
                 "env": env}
     if tool == "opencode-browse":
