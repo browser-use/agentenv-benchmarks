@@ -11,6 +11,7 @@ writes the site's container; it stays in this process, and Playwright MCP, as an
 """
 from __future__ import annotations
 
+import asyncio
 import contextlib
 
 import cloud
@@ -25,6 +26,9 @@ from starlette.routing import Route
 API_URL = "https://api.browser-use.com/api/v3"
 #: The extension the run's teardown stops the browser for good with (agentenv_benchmarks.bu_browser.env).
 CLOSE_URI = "urn:agentenv-benchmarks:bu-browser-close/v1"
+#: The most a browser's create and CDP discovery take, so one in flight at teardown and its stop fit the close's 90 s
+#: (bu_browser's STOP_TIMEOUT_S): cloud.CloudBrowser.start stops a half-made browser when cancelled.
+START_BROWSER_S = 20.0
 
 
 async def _page(request) -> HTMLResponse:
@@ -52,8 +56,10 @@ class BuBrowser(WebsiteEnvironment):
         self.playwright = playwright_mcp.PlaywrightMcp(self._start_browser)
 
     async def _start_browser(self) -> cloud.CloudBrowser:
-        return await cloud.CloudBrowser.start(proxy_country_code=self.settings.proxy_country_code or None,
-                                              timeout_minutes=self.settings.timeout_minutes, enable_recording=False)
+        async with asyncio.timeout(START_BROWSER_S):
+            return await cloud.CloudBrowser.start(proxy_country_code=self.settings.proxy_country_code or None,
+                                                  timeout_minutes=self.settings.timeout_minutes,
+                                                  enable_recording=False)
 
     def forwarded_tools(self) -> list:
         return self.playwright.tools()

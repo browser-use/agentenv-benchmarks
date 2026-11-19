@@ -15,10 +15,11 @@ browser of the run's own:
   gateway serves them to the agent like any MCP env's tools. The site is ready once its key is set; a bad key or an
   account at its concurrency limit shows up as the first tool call's error.
 - If Browser Use ends the browser mid-episode (its `timeout_minutes`, a crash), the next failing call says so and the
-  call after it starts a fresh browser. A call fails that way only when the browser's CDP discovery answers 404 or 410
-  or refuses the connection twice; any other failed check (a timeout, a 5xx) leaves the browser, and the call returns
-  the tool's own error. If Playwright MCP dies, the next call starts a fresh browser and its result
-  says the earlier pages are gone.
+  call after it starts a fresh browser. A call fails that way when the browser's CDP discovery answers 404 or 410 or
+  refuses the connection twice. On any other answer (a timeout, a 5xx) the site asks Browser Use's API for the
+  browser's status and treats anything but `active` as ended. Only when that also fails is the browser left running,
+  and the call returns the tool's own error. If Playwright MCP dies, the next call starts a fresh browser and its
+  result says the earlier pages are gone.
 - `browser_evaluate` is hidden until a task's tool access enables it. `browser_run_code_unsafe` is never served,
   because it would run the agent's code in the site's container, and neither is `browser_close`, which can end the
   Browser Use browser.
@@ -49,7 +50,8 @@ One episode uses one browser. The browser is stopped when:
 - the site's server gets SIGTERM.
 
 A failed stop request is retried twice. Each request waits at most 20 s, and the run's teardown waits up to 90 s for
-all three. If none of these happens, Browser Use ends the browser after `timeout_minutes` (30 by default), counted from
+all three. A browser still being created at teardown gets at most 20 s to come up before it is stopped, so its stop
+fits in those 90 s too. If none of these happens, Browser Use ends the browser after `timeout_minutes` (30 by default), counted from
 the first tool call. That is the case when:
 
 - the server process or its container is killed outright;

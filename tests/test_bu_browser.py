@@ -302,6 +302,19 @@ def test_a_browser_that_fails_to_start_is_refused_to_the_call_and_leaves_nothing
     assert browser_use.created == [] and not site.playwright.running
 
 
+def test_a_browser_create_that_hangs_is_given_up_within_the_start_bound(site, browser_use, monkeypatch):
+    """Else one in flight at teardown, plus its stop, outlasts the close's 90 s, and the container goes first."""
+    monkeypatch.setattr(browser_site, "START_BROWSER_S", 0.3)
+    browser_use.delay_s = 3.0
+    with TestClient(site.create_app()) as client:
+        asked = time.monotonic()
+        refused = _call(client, _mcp(client), "browser_navigate", url="https://pypi.org/")
+        answered = time.monotonic()
+
+    assert refused["isError"] and "the browser didn't start: TimeoutError" in refused["content"][0]["text"]
+    assert answered - asked < 2.0 and not site.playwright.running
+
+
 def test_an_empty_key_fails_readiness(site, browser_use, monkeypatch):
     monkeypatch.setenv("AGENTENV_WEBSITE_SETTINGS", json.dumps({"api_url": browser_use.url}))
     with TestClient(browser_site.BuBrowser().create_app()) as client:
