@@ -231,6 +231,26 @@ def test_a_browser_whose_cdp_discovery_refuses_connections_has_ended(monkeypatch
     assert asyncio.run(playwright_mcp._ended(gone)) is True
 
 
+
+def test_one_refused_connection_is_not_enough_to_call_the_browser_ended(monkeypatch):
+    """A connection refused once and then answered is a blip: the browser is left running."""
+    from types import SimpleNamespace
+
+    answers = iter([ConnectionRefusedError(), httpx.Response(200, json={})])
+    real = httpx.AsyncClient
+
+    def reply(request):
+        answer = next(answers)
+        if isinstance(answer, BaseException):
+            raise httpx.ConnectError("refused", request=request) from answer
+        return answer
+
+    monkeypatch.setattr(playwright_mcp, "PROBE_RETRY_S", 0.0)
+    monkeypatch.setattr(playwright_mcp.httpx, "AsyncClient",
+                        lambda **kw: real(transport=httpx.MockTransport(reply), **kw))
+
+    assert asyncio.run(playwright_mcp._ended(SimpleNamespace(cdp_url="http://browser.invalid"))) is False
+
 def test_the_first_result_on_the_browser_that_replaced_one_playwright_mcp_lost_says_the_pages_are_gone(site, browser_use):
     with TestClient(site.create_app()) as client:
         mcp = _mcp(client)

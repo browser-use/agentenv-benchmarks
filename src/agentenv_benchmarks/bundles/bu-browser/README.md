@@ -53,8 +53,9 @@ A failed stop request is retried twice. If none of these happens, Browser Use en
 
 - the server process or its container is killed outright;
 - the run's teardown skips `close()`: a retried `deploy_env` span's earlier deployment, and an env on a provider that
-  is not one of agent-env's built-in env providers, are not closed by it. Keep it at or above the task's turn
-timeouts.
+  is not one of agent-env's built-in env providers, are not closed by it.
+
+Keep `timeout_minutes` at or above the task's turn timeouts.
 `build_app` serves up to 8 episodes at once by default (`max_concurrent_envs`), so that is up to 8 browsers. Check
 your Browser Use account's concurrency limit before you scale.
 

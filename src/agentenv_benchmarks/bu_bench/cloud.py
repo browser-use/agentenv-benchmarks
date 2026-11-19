@@ -73,8 +73,8 @@ def scrub_json(value: Any, secrets: list[str]) -> Any:
     return json.loads(scrub(json.dumps(value, default=str), secrets))
 
 
-async def request(method: str, path: str, body: dict[str, Any] | None = None) -> dict[str, Any]:
-    async with httpx.AsyncClient(timeout=60) as client:
+async def request(method: str, path: str, body: dict[str, Any] | None = None, timeout: float = 60) -> dict[str, Any]:
+    async with httpx.AsyncClient(timeout=timeout) as client:
         response = await client.request(method, f"{API}{path}", json=body,
                                         headers={"X-Browser-Use-API-Key": api_key()})
     if response.is_error:
@@ -131,7 +131,8 @@ class CloudBrowser:
             if self.stopped:
                 return
             try:
-                await request("PATCH", f"/browsers/{self.id}", {"action": "stop"})
+                # 20 s each: all attempts fit inside bu-browser's 90 s close.
+                await request("PATCH", f"/browsers/{self.id}", {"action": "stop"}, timeout=20)
                 self.stopped = True
             except Exception as error:  # noqa: BLE001
                 logger.warning("stopping cloud browser %s failed (%s), attempt %d of %d%s", self.label,

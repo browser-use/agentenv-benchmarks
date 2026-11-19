@@ -347,7 +347,7 @@ class FakeBrowserUseApi:
         self.calls: list[tuple[str, str]] = []
         self.failing_stops = failing_stops
 
-    async def __call__(self, method, path, body=None):
+    async def __call__(self, method, path, body=None, timeout=60):
         self.calls.append((method, path))
         if method == "PATCH" and self.failing_stops:
             self.failing_stops -= 1

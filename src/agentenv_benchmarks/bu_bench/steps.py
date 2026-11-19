@@ -220,9 +220,9 @@ class BuFindingsVerifierTaskStep(TaskStep):
         state = context.metadata.get(STATE_KEY) or {}
         handle = state.get("handle", "")
         live = _LIVE.get(handle)
-        if STATE_KEY in context.metadata and live is None:
-            # Its screenshots and browser are gone (an earlier attempt of this step stopped them, or another process
-            # started it): a judgment now would score the agent on no evidence.
+        if live is None:
+            # No browser step ran, or its screenshots and browser are gone (an earlier attempt of this step stopped
+            # them, or another process started it): a judgment now would score the agent on no evidence.
             raise RuntimeError(f"{self.task_id}: no live browser for this task's handle, so nothing to judge")
         report: dict[str, Any] = {"task_id": self.task_id, "browser": state.get("browser")}
         secrets = live.browser.secrets if live is not None else []
@@ -239,8 +239,9 @@ class BuFindingsVerifierTaskStep(TaskStep):
         finally:
             if live is not None:
                 await live.browser.stop()
-                if live.browser.stopped:  # else the exit hook tries again
+                if live.browser.stopped:  # else the exit hook tries again, and a retry of this step still has them
                     _LIVE.pop(handle, None)
+                    shutil.rmtree(live.shots_dir, ignore_errors=True)
                 report["browser_seconds"] = round(time.time() - live.started, 1)
                 try:
                     await asyncio.sleep(2)  # costs and the recording link appear once the session has stopped
@@ -248,7 +249,6 @@ class BuFindingsVerifierTaskStep(TaskStep):
                 except Exception as error:  # noqa: BLE001 - cost lookup never fails the task
                     logger.warning("reading cloud browser session %s failed (%s)", live.browser.label,
                                    cloud.scrub(str(error), secrets))
-                shutil.rmtree(live.shots_dir, ignore_errors=True)
         report["cloud"] = cloud.costs(session)
         if self.keep_recording:
             report["recording"] = await self._keep_recording(session, context)
