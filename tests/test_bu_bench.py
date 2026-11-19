@@ -674,6 +674,30 @@ def test_a_failed_browser_handoff_stops_the_browser_or_leaves_it_to_the_exit_hoo
     assert patched == ([(f"{cloud.API}/browsers/{BROWSER_ID}", {"action": "stop"})] if left else [])
 
 
+@pytest.mark.parametrize("recorded, delivered", [("per step and flat", ["a.csv"]), ("flat", ["b.csv"]),
+                                                 ("neither", None)])
+def test_the_delivered_files_are_those_the_verifiers_own_collect_recorded(monkeypatch, tmp_path, recorded, delivered):
+    """collect_artifacts records its files under its step id, and the latest collect's under the legacy flat key; a
+    collect that succeeded and recorded neither must not be judged as no files."""
+    step, context, _, judged = verifying(monkeypatch, tmp_path, SCORED, artifacts={"a.csv": b"1", "b.csv": b"2"})
+    grade = json.loads((BUNDLE / "tasks" / "bu2-140.json").read_text())[-1]
+    step = steps.BuFindingsVerifierTaskStep.from_dict({**grade, "version": 1})
+    metadata = {key: value for key, value in context.metadata.items() if key != "artifacts"}
+    if recorded != "neither":
+        metadata["artifacts"] = {"b.csv": "mem://out/b.csv"}  # as a later collect, not this verifier's, left it
+    if recorded == "per step and flat":
+        metadata["collected_artifacts"] = {"collect": {"artifacts": {"a.csv": "mem://out/a.csv"}}}
+    context.metadata = metadata
+
+    if delivered is None:
+        with pytest.raises(RuntimeError, match="step collect, which this verifier depends on, recorded no collected"):
+            asyncio.run(step.execute(context))
+        assert judged == []
+    else:
+        asyncio.run(step.execute(context))
+        assert context.metadata["verifications"]["findings"]["report"]["delivered_files"] == delivered
+
+
 def test_httpx_request_logs_name_no_browser_and_no_signed_link(monkeypatch, caplog):
     """httpx logs each request's URL at INFO, which agent-env up logs at: a browser's id or CDP host there reaches it."""
     import logging

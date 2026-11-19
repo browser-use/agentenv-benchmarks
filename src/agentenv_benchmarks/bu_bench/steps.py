@@ -282,7 +282,7 @@ class BuFindingsVerifierTaskStep(TaskStep):
         trajectory = cloud.scrub_json(trajectory, secrets)
         (workspace / "trajectory.json").write_text(json.dumps(trajectory, default=str))
         fmt, steps, usage = evidence.steps_and_usage(trajectory)
-        files = cloud.scrub_json(await asyncio.to_thread(self._delivered, context), secrets)
+        files = cloud.scrub_json(await asyncio.to_thread(self._delivered, context, response), secrets)
         report.update(trajectory_format=fmt, steps=len(steps), usage=usage, model_usd=evidence.model_usd(usage),
                       delivered_files=[f["name"] for f in files])
         (workspace / "task.json").write_text(json.dumps({"task_id": self.task_id,
@@ -360,10 +360,10 @@ class BuFindingsVerifierTaskStep(TaskStep):
                          and (needed is None or failure.get("step_id") in needed)
                          and not is_prompt_step({"type": failure.get("step_type")}))
 
-    def _delivered(self, context: TaskStepContext) -> list[dict[str, Any]]:
+    def _delivered(self, context: TaskStepContext, response) -> list[dict[str, Any]]:
         """The judge's share of the delivered files. One it can't read fails the step: judging without it would score
         the agent on files the run lost."""
-        collected = context.metadata.get("artifacts") or {}
+        collected = self._collected(context, response)
         if not isinstance(collected, dict):
             return []
         from agent_env.config import get_config
@@ -376,6 +376,26 @@ class BuFindingsVerifierTaskStep(TaskStep):
         except Exception as error:
             raise RuntimeError(f"{self.task_id}: reading a delivered file failed ({type(error).__name__}: {error}), "
                                "so nothing is judged") from error
+
+    def _collected(self, context: TaskStepContext, response) -> Any:
+        """The delivered files, name: object URL, as the collect step this verifier depends on recorded them: its own
+        entry in ``collected_artifacts``, else the legacy flat ``artifacts`` (the latest collect's). The verifier's
+        named dependencies are its turn and its collect: one of those that succeeded and recorded neither fails the
+        step, as judging no files would score the agent on files the run lost."""
+        by_step = context.metadata.get("collected_artifacts") or {}
+        collects = list(by_step) if self.depends_on is None else [
+            dependency.task_step_id for dependency in self.depends_on
+            if dependency.task_step_id not in {response.step_id, self.prompt_id}]
+        for step_id in reversed(collects):
+            entry = by_step.get(step_id)
+            if isinstance(entry, dict) and "artifacts" in entry:
+                return entry["artifacts"] or {}
+        if "artifacts" in context.metadata:
+            return context.metadata["artifacts"] or {}
+        if self.depends_on is not None and collects:
+            raise RuntimeError(f"{self.task_id}: step {', '.join(collects)}, which this verifier depends on, recorded "
+                               "no collected files, so nothing is judged")
+        return {}
 
     async def _keep_recording(self, session: dict[str, Any], context: TaskStepContext) -> dict[str, Any]:
         """The cloud browser's own MP4, stored as a file artifact; its signed link expires in an hour."""
