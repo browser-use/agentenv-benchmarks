@@ -10,9 +10,12 @@ read, for the two trajectory formats this bundle's agents write.
 
 from __future__ import annotations
 
+import codecs
+import contextlib
 import json
 import re
-from typing import Any
+from collections.abc import Callable
+from typing import Any, BinaryIO
 
 BASE64_BLOB = re.compile(r'"[A-Za-z0-9+/=\\]{400,}"')
 TOOL_OUTPUT_CHARS = 20_000
@@ -151,18 +154,39 @@ def model_usd(usage: dict[str, int]) -> float:
     return (uncached * PRICES["input"] + cached * PRICES["cached"] + output * PRICES["output"]) / 1e6
 
 
-def output_files(files: list[tuple[str, bytes]]) -> list[dict[str, Any]]:
-    """Delivered files as the findings judge reads them: text when UTF-8, split evenly under its 600 kB cap."""
-    files = sorted(files)[:50]
+def output_files(files: list[tuple[str, Callable[[], BinaryIO]]]) -> list[dict[str, Any]]:
+    """Delivered files as the findings judge reads them: the first 50 by name, text when UTF-8, split evenly under its
+    600 kB cap. Only those 50 are opened, each streamed, holding no more than its share of the cap whatever its size."""
+    files = sorted(files, key=lambda file: file[0])[:50]
+    limit = 600_000 // max(1, len(files))
     out = []
-    for name, raw in files:
-        try:
-            text: str | None = raw.decode("utf-8")
-        except UnicodeDecodeError:
-            text = None
-        limit = 600_000 // max(1, len(files))
-        clipped = text is not None and len(text) > limit
-        if clipped and text is not None:
-            text = text[: limit // 3] + "\n...[middle omitted]...\n" + text[-(limit - limit // 3):]
-        out.append({"name": name, "size": len(raw), "text": text, "clipped": clipped})
+    for name, opened in files:
+        with contextlib.closing(opened()) as stream:
+            out.append({"name": name, **_capped_text(stream, limit)})
     return out
+
+
+def _capped_text(stream: BinaryIO, limit: int) -> dict[str, Any]:
+    """The stream's size, and its UTF-8 text clipped to its first third and last two thirds of ``limit`` characters
+    (None when it isn't UTF-8), read 1 MB at a time."""
+    decoder = codecs.getincrementaldecoder("utf-8")()
+    size, chars, head, tail, text_ok = 0, 0, "", "", True
+    while True:
+        chunk = stream.read(1 << 20)
+        size += len(chunk)
+        if text_ok:
+            try:
+                piece = decoder.decode(chunk, final=not chunk)
+            except UnicodeDecodeError:
+                text_ok = False
+            else:
+                chars += len(piece)
+                head += piece[:limit + 1 - len(head)]
+                tail = (tail + piece)[-(limit - limit // 3):]
+        if not chunk:
+            break
+    if not text_ok:
+        return {"size": size, "text": None, "clipped": False}
+    if chars <= limit:
+        return {"size": size, "text": head, "clipped": False}
+    return {"size": size, "text": head[: limit // 3] + "\n...[middle omitted]...\n" + tail, "clipped": True}

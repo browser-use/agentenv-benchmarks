@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import importlib.util
+import io
 import json
 import re
 from pathlib import Path
@@ -87,10 +88,25 @@ def test_images_never_reach_the_judge_as_base64():
     assert "AAAA" not in evidence.text_of(json.dumps({"data": "A" * 1000}))
 
 
-def test_output_files_split_the_judge_cap():
-    files = evidence.output_files([("a.csv", b"x" * 400_000), ("b.bin", b"\xff\xfe")])
-    assert files[0]["clipped"] and len(files[0]["text"]) < 400_000
-    assert files[1]["text"] is None
+def test_output_files_open_only_the_judges_share_and_split_its_cap():
+    """The judge reads the first 50 files by name, 600 kB of text between them; a file past them is never opened, and a
+    big one is read in chunks, whatever its size, into the same head and tail."""
+    big = "é" + "x" * 2_000_000 + "€"  # multi-byte characters at both ends and across every chunk boundary
+    opened = []
+
+    def opener(name, raw):
+        return lambda: opened.append(name) or io.BytesIO(raw)
+
+    named = {"a.csv": big.encode(), "b.bin": b"\xff\xfe", "c.txt": b"ok \xe2\x82",  # c ends inside a character
+             **{f"d{n:02}.txt": b"d" for n in range(60)}}
+    files = evidence.output_files([(name, opener(name, raw)) for name, raw in reversed(named.items())])
+
+    limit = 600_000 // 50
+    assert [f["name"] for f in files] == sorted(named)[:50] == sorted(opened)
+    assert files[0] == {"name": "a.csv", "size": len(big.encode()), "clipped": True,
+                        "text": big[:limit // 3] + "\n...[middle omitted]...\n" + big[-(limit - limit // 3):]}
+    assert files[1]["text"] is None and files[2]["text"] is None and files[2]["size"] == 5
+    assert files[3] == {"name": "d00.txt", "size": 1, "text": "d", "clipped": False}
 
 
 BROWSER_ID = "0f6c1a52-9d0e-4b8a-a1f7-3c2d5e6f7a8b"
@@ -359,11 +375,28 @@ class FakeBrowserUseApi:
         return sum(method == "PATCH" for method, _ in self.calls)
 
 
-def verifying(monkeypatch, tmp_path, judgment, failing_stops=0, evidence_dir=None):
-    """A live browser as bu_cloud_browser leaves it, Browser Use's API faked, the judge answering ``judgment``, and the
-    verifier step with the context it runs in."""
+def verifying(monkeypatch, tmp_path, judgment, failing_stops=0, evidence_dir=None, handle="h1", artifacts=None):
+    """A live browser as bu_cloud_browser leaves it, the agent's answered turn, its delivered files (``artifacts``,
+    name: bytes, or None for one whose download fails) in a faked object store, Browser Use's API faked, the judge
+    answering ``judgment``, and the verifier step with the context it runs in."""
     from types import SimpleNamespace
 
+    import agent_env.config
+    from agent_env.task_step.context import PromptResponse
+
+    objects = {"mem://trajectory": b"[]", **{f"mem://out/{name}": raw for name, raw in (artifacts or {}).items()}}
+
+    class Store:
+        def open(self, url):
+            if objects[url] is None:
+                raise OSError("object store unavailable")
+            return io.BytesIO(objects[url])
+
+        def get(self, url):
+            return self.open(url).read()
+
+    monkeypatch.setattr(agent_env.config, "get_config",
+                        lambda: SimpleNamespace(get_object_store_at=lambda url: Store()))
     api = FakeBrowserUseApi(failing_stops)
     monkeypatch.setattr(cloud, "request", api)
     real_sleep = asyncio.sleep
@@ -381,9 +414,13 @@ def verifying(monkeypatch, tmp_path, judgment, failing_stops=0, evidence_dir=Non
     monkeypatch.setattr(steps.BuFindingsVerifierTaskStep, "_judge", judge)
     browser = cloud.CloudBrowser(id=BROWSER_ID, ws_url=WS, cdp_url=f"https://{BROWSER_ID}.cdp.browser-use.com")
     shots = cloud.Screenshots("ws://127.0.0.1:9/devtools/browser/x", tmp_path / "shots")  # nothing answers there
-    monkeypatch.setattr(steps, "_LIVE", {"h1": steps._Live(browser, shots, tmp_path / "shots", 0.0)})
-    context = SimpleNamespace(metadata={steps.STATE_KEY: {"handle": "h1", "browser": browser.label}},
-                              prompt_responses=[], deployed_agents=[], instance_id=None)
+    monkeypatch.setattr(steps, "_LIVE", {handle: steps._Live(browser, shots, tmp_path / "shots", 0.0)})
+    answered = PromptResponse(prompt_id="solve", response="FINAL ANSWER: done",
+                              agent_trajectory_object_url="mem://trajectory")
+    context = SimpleNamespace(metadata={steps.STATE_KEY: {"handle": handle, "browser": browser.label},
+                                        "run_group_id": "group-1",
+                                        "artifacts": {name: f"mem://out/{name}" for name in artifacts or {}}},
+                              prompt_responses=[answered], deployed_agents=[], instance_id=None)
     return steps.BuFindingsVerifierTaskStep("grade", 1, "bu2-140", "solve"), context, api, judged
 
 
@@ -446,3 +483,55 @@ def test_a_task_whose_browser_is_gone_is_not_judged(monkeypatch, tmp_path):
         asyncio.run(step.execute(context))
 
     assert judged == [] and api.calls == [] and "verifications" not in context.metadata
+
+
+def test_a_turn_that_left_no_response_is_not_judged(monkeypatch, tmp_path):
+    """A turn that timed out, or whose agent died or never got the prompt, leaves no response: judging an empty reply
+    would score the agent on what the run lost."""
+    step, context, api, judged = verifying(monkeypatch, tmp_path, SCORED)
+    context.prompt_responses = []
+
+    with pytest.raises(RuntimeError, match="left no response"):
+        asyncio.run(step.execute(context))
+
+    assert judged == [] and api.stops == 1 and steps._LIVE == {} and "verifications" not in context.metadata
+
+
+def test_a_delivered_file_that_cant_be_read_is_not_judged_as_missing(monkeypatch, tmp_path):
+    step, context, api, judged = verifying(monkeypatch, tmp_path, SCORED, artifacts={"a.csv": b"1,2", "b.csv": None})
+
+    with pytest.raises(RuntimeError, match="reading a delivered file failed"):
+        asyncio.run(step.execute(context))
+
+    assert judged == [] and api.stops == 1 and "verifications" not in context.metadata
+
+
+def test_two_runs_of_a_task_in_one_run_group_keep_their_own_evidence(monkeypatch, tmp_path):
+    """An explorer batch runs a task several times under one run group id."""
+    for n, handle in enumerate(["a" * 32, "b" * 32]):
+        step, context, _, _ = verifying(monkeypatch, tmp_path / str(n), SCORED, evidence_dir=tmp_path / "evidence",
+                                        handle=handle)
+        asyncio.run(step.execute(context))
+    assert len(list((tmp_path / "evidence").iterdir())) == 2
+    assert all((folder / "result.json").exists() for folder in (tmp_path / "evidence").iterdir())
+
+
+@pytest.mark.parametrize("answers, runs, status", [(["error", "scored"], 2, "scored"),
+                                                   (["error", "error", "error", "scored"], 3, "error")],
+                         ids=["one transient error", "errs every time"])
+def test_a_judge_error_is_asked_again_before_the_task_is_given_up(monkeypatch, tmp_path, answers, runs, status):
+    import subprocess
+
+    ran = []
+
+    def judge_run(args, *, env, **kwargs):
+        ran.append(args)
+        Path(env["EVAL_JUDGMENT_PATH"]).write_text(json.dumps({"status": answers[len(ran) - 1], "score": 0.5}))
+        return subprocess.CompletedProcess(args, 0)
+
+    monkeypatch.setattr(steps.subprocess, "run", judge_run)
+    monkeypatch.setattr(steps, "JUDGE_RETRY_S", 0)
+    monkeypatch.setenv("BU_BENCH_JUDGE_API_KEY", "k")
+    step = steps.BuFindingsVerifierTaskStep("grade", 1, "bu2-140", "solve")
+
+    assert step._judge(tmp_path)["status"] == status and len(ran) == runs

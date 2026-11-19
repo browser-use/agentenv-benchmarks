@@ -7,8 +7,9 @@ screenshot capture the judge reads, and puts the task's instruction into the see
 ``bu_findings_verifier`` stops the capture and the browser (always, even when the agent failed), keeps the
 recording, builds the judge evidence from the agent's reply, its trajectory and the delivered files (scrubbed of the
 browser's CDP address, which is its credential), and runs the frozen BU Bench V2.1 findings judge unchanged, as a
-subprocess. The score is the judge's continuous one, 0 to 1. A
-judge error fails the step and records no score: it is never a zero.
+subprocess. The score is the judge's continuous one, 0 to 1. A judge
+error is asked again; one that persists, a turn that left no response and a delivered file it can't read fail the step
+and record no score: never a zero.
 """
 
 from __future__ import annotations
@@ -41,6 +42,9 @@ STATE_KEY = "bu_cloud_browser"
 SEED_KEY = "bu_task"
 JUDGE_RUN = tasks.JUDGE_DIR / "run.py"
 JUDGE_TIMEOUT_S = 1800
+#: Judge runs per task while it errs (a timeout is not retried), and the wait before each retry (times the attempt).
+JUDGE_ATTEMPTS = 3
+JUDGE_RETRY_S = 5.0
 #: Where each task's judge inputs and outputs are kept after the run. Unset, they go to a temporary folder, deleted
 #: once the task is graded and kept when it isn't.
 EVIDENCE_DIR_ENV = "BU_BENCH_EVIDENCE_DIR"
@@ -225,39 +229,41 @@ class BuFindingsVerifierTaskStep(TaskStep):
             # them, or another process started it): a judgment now would score the agent on no evidence.
             raise RuntimeError(f"{self.task_id}: no live browser for this task's handle, so nothing to judge")
         report: dict[str, Any] = {"task_id": self.task_id, "browser": state.get("browser")}
-        secrets = live.browser.secrets if live is not None else []
+        secrets = live.browser.secrets
         session: dict[str, Any] = {}
-        shot_names: list[str] = []
         try:
-            if live is not None:
-                report["screenshots"] = await live.screenshots.stop()
-                shot_names = list(live.screenshots.saved)
-            workspace = self._workspace(context)
+            report["screenshots"] = await live.screenshots.stop()
+            shot_names = list(live.screenshots.saved)
+            workspace = self._workspace(context, handle)
             (workspace / "judge_screenshots").mkdir(exist_ok=True)
             for name in shot_names:
                 shutil.copy2(live.shots_dir / name, workspace / "judge_screenshots" / name)
         finally:
-            if live is not None:
-                await live.browser.stop()
-                if live.browser.stopped:  # else the exit hook tries again, and a retry of this step still has them
-                    _LIVE.pop(handle, None)
-                    shutil.rmtree(live.shots_dir, ignore_errors=True)
-                report["browser_seconds"] = round(time.time() - live.started, 1)
-                try:
-                    await asyncio.sleep(2)  # costs and the recording link appear once the session has stopped
-                    session = await live.browser.session()
-                except Exception as error:  # noqa: BLE001 - cost lookup never fails the task
-                    logger.warning("reading cloud browser session %s failed (%s)", live.browser.label,
-                                   cloud.scrub(str(error), secrets))
+            await live.browser.stop()
+            if live.browser.stopped:  # else the exit hook tries again, and a retry of this step still has them
+                _LIVE.pop(handle, None)
+                shutil.rmtree(live.shots_dir, ignore_errors=True)
+            report["browser_seconds"] = round(time.time() - live.started, 1)
+            try:
+                await asyncio.sleep(2)  # costs and the recording link appear once the session has stopped
+                session = await live.browser.session()
+            except Exception as error:  # noqa: BLE001 - cost lookup never fails the task
+                logger.warning("reading cloud browser session %s failed (%s)", live.browser.label,
+                               cloud.scrub(str(error), secrets))
         report["cloud"] = cloud.costs(session)
         if self.keep_recording:
             report["recording"] = await self._keep_recording(session, context)
 
         response = next((r for r in reversed(context.prompt_responses) if r.prompt_id == self.prompt_id), None)
-        final_output = cloud.scrub((response.response if response else "") or "", secrets)
+        if response is None:
+            # The turn never answered (it timed out, its agent died or the prompt never reached it): judging an empty
+            # reply would score the agent on what the run lost, not on what it did.
+            raise RuntimeError(f"{self.task_id}: the agent's turn {self.prompt_id!r} left no response, so nothing to "
+                               f"judge (its screenshots are kept in {workspace})")
+        final_output = cloud.scrub(response.response or "", secrets)
         report["agent_error"] = ({"type": response.error_type, "code": response.error_code,
                                   "message": cloud.scrub(response.error_message or "", secrets)[:2000]}
-                                 if response and response.error_type else None)
+                                 if response.error_type else None)
         trajectory, report["trajectory_source"] = await self._trajectory(context, response)
         trajectory = cloud.scrub_json(trajectory, secrets)
         (workspace / "trajectory.json").write_text(json.dumps(trajectory, default=str))
@@ -294,11 +300,12 @@ class BuFindingsVerifierTaskStep(TaskStep):
         context.metadata.setdefault("verifications", {})[self.verifier_id] = verification
         return context
 
-    def _workspace(self, context: TaskStepContext) -> Path:
+    def _workspace(self, context: TaskStepContext, handle: str) -> Path:
+        """``<task>-<run group>-<browser handle>``: one task's runs in one group (an explorer batch) each get their own."""
         root = os.environ.get(EVIDENCE_DIR_ENV)
         run = str(context.metadata.get("run_group_id") or uuid.uuid4().hex)[:12]
         if root:
-            path = Path(root) / f"{self.task_id}-{run}"
+            path = Path(root) / f"{self.task_id}-{run}-{handle[:8]}"
             path.mkdir(parents=True, exist_ok=True)
             return path
         return Path(tempfile.mkdtemp(prefix=f"bu-judge-{self.task_id}-"))
@@ -306,8 +313,6 @@ class BuFindingsVerifierTaskStep(TaskStep):
     async def _trajectory(self, context: TaskStepContext, response) -> tuple[Any, str]:
         """The turn's trajectory as prompt_agent stored it, else asked of the agent itself, inline: the stored copy
         goes through the runner's grant server, and a failed fetch there is only logged."""
-        if response is None:
-            return [], "none"
         url = response.agent_trajectory_object_url or next(
             (u for u in reversed(response.target_agent_per_turn_trajectory_object_urls or []) if u), None)
         if url:
@@ -331,20 +336,21 @@ class BuFindingsVerifierTaskStep(TaskStep):
             return [], "none"
 
     def _delivered(self, context: TaskStepContext) -> list[dict[str, Any]]:
+        """The judge's share of the delivered files. One it can't read fails the step: judging without it would score
+        the agent on files the run lost."""
         collected = context.metadata.get("artifacts") or {}
         if not isinstance(collected, dict):
             return []
         from agent_env.config import get_config
 
-        files = []
-        for name, url in collected.items():
-            if any(part in SKIPPED_PARTS for part in Path(str(name)).parts):
-                continue
-            try:
-                files.append((str(name), get_config().get_object_store_at(url).get(url)))
-            except Exception:
-                logger.exception("reading delivered file %s failed", name)
-        return evidence.output_files(files)
+        delivered = [(str(name), url) for name, url in collected.items()
+                     if not any(part in SKIPPED_PARTS for part in Path(str(name)).parts)]
+        try:
+            return evidence.output_files([(name, lambda url=url: get_config().get_object_store_at(url).open(url))
+                                          for name, url in delivered])
+        except Exception as error:
+            raise RuntimeError(f"{self.task_id}: reading a delivered file failed ({type(error).__name__}: {error}), "
+                               "so nothing is judged") from error
 
     async def _keep_recording(self, session: dict[str, Any], context: TaskStepContext) -> dict[str, Any]:
         """The cloud browser's own MP4, stored as a file artifact; its signed link expires in an hour."""
@@ -373,6 +379,8 @@ class BuFindingsVerifierTaskStep(TaskStep):
             return {"available": True, "artifact_id": None, "error": type(error).__name__}
 
     def _judge(self, workspace: Path) -> dict[str, Any]:
+        """The judge's judgment, asked up to JUDGE_ATTEMPTS times while it errs: one failed judge request must not
+        lose the task, and its evidence is still on disk."""
         key = _judge_key()
         if not key:
             return {"status": "error", "reason": "no judge key: set BU_BENCH_JUDGE_API_KEY or OPENAI_API_KEY"}
@@ -382,13 +390,23 @@ class BuFindingsVerifierTaskStep(TaskStep):
                    EVAL_JUDGE_MODEL=self.judge_model,
                    EVAL_JUDGE_OPTIONS_JSON=json.dumps({"reasoning_effort": self.reasoning_effort}),
                    EVAL_JUDGE_API_KEY=key, PYTHONDONTWRITEBYTECODE="1")
-        with (workspace / "judge.log").open("w") as log:
+        judgment: dict[str, Any] = {}
+        for attempt in range(1, JUDGE_ATTEMPTS + 1):
+            if attempt > 1:
+                logger.warning("judging %s failed (%s), attempt %d of %d", self.task_id, judgment.get("reason"),
+                               attempt - 1, JUDGE_ATTEMPTS)
+                time.sleep(JUDGE_RETRY_S * (attempt - 1))
+            (workspace / "judgment.json").unlink(missing_ok=True)
+            with (workspace / "judge.log").open("a") as log:
+                try:
+                    subprocess.run([sys.executable, str(JUDGE_RUN)], env=env, stdout=log, stderr=subprocess.STDOUT,
+                                   timeout=JUDGE_TIMEOUT_S, check=False)
+                except subprocess.TimeoutExpired:
+                    return {"status": "error", "reason": f"judge timed out after {JUDGE_TIMEOUT_S}s"}
             try:
-                subprocess.run([sys.executable, str(JUDGE_RUN)], env=env, stdout=log, stderr=subprocess.STDOUT,
-                               timeout=JUDGE_TIMEOUT_S, check=False)
-            except subprocess.TimeoutExpired:
-                return {"status": "error", "reason": f"judge timed out after {JUDGE_TIMEOUT_S}s"}
-        try:
-            return json.loads((workspace / "judgment.json").read_text())
-        except (OSError, ValueError) as error:
-            return {"status": "error", "reason": f"judge wrote no judgment: {error}"}
+                judgment = json.loads((workspace / "judgment.json").read_text())
+            except (OSError, ValueError) as error:
+                judgment = {"status": "error", "reason": f"judge wrote no judgment: {error}"}
+            if judgment.get("status") != "error":
+                break
+        return judgment
