@@ -72,9 +72,9 @@ _LIVE: dict[str, _Live] = {}
 @atexit.register
 def _stop_leftovers() -> None:
     """A run that ends before its verifier (Ctrl-C, a crash) still stops its browsers."""
-    for live in list(_LIVE.values()):
+    for browser in [live.browser for live in _LIVE.values()] + list(cloud.UNSTOPPED):
         try:
-            httpx.patch(f"{cloud.API}/browsers/{live.browser.id}", json={"action": "stop"}, timeout=20,
+            httpx.patch(f"{cloud.API}/browsers/{browser.id}", json={"action": "stop"}, timeout=20,
                         headers={"X-Browser-Use-API-Key": cloud.api_key()})
         except Exception:  # noqa: BLE001, S110 - the browser's own timeout ends it
             pass

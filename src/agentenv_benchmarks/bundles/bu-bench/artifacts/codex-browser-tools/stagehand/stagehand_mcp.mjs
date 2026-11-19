@@ -24,7 +24,14 @@ if (!apiKey) throw new Error("STAGEHAND_MODEL_KEY_FILE is empty");
 const modelName = process.env.STAGEHAND_MODEL || "openai/gpt-6.1-terra";
 const reasoningEffort = process.env.STAGEHAND_REASONING_EFFORT || "medium";
 const baseURL = process.env.STAGEHAND_BASE_URL || undefined;
-const headers = JSON.parse(process.env.STAGEHAND_HEADERS || "{}");
+// Like AgentEnv's codex_config: headers that aren't a JSON object are ignored, never fatal for the arm's only tool.
+let headers = {};
+try {
+  const parsed = JSON.parse(process.env.STAGEHAND_HEADERS || "{}");
+  if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) headers = parsed;
+} catch {
+  // ignored, as above
+}
 
 // Everything except the MCP transport goes to the log file: Stagehand falls back to console.log outside an instance
 // context, and any stray stdout byte corrupts the protocol.

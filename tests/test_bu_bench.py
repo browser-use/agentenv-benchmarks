@@ -831,3 +831,39 @@ def test_httpx_request_logs_name_no_browser_and_no_signed_link(monkeypatch, capl
 
     assert len([record for record in caplog.records if record.name == "httpx"]) == 5
     assert BROWSER_ID not in caplog.text and "cdp.browser-use.com" not in caplog.text and "s3cr3t" not in caplog.text
+
+
+def test_logged_urls_hide_every_cdp_host_form():
+    import logging
+
+    record = logging.LogRecord("httpx", logging.INFO, __file__, 1, "HTTP Request: GET %s", (
+        f"https://{BROWSER_ID}.cdp.eu.browser-use.com/json and https://{BROWSER_ID}.cdp0.browser-use.com/json",), None)
+    cloud._scrub_logged_urls(record)
+    assert BROWSER_ID not in record.getMessage() and record.getMessage().count("<cdp>") == 2
+
+
+def test_a_browser_whose_start_failed_and_stop_failed_is_left_to_the_exit_hook(monkeypatch):
+    calls = []
+
+    async def api(method, path, body=None, timeout=60):
+        calls.append(method)
+        if method == "POST":
+            return {"id": BROWSER_ID, "cdpUrl": ""}  # no cdpUrl: the start fails after the browser exists
+        raise RuntimeError("Browser Use API PATCH /browsers returned 503")
+
+    patched = []
+    monkeypatch.setattr(cloud, "request", api)
+    monkeypatch.setattr(cloud, "STOP_RETRY_S", 0.0)
+    monkeypatch.setattr(cloud, "UNSTOPPED", [])
+    monkeypatch.setattr(steps, "_LIVE", {})
+    monkeypatch.setattr(cloud, "api_key", lambda: "k")
+    monkeypatch.setattr(steps.httpx, "patch", lambda url, **kw: patched.append(url))
+    try:
+        asyncio.run(cloud.CloudBrowser.start())
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError("expected the start to fail")
+    steps._stop_leftovers()
+    assert calls.count("PATCH") == cloud.STOP_ATTEMPTS and [b.id for b in cloud.UNSTOPPED] == [BROWSER_ID]
+    assert patched == [f"{cloud.API}/browsers/{BROWSER_ID}"]

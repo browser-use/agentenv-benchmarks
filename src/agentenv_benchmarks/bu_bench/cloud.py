@@ -30,9 +30,12 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
+#: Browsers whose start failed and whose stop never went through: the caller never got them, so no one else can.
+UNSTOPPED: list = []
+
 #: What httpx's request log line (INFO, logger ``httpx``) must not keep: a browser's CDP host, its id in the API's
 #: path, and any query string, where a signed link such as the recording's carries its signature.
-LOGGED_URL_SECRETS = ((re.compile(r"[\w-]+\.cdp\.browser-use\.com"), "<cdp>"),
+LOGGED_URL_SECRETS = ((re.compile(r"[\w-]+\.cdp[\w.-]*\.browser-use\.com"), "<cdp>"),  # also cdp.eu., cdp0.
                       (re.compile(r"/browsers/[^/?#\s\"]+"), "/browsers/<id>"),
                       (re.compile(r"\?[^\s\"]*"), "?<redacted>"))
 
@@ -142,6 +145,8 @@ class CloudBrowser:
                 raise RuntimeError(f"cloud browser {browser.label} did not expose webSocketDebuggerUrl")
         except BaseException:
             await browser.stop()
+            if not browser.stopped:  # the exit hook tries once more
+                UNSTOPPED.append(browser)
             raise
         return browser
 
