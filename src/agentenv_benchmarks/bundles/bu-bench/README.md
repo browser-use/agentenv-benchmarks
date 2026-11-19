@@ -6,14 +6,17 @@ The tasks are [BU Bench V2.1](https://github.com/browser-use/benchmark)'s 200, m
 [Odysseys2](https://odysseysbench.com) (Carnegie Mellon University and Browser Use) plus some of Browser Use's own.
 They ship encrypted: each task file here names a task id only, and `bu_cloud_browser` decrypts its instruction at run
 time from the benchmark's `.enc`. Please don't publish decrypted tasks or rubrics, or train on them. A test fails if
-any file of this bundle holds task, rubric or canary text.
+any file of this bundle holds task, rubric or canary text. A run's records hold the decrypted instruction too (the
+context's seed value `bu_task`, the stored prompt, the agents' trajectories in agent-env's stores): don't publish them
+either.
 
 ## Run
 
 Needs a local Docker daemon (or an agent-env sandbox that builds Dockerfiles): the first run builds the agents'
 images, pulling `ghcr.io/scaleapi/agentenv-codex` and the npm and PyPI tools (top-level versions pinned). A run stops before any agent or
 browser starts when the Browser Use key or the judge key is missing. Keys are checked for presence only, not validity:
-run `smoke-2` first.
+run `smoke-2` first. `--judge-model` is ignored: the judge is frozen at gpt-5.6-luna, as the published scores were
+graded.
 
 ```bash
 export BROWSER_USE_API_KEY=...       # cloud.browser-use.com: one fresh cloud browser per task
