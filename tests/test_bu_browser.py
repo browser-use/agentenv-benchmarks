@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import getpass
 import importlib.util
 import json
 import os
@@ -65,6 +66,7 @@ TOOLS = [{"name": name, "description": name, "inputSchema": schema, "annotations
              ("browser_click", {"type": "object", "properties": {"ref": {"type": "string"}}}),
              ("browser_crash", {"type": "object", "properties": {}}),
              ("browser_hang", {"type": "object", "properties": {}}),
+             ("browser_take_screenshot", {"type": "object", "properties": {}}),
              ("browser_close", {"type": "object", "properties": {}}),
              ("browser_run_code_unsafe", {"type": "object", "properties": {"code": {"type": "string"}}}))]
 HASH = "3721b75f6c501523694ef58cd7a3911c032cdabddbb38bca02709a249465c68f"
@@ -177,7 +179,7 @@ def test_a_deployed_env_is_not_deployed_again_until_closed(monkeypatch):
 def test_playwright_mcp_runs_as_pw_with_no_groups_and_its_browser_off_its_command_line():
     """Not as the site's root, which holds the Browser Use key in its settings; and the browser's CDP address, a
     credential, not where any user can read it (ps, /proc/<pid>/cmdline): in its environment."""
-    command = playwright_mcp.command(9000)
+    command = playwright_mcp.command(9000, Path("/home/pw/playwright-output/x"))
 
     assert command[:4] == ["setpriv", "--reuid=pw", "--regid=pw", "--clear-groups"]
     assert "--cdp-endpoint" not in command
@@ -215,7 +217,8 @@ def test_the_site_starts_its_browser_at_the_first_call_serves_its_tools_and_stop
     # browser_evaluate is listed hidden, which the gateway hides until tool access names it; browser_close, which can
     # end the cloud browser, and run_code_unsafe aren't listed.
     assert listed == {"browser_navigate": False, "browser_environment": False, "browser_evaluate": True,
-                      "browser_click": False, "browser_crash": False, "browser_hang": False}
+                      "browser_click": False, "browser_crash": False, "browser_hang": False,
+                      "browser_take_screenshot": False}
     assert navigated.startswith("navigated to https://pypi.org/ over <cdp>") and first not in navigated
     assert "cdp.test" not in navigated
     assert {"AGENTENV_WEBSITE_SETTINGS", "BROWSER_USE_API_KEY"}.isdisjoint(environment) and "USER" in environment
@@ -320,6 +323,21 @@ def test_an_actions_result_carries_the_page_it_left_not_a_link_to_a_file_the_mod
     assert list((tmp_path / "output").iterdir()) == []
 
 
+def test_a_file_one_task_saved_is_gone_before_a_later_tasks_browser_can_upload_it(site, browser_use, tmp_path):
+    """Playwright MCP keeps screenshots, PDFs and downloads in its output folder, and browser_file_upload sends any file
+    it can read: each Playwright MCP gets a folder of its own, deleted once it has exited."""
+    with TestClient(site.create_app()) as client:
+        mcp = _mcp(client)
+        saved = Path(_text(_call(client, mcp, "browser_take_screenshot")))
+        kept_until_reset = saved.is_file()
+        client.post("/agentenv", json={"jsonrpc": "2.0", "id": 1, "method": "data/reset", "params": {}})
+        kept_after_reset = saved.exists() or saved.parent.exists()
+        later = Path(_text(_call(client, mcp, "browser_take_screenshot")))
+
+    assert kept_until_reset and not kept_after_reset and later.parent != saved.parent
+    assert list((tmp_path / "output").iterdir()) == []
+
+
 def test_a_snapshot_link_that_is_a_symlink_or_fifo_is_left_as_a_link_and_not_read(monkeypatch, tmp_path):
     """OUTPUT is the pw user's: the root site must not inline what a link there points at (its settings hold the key),
     nor wait on a FIFO."""
@@ -330,17 +348,16 @@ def test_a_snapshot_link_that_is_a_symlink_or_fifo_is_left_as_a_link_and_not_rea
     secret.write_text("bu-test-key")
     (output / "page-1.yml").symlink_to(secret)
     os.mkfifo(output / "page-2.yml")
-    monkeypatch.setattr(playwright_mcp, "OUTPUT", output)
     text = "- [Snapshot](./page-1.yml)\n- [Snapshot](./page-2.yml)"
 
-    inlined = playwright_mcp._inlined(CallToolResult(content=[TextContent(type="text", text=text)]))
+    inlined = playwright_mcp._inlined(CallToolResult(content=[TextContent(type="text", text=text)]), output)
 
     assert inlined.content[0].text == text and sorted(p.name for p in output.iterdir()) == ["page-1.yml", "page-2.yml"]
 
 
 def test_a_reset_sends_the_browsers_stop_before_waiting_on_playwright_mcp_to_exit(site, browser_use, monkeypatch):
     monkeypatch.setattr(playwright_mcp, "STOP_S", 2.0)
-    monkeypatch.setattr(playwright_mcp, "command", lambda port: [
+    monkeypatch.setattr(playwright_mcp, "command", lambda port, output: [
         sys.executable, str(FAKE_PLAYWRIGHT_MCP), "--port", str(port), "--ignore-term"])
     with TestClient(site.create_app()) as client:
         _call(client, _mcp(client), "browser_navigate", url="https://pypi.org/")
@@ -410,7 +427,7 @@ def test_an_empty_key_fails_readiness(site, browser_use, monkeypatch):
 
 
 def test_playwright_mcp_failing_to_start_stops_the_browser_it_was_given(site, browser_use, monkeypatch):
-    monkeypatch.setattr(playwright_mcp, "command", lambda port: [sys.executable, "-c", "raise SystemExit(3)"])
+    monkeypatch.setattr(playwright_mcp, "command", lambda port, output: [sys.executable, "-c", "raise SystemExit(3)"])
     with TestClient(site.create_app()) as client:
         refused = _call(client, _mcp(client), "browser_navigate", url="https://pypi.org/")
 
@@ -632,8 +649,9 @@ def site(browser_use, tmp_path, monkeypatch):
     manifest.write_text(json.dumps({"version": "test", "tools": TOOLS}))
     monkeypatch.setattr(playwright_mcp, "TOOLS", manifest)
     monkeypatch.setattr(playwright_mcp, "OUTPUT", tmp_path / "output")
+    monkeypatch.setattr(playwright_mcp, "USER", getpass.getuser())  # who owns each output folder: pw in the image
     monkeypatch.setattr(playwright_mcp, "LOG", tmp_path / "playwright-mcp.log")
-    monkeypatch.setattr(playwright_mcp, "command", lambda port: [
+    monkeypatch.setattr(playwright_mcp, "command", lambda port, output: [
         sys.executable, str(FAKE_PLAYWRIGHT_MCP), "--port", str(port)])
     monkeypatch.setattr(site_cloud, "UNSTOPPED", [])
     monkeypatch.setattr(site_cloud, "API", site_cloud.API)  # the site sets both from its settings

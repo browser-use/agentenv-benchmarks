@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3 python3
     && /opt/bu-browser/venv/bin/pip install --no-cache-dir "agentenv-framework-protocol==0.1.588" "mcp==1.30.0" \
        "uvicorn==0.54.0" "httpx==0.28.1" \
     && useradd --create-home --shell /usr/sbin/nologin pw \
-    && install -d -o pw -g pw /home/pw/playwright-output
+    && install -d /home/pw/playwright-output
 WORKDIR /opt/bu-browser
 # No browser download: Playwright MCP attaches to the cloud browser over --cdp-endpoint.
 RUN npm install --prefix /opt/bu-browser --no-audit --no-fund --save-exact --loglevel=error "@playwright/mcp@0.0.85" \

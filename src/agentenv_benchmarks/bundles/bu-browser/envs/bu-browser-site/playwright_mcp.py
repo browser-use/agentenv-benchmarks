@@ -52,10 +52,12 @@ DROPPED_TOOLS = frozenset({"browser_run_code_unsafe", "browser_close"})
 #: Who Playwright MCP runs as, and all it keeps of the site's environment.
 USER = "pw"
 KEPT_ENVIRONMENT = ("PATH", "LANG", "LC_ALL", "TZ")
+#: Root's folder where each Playwright MCP gets an output folder of its own, deleted once that one has exited: nothing
+#: a task saved (a screenshot, a PDF, a download) is left for a later task's browser_file_upload to send.
 OUTPUT = Path("/home") / USER / "playwright-output"
 LOG = Path(tempfile.gettempdir()) / "bu-browser-playwright-mcp.log"
-#: How Playwright MCP answers an action (navigate, click, type...): the page's snapshot written to a file in OUTPUT and
-#: only a link to it, which a model with no file tool can't open. --snapshot-mode has no inline choice.
+#: How Playwright MCP answers an action (navigate, click, type...): the page's snapshot written to a file in its output
+#: folder and only a link to it, which a model with no file tool can't open. --snapshot-mode has no inline choice.
 SNAPSHOT_LINK = re.compile(r"^- \[Snapshot\]\(\./(page-[^/\\()]+\.yml)\)$", re.MULTILINE)
 START_S = 30.0
 CALL_TIMEOUT_S = 300.0
@@ -77,12 +79,12 @@ def manifest() -> list[dict]:
     return json.loads(TOOLS.read_text(encoding="utf-8"))["tools"]
 
 
-def command(port: int) -> list[str]:
+def command(port: int, output: Path) -> list[str]:
     """Playwright MCP on loopback ``port``, as ``pw`` with no groups, ended by the kernel if the site dies first. Its
     other flags are BU Bench's Playwright MCP arm's; the browser it attaches to is in its environment."""
     return ["setpriv", f"--reuid={USER}", f"--regid={USER}", "--clear-groups", "--pdeathsig", "TERM", "--",
             shutil.which("node") or "node", str(CLI), "--host", "127.0.0.1", "--port", str(port), "--ignore-roots",
-            "--output-dir", str(OUTPUT)]
+            "--output-dir", str(output)]
 
 
 def environment(endpoint: str) -> dict[str, str]:
@@ -104,6 +106,7 @@ class PlaywrightMcp:
         self._starting: asyncio.Task | None = None
         self.browser: Any = None
         self._process: asyncio.subprocess.Process | None = None
+        self._output: Path | None = None
         self._session: _Session | None = None
         self._orphans: list[asyncio.Task] = []
         self.closed = False
@@ -177,7 +180,7 @@ class PlaywrightMcp:
             called.cancel()
             return _refused(f"the browser was reset or Playwright MCP ended during {tool}, which may have acted")
         try:
-            result = _inlined(called.result())
+            result = _inlined(called.result(), held.output)
         except Exception as e:  # noqa: BLE001 - the call may have acted: refused, not retried
             if _timed_out(e):  # Playwright MCP is stuck on it, and every later call on it would wait as long
                 await self.stop(held)
@@ -214,15 +217,17 @@ class PlaywrightMcp:
         try:
             port = _free_port()
             OUTPUT.mkdir(parents=True, exist_ok=True)
+            self._output = Path(tempfile.mkdtemp(dir=OUTPUT))
+            shutil.chown(self._output, USER)
             log = os.open(LOG, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)  # it can name the CDP address
             try:
                 self._process = await asyncio.create_subprocess_exec(
-                    *command(port), cwd=OUTPUT, env=environment(self.browser.ws_url),
+                    *command(port, self._output), cwd=self._output, env=environment(self.browser.ws_url),
                     stdin=asyncio.subprocess.DEVNULL, stdout=asyncio.subprocess.DEVNULL, stderr=log)
             finally:
                 os.close(log)
             await _listening(port, self._process)
-            self._session = await _Session.open(f"http://127.0.0.1:{port}/mcp", self.browser, notice)
+            self._session = await _Session.open(f"http://127.0.0.1:{port}/mcp", self.browser, self._output, notice)
         except BaseException:
             await self._close()
             raise
@@ -232,8 +237,8 @@ class PlaywrightMcp:
     async def _close(self) -> None:
         """Stop the browser, its request sent first, alongside ending the session and Playwright MCP: a reset's time
         goes to the stop, which BU bills until, and not to waiting on a process before it is sent."""
-        session, process, browser = self._session, self._process, self.browser
-        self._session, self._process, self.browser = None, None, None
+        session, process, browser, output = self._session, self._process, self.browser, self._output
+        self._session, self._process, self.browser, self._output = None, None, None, None
         stopping = asyncio.ensure_future(_stop(browser)) if browser is not None else None
         try:
             if session is not None:
@@ -250,6 +255,8 @@ class PlaywrightMcp:
         finally:
             if process is not None and process.returncode is None:
                 process.kill()  # cancelled before it was ended: never leave Playwright MCP running
+            if output is not None:
+                shutil.rmtree(output, ignore_errors=True)  # links in it are removed, never followed
             if stopping is not None:
                 try:
                     await asyncio.shield(stopping)
@@ -338,16 +345,16 @@ class _Session:
     """One MCP session on Playwright MCP, held open by a task of its own until ``close`` is set, since mcp's client
     contexts are anyio task groups, which only the task that entered one can leave."""
 
-    def __init__(self, url: str, browser: Any, notice: str | None) -> None:
-        self.url, self.browser, self.notice = url, browser, notice
+    def __init__(self, url: str, browser: Any, output: Path, notice: str | None) -> None:
+        self.url, self.browser, self.output, self.notice = url, browser, output, notice
         self.secrets: list[str] = list(browser.secrets)
         self.close = asyncio.Event()
         self.session: ClientSession | None = None
         self.owner: asyncio.Task | None = None
 
     @classmethod
-    async def open(cls, url: str, browser: Any, notice: str | None) -> _Session:
-        held = cls(url, browser, notice)
+    async def open(cls, url: str, browser: Any, output: Path, notice: str | None) -> _Session:
+        held = cls(url, browser, output, notice)
         ready: asyncio.Future = asyncio.get_running_loop().create_future()
         held.owner = asyncio.create_task(held._own(ready))
         try:
@@ -397,12 +404,13 @@ async def _listening(port: int, process: asyncio.subprocess.Process) -> None:
     raise RuntimeError(f"Playwright MCP didn't listen within {START_S:.0f} s")
 
 
-def _inlined(result: CallToolResult) -> CallToolResult:
-    """``result`` with each page snapshot Playwright MCP linked to in place of its link, as it renders one inline, and
-    the file deleted: the model sees the page it acted on, and OUTPUT doesn't grow with every action. Only a regular
-    file is read, never what a link in OUTPUT, which the pw user writes, points at: this root process reads it."""
+def _inlined(result: CallToolResult, output: Path) -> CallToolResult:
+    """``result`` with each page snapshot Playwright MCP linked to in its ``output`` folder in place of its link, as it
+    renders one inline, and the file deleted: the model sees the page it acted on, and the folder doesn't grow with
+    every action. Only a regular file is read, never what a link there, which the pw user writes, points at: this root
+    process reads it."""
     def snapshot(link: re.Match) -> str:
-        path = OUTPUT / link.group(1)
+        path = output / link.group(1)
         try:
             # No link followed, and no wait on a FIFO's writer.
             with open(os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK), encoding="utf-8") as file:

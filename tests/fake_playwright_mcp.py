@@ -37,6 +37,14 @@ def browser_navigate(url: str) -> str:
 
 
 @server.tool()
+def browser_take_screenshot() -> str:
+    """Saves a file in its working directory (its output folder), as the real one's screenshots, PDFs and downloads."""
+    saved = Path(f"page-{time.time_ns()}.png").resolve()
+    saved.write_bytes(b"\x89PNG")
+    return str(saved)
+
+
+@server.tool()
 def browser_environment() -> str:
     return json.dumps(sorted(os.environ))
 
