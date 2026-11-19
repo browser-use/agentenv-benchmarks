@@ -82,8 +82,8 @@ scored: a task whose `report.agent_error` is set was an infra failure in our run
 | Codex + OpenCode browse | 66.7 [63.0, 70.4] | 62.4 | +4.2 [+1.0, +7.5] | 0.44 | 0.20 | 6.6 |
 | Codex + Stagehand | 61.8 [58.0, 65.4] | 62.8 | -1.1 [-4.7, +2.7] | 1.26 | 0.36 | 16.6 |
 
-7 of 8 paired CIs contain 0: the same harness, adapter and judge score the same on agent-env as on Browser Use's
-platform. Codex + OpenCode browse scored 4.2 points higher here; not yet explained. A smoke of 2 tasks on
+For 7 of 8 harnesses there is no statistically detectable difference between agent-env and Browser Use's platform
+(paired 95% CI contains 0). Codex + OpenCode browse scored 4.2 points higher here [+1.0, +7.5]; not yet explained. A smoke of 2 tasks on
 agentenv-framework 0.9.1573, the version this repository's lock pins, scored 100 on both for `browser-use-104rc1`
 and `codex-playwright-mcp`.
 

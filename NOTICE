@@ -47,8 +47,10 @@ contributed by Browser Use, Inc., is licensed under the Apache License, Version 
   Most tasks come from Odysseys2 (https://odysseysbench.com), by researchers at Carnegie Mellon University and
   Browser Use. Browser Use asks that the decrypted tasks and rubrics are not published in plaintext and not used to
   train models.
-- src/agentenv_benchmarks/bu_bench/judge/findings-v21/vendor/browser_use/: unmodified files from browser-use 0.11.5
-  (https://github.com/browser-use/browser-use), under its MIT License:
+- src/agentenv_benchmarks/bu_bench/judge/findings-v21/vendor/browser_use/: files from browser-use 0.11.5
+  (https://github.com/browser-use/browser-use), under its MIT License. The judge's LLM modules are unmodified; the
+  package __init__.py files are not: browser_use/, llm/ and llm/google/ hold cut-down stubs of upstream's (one import
+  line or empty), and llm/openai/__init__.py (empty) is added, so only those modules load:
 
   Copyright (c) 2024 Gregor Zunic
 
