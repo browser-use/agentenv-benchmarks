@@ -1,7 +1,7 @@
 [project]
 name = "agentenv-benchmarks"
 version = "0.1.0"
-description = "Public agent benchmarks as agent-env bundles: Online-Mind2Web, WebArena-Verified and BU Bench V2.1."
+description = "Public agent benchmarks as agent-env bundles: Online-Mind2Web, WebArena-Verified and BU Bench V2.1, plus bu-browser, a Browser Use Cloud browser env for RL."
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]
@@ -54,3 +54,5 @@ extend-exclude = ["src/agentenv_benchmarks/online_mind2web/webjudge", "src/agent
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["docker: needs Docker and a few minutes; skipped unless selected with -m docker"]
+addopts = ["-m", "not docker"]

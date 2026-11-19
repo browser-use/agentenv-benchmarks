@@ -1,0 +1,54 @@
+"""OpenEnv episodes on a copy of the bu-browser bundle, this script playing the model, for
+tests/test_bu_browser_e2e.py: the site's real image on agent-env's local Docker provider, a fake Browser Use API
+(fake_browser_use.py, which logs to ``calls``) and a local Chromium. Prints one JSON line per checkpoint: what was
+created and stopped so far.
+
+    python bu_browser_episode.py <bundle> <calls>
+"""
+import json
+import sys
+import time
+from pathlib import Path
+
+from agent_env.openenv import build_app
+from fastapi.testclient import TestClient
+
+HASH = "3721b75f6c501523694ef58cd7a3911c032cdabddbb38bca02709a249465c68f"
+root, calls = Path(sys.argv[1]), Path(sys.argv[2])
+
+
+def checkpoint(label: str, **seen) -> None:
+    entries = [json.loads(line) for line in calls.read_text().splitlines()] if calls.exists() else []
+    print(json.dumps({"at": label, "created": [e["id"] for e in entries if e["call"] == "create"],
+                      "stopped": [e["id"] for e in entries if e["call"] == "stop"], **seen}), flush=True)
+
+
+def step(ws, data: dict) -> dict:
+    ws.send_json({"type": "step", "data": data})
+    return ws.receive_json()
+
+
+def reset(ws) -> None:
+    ws.send_json({"type": "reset", "data": {"split": "all", "index": 0}})
+    ws.receive_json()
+
+
+with TestClient(build_app(root)) as client, client.websocket_connect("/ws") as ws:
+    reset(ws)
+    checkpoint("episode 1 reset")
+    tools = sorted(t["name"] for t in step(ws, {"type": "list_tools"})["data"]["observation"]["tools"])
+    navigated = step(ws, {"type": "call_tool", "tool_name": "browser_navigate",
+                          "arguments": {"url": f"data:text/html,<title>pypi</title><p>{HASH}</p>"}})
+    navigated_text = json.dumps(navigated["data"]["observation"].get("result"))
+    ended = step(ws, {"type": "call_tool", "tool_name": "end_turn", "arguments": {"response": HASH}})
+    time.sleep(2)
+    checkpoint("episode 1 ended", tools=tools, saw_page=HASH in navigated_text,
+               done=ended["data"].get("done"), reward=ended["data"].get("reward"))
+    reset(ws)
+    step(ws, {"type": "call_tool", "tool_name": "browser_navigate", "arguments": {"url": "data:text/html,x"}})
+    checkpoint("episode 2 running")
+    reset(ws)  # abandons episode 2 mid-turn; episode 3 calls no tool
+    time.sleep(2)
+    checkpoint("episode 2 abandoned")
+time.sleep(5)
+checkpoint("session closed")

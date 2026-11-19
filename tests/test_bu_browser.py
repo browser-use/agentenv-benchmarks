@@ -4,6 +4,7 @@ Use Cloud browser, here a fake Browser Use API and a fake Playwright MCP, so no 
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import importlib.util
 import json
 import socket
@@ -12,14 +13,18 @@ import threading
 import time
 import tomllib
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import agent_env
+import httpx
 import pytest
 import uvicorn
+from agent_env.env.env import DeployedEnv, Env
 from agent_env.env.envs.multi_env import MultiEnv
-from agent_env.env.envs.website import live_problems
+from agent_env.env.envs.website import WebsiteEnv, live_problems
 from agent_env.env.registry import get_env_registry
-from agent_env.task import EpisodeSpec, Task
+from agent_env.providers.env_providers.env_gateway_provider import EnvironmentGatewayProvider
+from agent_env.task import EpisodeSpec, Task, teardown
 from agent_env.task.episode.rules import works_in_sandbox
 from agent_env.utils.card_naming import website_source_from_source
 from agentenv_protocol import HIDDEN_BY_DEFAULT_META_KEY
@@ -55,7 +60,11 @@ TOOLS = [{"name": name, "description": name, "inputSchema": schema, "annotations
              ("browser_navigate", {"type": "object", "properties": {"url": {"type": "string"}}, "required": ["url"]}),
              ("browser_environment", {"type": "object", "properties": {}}),
              ("browser_evaluate", {"type": "object", "properties": {"function": {"type": "string"}}}),
+             ("browser_click", {"type": "object", "properties": {"ref": {"type": "string"}}}),
+             ("browser_crash", {"type": "object", "properties": {}}),
+             ("browser_close", {"type": "object", "properties": {}}),
              ("browser_run_code_unsafe", {"type": "object", "properties": {"code": {"type": "string"}}}))]
+HASH = "3721b75f6c501523694ef58cd7a3911c032cdabddbb38bca02709a249465c68f"
 
 
 def test_the_example_task_is_an_episode_on_the_browser_alone_scored_by_its_verifier():
@@ -70,6 +79,17 @@ def test_the_example_task_is_an_episode_on_the_browser_alone_scored_by_its_verif
     assert deploy.env_ids == ["bu-browser"] and not works_in_sandbox(task.steps, deploy.agent_name)
     assert access == [("bu-browser", "disable", "default", ["list_website_urls"])]
     assert problem is None and reward({"grade": 1.0}) == 1.0
+
+
+@pytest.mark.parametrize("reply, scored", [(HASH, True), (f" {HASH.upper()}\n", True),
+                                           (f"The hash is {HASH}.", False),
+                                           (f"{HASH} or b1e0d7a9a8e1f2c3d4b5a6f7e8d9c0b1a2f3e4d5c6b7a8f9e0d1c2b3a4f5e6d7", False)],
+                         ids=["the hash", "the hash spaced and upper case", "the hash in a sentence", "two hashes"])
+def test_the_example_task_scores_only_a_reply_that_is_the_hash(reply, scored):
+    task = Task.from_dict({"id": "pypi", "version": None, "steps": json.loads(TASK.read_text())})
+    [grade] = [step for step in task.steps if step.type == "agent_prompt_response_verifier"]
+
+    assert [grade._eval_criterion(0, reply, criterion)["passed"] for criterion in grade.criteria] == [scored]
 
 
 def test_the_bundle_runs_no_bu_bench_step_or_task():
@@ -130,26 +150,30 @@ def test_closing_an_env_never_deployed_only_closes(monkeypatch):
     assert calls == [("close",)]
 
 
-def test_the_site_boots_one_browser_serves_its_tools_and_stops_it_on_reset_and_shutdown(site, browser_use):
+def test_the_site_starts_its_browser_at_the_first_call_serves_its_tools_and_stops_it_on_reset_and_shutdown(
+        site, browser_use):
     with TestClient(site.create_app()) as client:
         assert _ready(client)["ready"] is True
-        [(first, asked)] = browser_use.created
+        created_when_ready = list(browser_use.created)
         mcp = _mcp(client)
         listed = {tool["name"]: bool((tool.get("_meta") or {}).get(HIDDEN_BY_DEFAULT_META_KEY))
                   for tool in _rpc(client, mcp, "tools/list")["tools"]}
-        navigated = _text(_rpc(client, mcp, "tools/call", {"name": "browser_navigate",
-                                                            "arguments": {"url": "https://pypi.org/"}}))
-        environment = json.loads(_text(_rpc(client, mcp, "tools/call", {"name": "browser_environment",
-                                                                          "arguments": {}})))
+        navigated = _text(_call(client, mcp, "browser_navigate", url="https://pypi.org/"))
+        [(first, asked)] = browser_use.created
+        environment = json.loads(_text(_call(client, mcp, "browser_environment")))
         reset = client.post("/agentenv", json={"jsonrpc": "2.0", "id": 1, "method": "data/reset", "params": {}})
         stopped_by_reset, running_after_reset = list(browser_use.stopped), site.playwright.running
-        again = _text(_rpc(client, mcp, "tools/call", {"name": "browser_navigate", "arguments": {"url": "https://x/"}}))
+        again = _text(_call(client, mcp, "browser_navigate", url="https://x/"))
         [_, (second, _)] = browser_use.created
 
+    # No browser before a call: none runs, or counts down its timeout, before the run records the env.
+    assert created_when_ready == []
     assert browser_use.keys == {"bu-test-key"}
     assert asked == {"proxyCountryCode": "us", "timeout": 30, "enableRecording": False}
-    # browser_evaluate is listed hidden, which the gateway hides until tool access names it; run_code_unsafe isn't.
-    assert listed == {"browser_navigate": False, "browser_environment": False, "browser_evaluate": True}
+    # browser_evaluate is listed hidden, which the gateway hides until tool access names it; browser_close, which can
+    # end the cloud browser, and run_code_unsafe aren't listed.
+    assert listed == {"browser_navigate": False, "browser_environment": False, "browser_evaluate": True,
+                      "browser_click": False, "browser_crash": False}
     assert navigated.startswith("navigated to https://pypi.org/ over <cdp>") and first not in navigated
     assert "cdp.test" not in navigated
     assert {"AGENTENV_WEBSITE_SETTINGS", "BROWSER_USE_API_KEY"}.isdisjoint(environment) and "USER" in environment
@@ -158,34 +182,143 @@ def test_the_site_boots_one_browser_serves_its_tools_and_stops_it_on_reset_and_s
     assert browser_use.stopped == [first, second] and not site.playwright.running
 
 
-def test_a_browser_that_fails_to_start_fails_readiness_and_leaves_nothing(site, browser_use):
+def test_a_browser_browser_use_ended_is_said_to_have_ended_and_the_next_call_gets_a_fresh_one(site, browser_use):
+    with TestClient(site.create_app()) as client:
+        mcp = _mcp(client)
+        _call(client, mcp, "browser_navigate", url="https://pypi.org/")
+        [(first, _)] = browser_use.created
+        failed_while_running = _call(client, mcp, "browser_click", ref="e1")
+        stopped_while_running = list(browser_use.stopped)
+        browser_use.ended.add(first)  # its timeout_minutes ran out, say
+        failed_once_ended = _call(client, mcp, "browser_click", ref="e1")
+        stopped_once_ended = list(browser_use.stopped)
+        again = _text(_call(client, mcp, "browser_navigate", url="https://pypi.org/"))
+        [_, (second, _)] = browser_use.created
+
+    # A tool's own error on a running browser is the agent's to handle, and the browser stays.
+    assert failed_while_running["isError"] and "has been closed (clicking e1)" in failed_while_running["content"][0]["text"]
+    assert stopped_while_running == []
+    assert failed_once_ended["isError"] and "the browser ended during browser_click" in failed_once_ended["content"][0]["text"]
+    assert stopped_once_ended == [first]
+    assert again.startswith("navigated to https://pypi.org/ over <cdp>") and second != first
+
+
+def test_the_first_result_on_the_browser_that_replaced_one_playwright_mcp_lost_says_the_pages_are_gone(site, browser_use):
+    with TestClient(site.create_app()) as client:
+        mcp = _mcp(client)
+        before = _call(client, mcp, "browser_navigate", url="https://pypi.org/")
+        _call(client, mcp, "browser_crash")
+        time.sleep(2)  # it exits 0.2 s after it answers
+        replaced = _call(client, mcp, "browser_navigate", url="https://pypi.org/")
+        after = _call(client, mcp, "browser_navigate", url="https://pypi.org/")
+
+    assert [part["text"] for part in replaced["content"]] == [
+        playwright_mcp.REPLACED, "navigated to https://pypi.org/ over <cdp>"]
+    assert len(before["content"]) == len(after["content"]) == 1 and len(browser_use.created) == 2
+
+
+def test_a_reset_sends_the_browsers_stop_before_waiting_on_playwright_mcp_to_exit(site, browser_use, monkeypatch):
+    monkeypatch.setattr(playwright_mcp, "STOP_S", 2.0)
+    monkeypatch.setattr(playwright_mcp, "command", lambda endpoint, port: [
+        sys.executable, str(FAKE_PLAYWRIGHT_MCP), "--cdp-endpoint", endpoint, "--port", str(port), "--ignore-term"])
+    with TestClient(site.create_app()) as client:
+        _call(client, _mcp(client), "browser_navigate", url="https://pypi.org/")
+        asked = time.monotonic()
+        client.post("/agentenv", json={"jsonrpc": "2.0", "id": 1, "method": "data/reset", "params": {}})
+        answered = time.monotonic()
+
+    [(browser, stopped_at)] = browser_use.stopped_at
+    # Playwright MCP ignores SIGTERM, so the reset waits STOP_S for it; the stop was sent before that wait.
+    assert answered - asked >= 2.0 and stopped_at - asked < 1.0 and browser == browser_use.created[0][0]
+
+
+def test_a_browser_that_fails_to_start_is_refused_to_the_call_and_leaves_nothing(site, browser_use):
     browser_use.refuse = True
     with TestClient(site.create_app()) as client:
         ready = _ready(client)
+        refused = _call(client, _mcp(client), "browser_navigate", url="https://pypi.org/")
 
-    assert ready["ready"] is False and "returned 429" in " ".join(ready["problems"])
+    assert ready["ready"] is True
+    assert refused["isError"] and "returned 429" in refused["content"][0]["text"]
     assert browser_use.created == [] and not site.playwright.running
+
+
+def test_an_empty_key_fails_readiness(site, browser_use, monkeypatch):
+    monkeypatch.setenv("AGENTENV_WEBSITE_SETTINGS", json.dumps({"api_url": browser_use.url}))
+    with TestClient(browser_site.BuBrowser().create_app()) as client:
+        ready = _ready(client)
+
+    assert ready["ready"] is False and "api_key setting is empty" in " ".join(ready["problems"])
 
 
 def test_playwright_mcp_failing_to_start_stops_the_browser_it_was_given(site, browser_use, monkeypatch):
     monkeypatch.setattr(playwright_mcp, "command", lambda endpoint, port: [sys.executable, "-c", "raise SystemExit(3)"])
     with TestClient(site.create_app()) as client:
-        ready = _ready(client)
+        refused = _call(client, _mcp(client), "browser_navigate", url="https://pypi.org/")
 
-    assert ready["ready"] is False and "exited at start with 3" in " ".join(ready["problems"])
+    assert refused["isError"] and "exited at start with 3" in refused["content"][0]["text"]
     assert browser_use.stopped == [browser_use.created[0][0]] and not site.playwright.running
 
 
 def test_a_reset_while_the_browser_is_still_being_created_stops_it_once_created(site, browser_use):
     browser_use.delay_s = 1.0
     with TestClient(site.create_app()) as client:
+        mcp = _mcp(client)
+        calling = threading.Thread(target=_call, args=(client, mcp, "browser_navigate"), kwargs={"url": "https://x/"})
+        calling.start()
         while not browser_use.asked:
             time.sleep(0.01)
         client.post("/agentenv", json={"jsonrpc": "2.0", "id": 1, "method": "data/reset", "params": {}})
         stopped_by_reset = list(browser_use.stopped)
+        calling.join(10)
 
     assert stopped_by_reset == [browser_use.created[0][0]] and len(browser_use.created) == 1
     assert browser_use.stopped == stopped_by_reset
+
+
+def test_teardown_closing_a_deployed_bu_browser_resets_its_site_which_stops_the_browser(site, browser_use, monkeypatch):
+    """agent-env's teardown closes the env a run's record names (``teardown._close``), as every run's teardown does
+    before it terminates sandboxes, here with the real site served on loopback behind the record's card. Only Docker
+    is stood in for: the record's sandbox, which the env reattaches and terminates last."""
+    terminated: list[str] = []
+
+    class Sandbox:
+        sandbox_id, mode = "sandbox-1", None
+
+        async def terminate(self):
+            terminated.append(self.sandbox_id)
+
+    async def reattach(self, env, deployed):
+        return Sandbox()
+
+    declared = tomllib.loads((BUNDLE / "envs" / "bu-browser" / "env.toml").read_text())
+    [site_name] = declared["website_envs"]
+
+    def bu_browser(cls, id, version=None):
+        assert (id, version) == (declared["name"], 1)
+        website = WebsiteEnv(id=site_name, version=1, server_docker_image_artifact=MagicMock(),
+                             environment_name=site_name, domains=["bu-browser.localhost"])
+        return bu_env.BuBrowserEnv(id=declared["name"], version=1, mcp_server_envs=[], website_envs=[website],
+                                   browser_envs=[])
+
+    monkeypatch.setattr(Env, "get", classmethod(bu_browser))
+    monkeypatch.setattr(EnvironmentGatewayProvider, "_reattach", reattach)
+    with _served(site.create_app()) as url, httpx.Client(base_url=url, timeout=30) as client:
+        _call(client, _mcp(client), "browser_navigate", url="https://pypi.org/")
+        card = client.get("/.well-known/agent-env.json").json()
+        record = DeployedEnv.from_dict({
+            "env_id": declared["name"], "env_version": 1, "env_provider_type": "gateway", "gateway_url": url,
+            "sandbox_id": "sandbox-1", "sandbox_type": "local_docker",
+            "environment_card_url": f"{url}/.well-known/agent-env.json",
+            "environment_card": {"name": declared["name"], "protocolVersion": "1.0", "url": "/agentenv",
+                                 "children_environments": [{**card, "environment_name": site_name}]}})
+        [(browser, _)] = browser_use.created
+        running = list(browser_use.stopped)
+
+        asyncio.run(teardown._close(record, teardown.TERMINATE_TIMEOUT_SECONDS))
+
+        assert running == [] and browser_use.stopped == [browser] and not site.playwright.running
+        assert terminated == ["sandbox-1"]
 
 
 class FakeBrowserUse:
@@ -197,6 +330,8 @@ class FakeBrowserUse:
         self.created: list[tuple[str, dict]] = []
         self.stopped: list[str] = []
         self.keys: set[str] = set()
+        self.stopped_at: list[tuple[str, float]] = []
+        self.ended: set[str] = set()
         self.refuse = False
         self.delay_s = 0.0
 
@@ -212,10 +347,13 @@ class FakeBrowserUse:
             return JSONResponse({"id": browser, "cdpUrl": f"{self.url}/cdp/{browser}"})
 
         async def version(request):
+            if request.path_params["id"] in self.ended:
+                return JSONResponse({"detail": "not found"}, 404)
             return JSONResponse({"webSocketDebuggerUrl": f"ws://cdp.test/devtools/{request.path_params['id']}"})
 
         async def stop(request):
             self.stopped.append(request.path_params["id"])
+            self.stopped_at.append((request.path_params["id"], time.monotonic()))
             return JSONResponse({"id": request.path_params["id"]})
 
         return Starlette(routes=[Route("/browsers", create, methods=["POST"]),
@@ -225,16 +363,25 @@ class FakeBrowserUse:
 
 @pytest.fixture
 def browser_use():
+    fake = FakeBrowserUse("")
+    with _served(fake.app()) as fake.url:
+        yield fake
+
+
+@contextlib.contextmanager
+def _served(app):
+    """``app`` served on a loopback port, lifespan included, until the block ends; yields its URL."""
     port = _free_port()
-    fake = FakeBrowserUse(f"http://127.0.0.1:{port}")
-    server = uvicorn.Server(uvicorn.Config(fake.app(), host="127.0.0.1", port=port, log_level="warning"))
+    server = uvicorn.Server(uvicorn.Config(app, host="127.0.0.1", port=port, log_level="warning"))
     thread = threading.Thread(target=server.run, daemon=True)
     thread.start()
     while not server.started:
         time.sleep(0.01)
-    yield fake
-    server.should_exit = True
-    thread.join(10)
+    try:
+        yield f"http://127.0.0.1:{port}"
+    finally:
+        server.should_exit = True
+        thread.join(30)
 
 
 @pytest.fixture
@@ -298,7 +445,7 @@ def _ready(client: TestClient) -> dict:
         time.sleep(0.05)
 
 
-def _mcp(client: TestClient) -> dict:
+def _mcp(client) -> dict:
     first = client.post("/mcp", headers=MCP_HEADERS, json={
         "jsonrpc": "2.0", "id": 1, "method": "initialize",
         "params": {"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "t", "version": "1"}}})
@@ -307,13 +454,17 @@ def _mcp(client: TestClient) -> dict:
     return headers
 
 
-def _rpc(client: TestClient, headers: dict, method: str, params: dict | None = None) -> dict:
+def _rpc(client, headers: dict, method: str, params: dict | None = None) -> dict:
     response = client.post("/mcp", headers=headers, json={"jsonrpc": "2.0", "id": 2, "method": method,
                                                           "params": params or {}})
     text = response.text
     if response.headers.get("content-type", "").startswith("text/event-stream"):
         text = [line[len("data:"):] for line in text.splitlines() if line.startswith("data:")][-1]
     return json.loads(text)["result"]
+
+
+def _call(client, headers: dict, tool: str, **arguments) -> dict:
+    return _rpc(client, headers, "tools/call", {"name": tool, "arguments": arguments})
 
 
 def _text(result: dict) -> str:

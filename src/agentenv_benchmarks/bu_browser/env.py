@@ -16,7 +16,8 @@ from agent_env.env.envs.multi_env import MultiEnv
 
 logger = logging.getLogger(__name__)
 
-STOP_TIMEOUT_S = 20.0
+#: The stop request alone may take Browser Use's API client 60 s (cloud.py), and teardown gives each env's close 120 s.
+STOP_TIMEOUT_S = 90.0
 
 
 class BuBrowserEnv(MultiEnv):

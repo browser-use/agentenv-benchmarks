@@ -53,7 +53,7 @@
       {
         "type": "response_regex_present",
         "criterion": "wheel sha256",
-        "pattern": "3721b75f6c501523694ef58cd7a3911c032cdabddbb38bca02709a249465c68f",
+        "pattern": "\\A\\s*3721b75f6c501523694ef58cd7a3911c032cdabddbb38bca02709a249465c68f\\s*\\Z",
         "flags": [
           "IGNORECASE"
         ]

@@ -4,8 +4,8 @@ FROM public.ecr.aws/docker/library/node:22-slim@sha256:813a7480f28fdadac1f7f5c82
 RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-venv \
     && rm -rf /var/lib/apt/lists/* \
     && python3 -m venv /opt/bu-browser/venv \
-    && /opt/bu-browser/venv/bin/pip install --no-cache-dir "agentenv-framework-protocol==0.1.588" "mcp>=1.25,<2" \
-       "uvicorn>=0.30" "httpx>=0.27" \
+    && /opt/bu-browser/venv/bin/pip install --no-cache-dir "agentenv-framework-protocol==0.1.588" "mcp==1.30.0" \
+       "uvicorn==0.54.0" "httpx==0.28.1" \
     && useradd --create-home --shell /usr/sbin/nologin pw \
     && install -d -o pw -g pw /home/pw/playwright-output
 WORKDIR /opt/bu-browser

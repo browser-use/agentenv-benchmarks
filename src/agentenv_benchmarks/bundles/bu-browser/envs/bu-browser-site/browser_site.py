@@ -1,16 +1,15 @@
 """A Browser Use Cloud browser as a website env that is an MCP server: Playwright MCP's tools, served on the browser.
 
-The site starts one cloud browser as its server starts, and Playwright MCP on it, and is ready once both are up, so a
-bad key or an account at its limit fails the deploy rather than the agent's first call. ``data/reset`` stops the
-browser and starts nothing: the next tool call starts a fresh one. The server's shutdown, SIGTERM included, stops it
-too, and the browser's own ``timeout_minutes`` ends it if nothing else does.
+The site starts a cloud browser, and Playwright MCP on it, at the first tool call, so no browser runs, or counts down
+its ``timeout_minutes``, before the run has recorded the env it would have to stop; it is ready once its key is set.
+``data/reset`` stops the browser and starts nothing: the next tool call starts a fresh one. The server's shutdown,
+SIGTERM included, stops it too, and the browser's own ``timeout_minutes`` ends it if nothing else does.
 
 ``api_key`` is a ``SecretStr`` setting, so its env.toml value is a ``secret:`` reference agentenv resolves only as it
 writes the site's container; it stays in this process, and Playwright MCP, as another user, never sees it.
 """
 from __future__ import annotations
 
-import asyncio
 import contextlib
 
 import cloud
@@ -36,7 +35,7 @@ class BuBrowser(WebsiteEnvironment):
         api_key: SecretStr = SecretStr("")
         api_url: str = API_URL
         proxy_country_code: str = "us"
-        #: Browser Use ends the browser after this long whatever happens here: at least the deploy plus a task's turns.
+        #: Browser Use ends the browser after this long, counted from the first tool call: at least a task's turns.
         timeout_minutes: int = 30
 
     #: The one page, at /: the browser is Browser Use's, reached only through the tools.
@@ -48,7 +47,6 @@ class BuBrowser(WebsiteEnvironment):
         cloud.API = self.settings.api_url.rstrip("/")
         cloud.api_key = self.settings.api_key.get_secret_value
         self.playwright = playwright_mcp.PlaywrightMcp(self._start_browser)
-        self._boot: asyncio.Task | None = None
 
     async def _start_browser(self) -> cloud.CloudBrowser:
         return await cloud.CloudBrowser.start(proxy_country_code=self.settings.proxy_country_code or None,
@@ -58,15 +56,14 @@ class BuBrowser(WebsiteEnvironment):
         return self.playwright.tools()
 
     def create_app(self):
-        """The site's app, whose lifespan also starts the browser and stops it at shutdown, which uvicorn runs on
-        SIGTERM before it exits."""
+        """The site's app, whose lifespan also stops the browser at shutdown, which uvicorn runs on SIGTERM before it
+        exits."""
         app = super().create_app()
         served = app.router.lifespan_context
 
         @contextlib.asynccontextmanager
         async def lifespan(scope_app):
             async with served(scope_app):
-                self._boot = asyncio.ensure_future(self.playwright.start())
                 try:
                     yield
                 finally:
@@ -76,14 +73,10 @@ class BuBrowser(WebsiteEnvironment):
         return app
 
     @ready_check
-    async def browser_started(self) -> bool:
-        """The browser the server started at boot is up with Playwright MCP on it, or was stopped since."""
+    async def api_key_set(self) -> bool:
+        """The key is set. It is first used at the first tool call, whose result says why if no browser starts."""
         if not self.settings.api_key.get_secret_value():
             raise RuntimeError("the api_key setting is empty; set it to secret:BROWSER_USE_API_KEY")
-        if self._boot is None or not self._boot.done():
-            return False
-        if not self._boot.cancelled() and (error := self._boot.exception()) is not None:
-            raise RuntimeError(f"the browser didn't start: {type(error).__name__}: {error}")
         return True
 
     @reset_data

@@ -1,13 +1,26 @@
 """A stand-in for Playwright MCP in tests/test_bu_browser.py: an MCP server on loopback ``--port`` whose tools say
-which CDP endpoint it was given and which environment variables it has, as the real one would be given them."""
+which CDP endpoint it was given and which environment variables it has, as the real one would be given them, fail as
+a tool does, or end the server. With ``--ignore-term`` it outlives a SIGTERM, as a hung Playwright MCP would."""
+import contextlib
 import json
 import os
+import signal
 import sys
+import threading
 
 from mcp.server.fastmcp import FastMCP
 
+
+@contextlib.asynccontextmanager
+async def lifespan(app):
+    if "--ignore-term" in sys.argv:  # here, since uvicorn sets its own handler as it starts
+        signal.signal(signal.SIGTERM, signal.SIG_IGN)
+    yield
+
+
 endpoint = sys.argv[sys.argv.index("--cdp-endpoint") + 1]
-server = FastMCP("fake-playwright-mcp", host="127.0.0.1", port=int(sys.argv[sys.argv.index("--port") + 1]))
+server = FastMCP("fake-playwright-mcp", host="127.0.0.1", port=int(sys.argv[sys.argv.index("--port") + 1]),
+                 lifespan=lifespan)
 
 
 @server.tool()
@@ -18,6 +31,18 @@ def browser_navigate(url: str) -> str:
 @server.tool()
 def browser_environment() -> str:
     return json.dumps(sorted(os.environ))
+
+
+@server.tool()
+def browser_click(ref: str) -> str:
+    raise RuntimeError(f"Target page, context or browser has been closed (clicking {ref})")
+
+
+@server.tool()
+def browser_crash() -> str:
+    """Answers, then the server dies, as Playwright MCP would on a crash."""
+    threading.Timer(0.2, os._exit, [1]).start()
+    return "crashing"
 
 
 server.run(transport="streamable-http")

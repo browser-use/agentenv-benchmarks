@@ -43,8 +43,9 @@ CLI = HERE / "node_modules" / "@playwright" / "mcp" / "cli.js"
 TOOLS = HERE / "playwright-mcp-tools.json"
 #: Runs the agent's JavaScript in the page: hidden until a task's tool access names it, as the page driver hides it.
 HIDDEN_TOOLS = frozenset({"browser_evaluate"})
-#: Runs the agent's code inside this container, beside the site that holds the key: never served.
-DROPPED_TOOLS = frozenset({"browser_run_code_unsafe"})
+#: Never served: browser_run_code_unsafe runs the agent's code inside this container, beside the site that holds the
+#: key; browser_close, on a browser attached over CDP, can end Browser Use's browser and its session with it.
+DROPPED_TOOLS = frozenset({"browser_run_code_unsafe", "browser_close"})
 #: Who Playwright MCP runs as, and all it keeps of the site's environment.
 USER = "pw"
 KEPT_ENVIRONMENT = ("PATH", "LANG", "LC_ALL", "TZ")
@@ -54,6 +55,11 @@ START_S = 30.0
 CALL_TIMEOUT_S = 300.0
 STOP_S = 10.0
 POLL_S = 0.1
+#: How long a check that Browser Use still runs the browser waits for its CDP discovery.
+PROBE_S = 10.0
+#: What a call's result starts with when its browser replaced one that ended without a reset.
+REPLACED = ("The browser ended and this call ran on a fresh one: the pages, tabs and anything signed in before it are "
+            "gone.")
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +74,7 @@ def command(endpoint: str, port: int) -> list[str]:
     with no groups, ended by the kernel if the site dies first. Its other flags are BU Bench's Playwright MCP arm's."""
     return ["setpriv", f"--reuid={USER}", f"--regid={USER}", "--clear-groups", "--pdeathsig", "TERM", "--",
             shutil.which("node") or "node", str(CLI), "--cdp-endpoint", endpoint, "--host", "127.0.0.1",
-            "--port", str(port), "--output-dir", str(OUTPUT)]
+            "--port", str(port), "--ignore-roots", "--output-dir", str(OUTPUT)]
 
 
 def environment() -> dict[str, str]:
@@ -78,8 +84,9 @@ def environment() -> dict[str, str]:
 
 class PlaywrightMcp:
     """The browser ``start_browser`` starts (a ``cloud.CloudBrowser``), Playwright MCP on it and one session there.
-    ``start`` brings all three up once, shared by every caller, and again after ``stop`` or once one has ended;
-    ``stop`` ends them, a start under way included, and starts nothing, so a reset leaves no browser running."""
+    ``start`` brings all three up once, shared by every caller, and again after ``stop`` or once one has ended, which
+    the first result on the new browser says (REPLACED); ``stop`` ends them, a start under way included, and starts
+    nothing, so a reset leaves no browser running."""
 
     def __init__(self, start_browser: Callable[[], Awaitable[Any]]) -> None:
         self._start_browser = start_browser
@@ -102,12 +109,16 @@ class PlaywrightMcp:
     async def start(self) -> _Session:
         async with self._lock:
             if self._starting is None or self._starting.done() and not self._up():
-                self._starting = asyncio.create_task(self._start())
+                ended = self._starting is not None and _succeeded(self._starting)  # a browser this one replaces
+                self._starting = asyncio.create_task(self._start(REPLACED if ended else None))
             starting = self._starting
         return await asyncio.shield(starting)
 
-    async def stop(self) -> None:
+    async def stop(self, held: _Session | None = None) -> None:
+        """Stop everything, or with ``held`` only while that session is still the one running."""
         async with self._lock:
+            if held is not None and self._session is not held:
+                return
             starting, self._starting = self._starting, None
             if starting is not None:
                 starting.cancel()
@@ -117,7 +128,9 @@ class PlaywrightMcp:
             await asyncio.gather(*orphans, return_exceptions=True)
 
     async def call(self, tool: str, /, **arguments: Any) -> CallToolResult:
-        """``tool`` called on Playwright MCP, its text scrubbed of the browser's CDP address, or refused saying why."""
+        """``tool`` called on Playwright MCP, its text scrubbed of the browser's CDP address, or refused saying why.
+        An error from a browser Browser Use has ended (its timeout, a crash) stops what is left of it and says so, so
+        the next call starts a fresh browser rather than failing on the dead one for the rest of the episode."""
         try:
             held = await self.start()
         except asyncio.CancelledError:
@@ -125,7 +138,8 @@ class PlaywrightMcp:
                 raise
             return _refused(f"the browser was reset before {tool} ran")
         except Exception as e:  # noqa: BLE001 - the agent is told why, as the page driver tells it
-            return _refused(f"the browser didn't start: {type(e).__name__}: {cloud.scrub(str(e), self._secrets())}")
+            # cloud.CloudBrowser.start's errors name the browser by its label only, never its CDP address.
+            return _refused(f"the browser didn't start: {type(e).__name__}: {e}")
         called = asyncio.ensure_future(held.session.call_tool(
             tool, arguments, read_timeout_seconds=timedelta(seconds=CALL_TIMEOUT_S)))
         try:
@@ -142,7 +156,15 @@ class PlaywrightMcp:
             result = called.result()
         except Exception as e:  # noqa: BLE001 - the call may have acted: refused, not retried
             return _refused(cloud.scrub(f"Playwright MCP didn't answer {tool}: {type(e).__name__}: {e}", held.secrets))
-        return _scrubbed(result, held.secrets)
+        if result.isError and await _ended(held.browser):
+            await self.stop(held)
+            return _refused(f"the browser ended during {tool} (Browser Use stopped it at its time limit, or it "
+                            "crashed); its pages are gone, and the next browser tool call starts a fresh browser")
+        result = _scrubbed(result, held.secrets)
+        if notice := held.notice:
+            held.notice = None
+            result = result.model_copy(update={"content": [TextContent(type="text", text=notice), *result.content]})
+        return result
 
     def _up(self) -> bool:
         starting = self._starting
@@ -151,10 +173,7 @@ class PlaywrightMcp:
                 and self._process is not None and self._process.returncode is None
                 and self._session is not None and not self._session.owner.done())
 
-    def _secrets(self) -> list[str]:
-        return list(self.browser.secrets) if self.browser is not None else []
-
-    async def _start(self) -> _Session:
+    async def _start(self, notice: str | None) -> _Session:
         await self._close()  # what an ended start left: a stopped browser, an exited process
         browser_start = asyncio.ensure_future(self._start_browser())
         try:
@@ -174,7 +193,7 @@ class PlaywrightMcp:
             finally:
                 os.close(log)
             await _listening(port, self._process)
-            self._session = await _Session.open(f"http://127.0.0.1:{port}/mcp", self._secrets())
+            self._session = await _Session.open(f"http://127.0.0.1:{port}/mcp", self.browser, notice)
         except BaseException:
             await self._close()
             raise
@@ -182,8 +201,11 @@ class PlaywrightMcp:
         return self._session
 
     async def _close(self) -> None:
+        """Stop the browser, its request sent first, alongside ending the session and Playwright MCP: a reset's time
+        goes to the stop, which BU bills until, and not to waiting on a process before it is sent."""
         session, process, browser = self._session, self._process, self.browser
         self._session, self._process, self.browser = None, None, None
+        stopping = asyncio.ensure_future(browser.stop()) if browser is not None else None
         try:
             if session is not None:
                 session.close.set()
@@ -197,9 +219,22 @@ class PlaywrightMcp:
                     process.kill()
                     await process.wait()
         finally:
-            if browser is not None:
-                await browser.stop()
+            if stopping is not None:
+                await asyncio.shield(stopping)  # a cancelled close leaves the stop request running
                 logger.info("cloud browser %s stopped", browser.label)
+
+
+def _succeeded(task: asyncio.Task) -> bool:
+    return task.done() and not task.cancelled() and task.exception() is None
+
+
+async def _ended(browser: Any) -> bool:
+    """Whether Browser Use no longer runs ``browser``: its CDP discovery, which needs no key, doesn't answer."""
+    try:
+        async with httpx.AsyncClient(timeout=PROBE_S) as client:
+            return (await client.get(f"{browser.cdp_url}/json/version")).is_error
+    except httpx.HTTPError:
+        return True
 
 
 async def _stop_once_started(browser_start: asyncio.Future) -> None:
@@ -215,15 +250,16 @@ class _Session:
     """One MCP session on Playwright MCP, held open by a task of its own until ``close`` is set, since mcp's client
     contexts are anyio task groups, which only the task that entered one can leave."""
 
-    def __init__(self, url: str, secrets: list[str]) -> None:
-        self.url, self.secrets = url, secrets
+    def __init__(self, url: str, browser: Any, notice: str | None) -> None:
+        self.url, self.browser, self.notice = url, browser, notice
+        self.secrets: list[str] = list(browser.secrets)
         self.close = asyncio.Event()
         self.session: ClientSession | None = None
         self.owner: asyncio.Task | None = None
 
     @classmethod
-    async def open(cls, url: str, secrets: list[str]) -> _Session:
-        held = cls(url, secrets)
+    async def open(cls, url: str, browser: Any, notice: str | None) -> _Session:
+        held = cls(url, browser, notice)
         ready: asyncio.Future = asyncio.get_running_loop().create_future()
         held.owner = asyncio.create_task(held._own(ready))
         try:
