@@ -11,7 +11,7 @@ any file of this bundle holds task, rubric or canary text.
 ## Run
 
 Needs a local Docker daemon (or an agent-env sandbox that builds Dockerfiles): the first run builds the agents'
-images, pulling `ghcr.io/scaleapi/agentenv-codex` and the pinned npm and PyPI tools. A run stops before any agent or
+images, pulling `ghcr.io/scaleapi/agentenv-codex` and the npm and PyPI tools (top-level versions pinned). A run stops before any agent or
 browser starts when the Browser Use key or the judge key is missing.
 
 ```bash
@@ -33,19 +33,21 @@ wrote under `/app/agent_outputs`) and `bu_findings_verifier`.
 
 | Piece | What it does |
 |---|---|
-| `bu_cloud_browser` step | Creates a Browser Use Cloud browser (`POST /api/v3/browsers {proxyCountryCode: us, timeout: 70, enableRecording: true}`), posts its CDP WebSocket to the agent's `cdp-config/v1`, starts the env's own screenshot capture (2 s, deduplicated, its own CDP connection), and decrypts the task instruction into the seed value `bu_task`. |
-| `bu_findings_verifier` step | Takes a final screenshot, stops the browser (always; plus an exit hook and the browser's 70 min timeout), stores the cloud recording MP4 as a file artifact, turns the agent's trajectory into judge steps, and runs the frozen judge (`agentenv_benchmarks/bu_bench/judge/findings-v21`, browser-use/benchmark@1e0e2f1e, gpt-5.6-luna xhigh) unchanged as a subprocess. Writes `verifications.findings` with the continuous score and one row per rubric item. A judge error records no score and fails the step: never a zero. |
+| `bu_cloud_browser` step | Creates a Browser Use Cloud browser (`POST /api/v3/browsers {proxyCountryCode: us, timeout: 70, enableRecording: true}`), posts its CDP WebSocket to the agent's `cdp-config/v1`, starts the env's own screenshot capture (2 s, deduplicated, at most 400 frames, the last kept for the final one, its own CDP connection), and decrypts the task instruction into the seed value `bu_task`. |
+| `bu_findings_verifier` step | Takes a final screenshot, stops the browser (always, retrying a failed stop; plus an exit hook and the browser's 70 min timeout), stores the cloud recording MP4 as a file artifact, turns the agent's trajectory into judge steps, and runs the frozen judge (`agentenv_benchmarks/bu_bench/judge/findings-v21`, browser-use/benchmark@1e0e2f1e, gpt-5.6-luna xhigh) unchanged as a subprocess. Writes `verifications.findings` with the continuous score and one row per rubric item. A judge error, or a task whose browser this process no longer holds, records no score and fails the step: never a zero. |
+| Evidence | The judge's inputs and outputs (`task.json` with the decrypted task, `result.json`, screenshots, `judgment.json`, `report.json`) go to `$BU_BENCH_EVIDENCE_DIR/<task>-<run>` and stay there. Without it they go to a temporary folder, deleted once the task is scored and kept when the judge errs (the error names the folder), so it can be rejudged. |
 | `agents/codex-*` | AgentEnv's published Codex agent + Codex CLI 0.166.0 + one browser tool (table above), all on `artifacts/codex-browser-tools`. Declares `cdp-config/v1`; each turn gets the bake-off prompt and its tool pointed at the task's browser. |
 | `agents/browser-use-104rc1` | AgentEnv's browser-use agent, on browser-use 1.0.4rc1, with the BU Bench eval adapter's model route (Responses API, `reasoning=medium`) and system-prompt additions. |
 | Tasks | Each task file names a task id only. The instruction is decrypted from the benchmark's `.enc` at run time; rubrics never leave the judge process. Do not publish decrypted tasks or rubrics: a test fails if any file here carries task, rubric or canary text. |
-| Credentials | A running cloud browser's CDP address reaches it with no other key, and its host is the browser id. Only the id's first 8 characters are logged or stored; the address is scrubbed from evidence, agent replies, errors and both agents' trajectories. |
+| Credentials | A running cloud browser's CDP address reaches it with no other key, and its host is the browser id. Only the id's first 8 characters are logged or stored; the address is scrubbed from evidence, agent replies, errors and both agents' trajectories. Files the agent writes are collected as it wrote them and may hold the address; it stops being a credential once the verifier stops the browser. |
+| Cleanup | The verifier stops the browser; the exit hook stops any this `agent-env run` process started and did not stop. A persistent runner that cancels a task before its verifier runs leaves its browser to Browser Use's 70 min limit. |
 
 ## Arms
 
 The 8 entries of the harness bake-off: Codex CLI 0.166.0 with each of 7 browser tools, plus browser-use's own agent.
 Same task steps, cloud browser, model and judge for all; `--agent` is the only change.
 
-| `--agent` | Harness | Tool version (pinned) | How the tool reaches the browser |
+| `--agent` | Harness | Tool version (top-level pinned) | How the tool reaches the browser |
 |---|---|---|---|
 | `codex-bu-cli` (default) | Codex + Browser Use CLI | browser-harness @c2420943 | `BU_CDP_WS`; `browser-harness` on PATH |
 | `codex-browser-use-mcp` | Codex + Browser Use MCP (`browser_exec`) | browser-use 1.0.3 `--cli-mcp` | MCP server env `BU_CDP_WS` |
@@ -56,8 +58,8 @@ Same task steps, cloud browser, model and judge for all; `--agent` is the only c
 | `codex-opencode-browse` | Codex + OpenCode browse | @opencode/browse 0.0.16 | relay + a shim for its extension |
 | `browser-use-104rc1` | browser-use 1.0.4rc1 agent | browser-use 1.0.4rc1 | `cdp-config/v1` |
 
-The 7 Codex agents are one image (`artifacts/codex-browser-tools`, every tool installed at the bake-off's pins and
-checked at build time) and differ only in their `agent.toml` (`BU_BENCH_TOOL`). Each turn sets up only its tool, as
+The 7 Codex agents are one image (`artifacts/codex-browser-tools`, every tool installed at the bake-off's top-level
+pins, checked at build time; their transitive npm and PyPI dependencies are not locked) and differ only in their `agent.toml` (`BU_BENCH_TOOL`). Each turn sets up only its tool, as
 the bake-off did, and sends the bake-off's prompt with that tool's rule line.
 
 ## Results
@@ -65,7 +67,8 @@ the bake-off did, and sends the bake-off's prompt with that tool's rule line.
 All 8 arms on all 200 tasks, run by `agent-env run` (agentenv-framework 0.9.1536) on GitHub Actions, Nov 17-18 2026:
 GPT-6.1 Terra at medium effort, the findings judge on gpt-5.6-luna xhigh, one run per arm, **1600/1600 scored**. Infra
 failures (a model rate limit inside the stream, a stalled turn) were rerun by task id; judge errors were rejudged on the
-run's saved evidence, never scored 0. The reference is the same 200 tasks on Browser Use's own eval platform; the diff is paired by task with a bootstrap 95% CI.
+run's saved evidence, never scored 0. The verifier still scores a turn that ended in an agent error, as these runs were
+scored: a task whose `report.agent_error` is set was an infra failure in our runs and was rerun by task id. The reference is the same 200 tasks on Browser Use's own eval platform; the diff is paired by task with a bootstrap 95% CI.
 
 | harness | score [95% CI] | reference | paired diff [95% CI] | model $/task | cloud $/task | min/task |
 |---|---|---|---|---|---|---|

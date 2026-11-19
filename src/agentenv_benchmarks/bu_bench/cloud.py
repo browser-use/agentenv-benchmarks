@@ -31,6 +31,9 @@ logger = logging.getLogger(__name__)
 
 API = os.environ.get("BROWSER_USE_API_URL", "https://api.browser-use.com/api/v3")
 KEY_NAME = "BROWSER_USE_API_KEY"
+#: Stop requests per browser, and the wait before each retry (times the attempt): one 503 must not leave it billing.
+STOP_ATTEMPTS = 3
+STOP_RETRY_S = 1.0
 
 
 def api_key() -> str:
@@ -122,14 +125,20 @@ class CloudBrowser:
         return browser
 
     async def stop(self) -> None:
-        if self.stopped:
-            return
-        try:
-            await request("PATCH", f"/browsers/{self.id}", {"action": "stop"})
-            self.stopped = True
-        except Exception as error:  # noqa: BLE001 - the browser's own timeout is the backstop
-            logger.warning("stopping cloud browser %s failed (%s); its timeout will end it", self.label,
-                           scrub(str(error), self.secrets))
+        """PATCH {action: stop}, retried; ``stopped`` says whether it went through. Never raises: the browser's own
+        timeout ends one this could not stop."""
+        for attempt in range(1, STOP_ATTEMPTS + 1):
+            if self.stopped:
+                return
+            try:
+                await request("PATCH", f"/browsers/{self.id}", {"action": "stop"})
+                self.stopped = True
+            except Exception as error:  # noqa: BLE001
+                logger.warning("stopping cloud browser %s failed (%s), attempt %d of %d%s", self.label,
+                               scrub(str(error), self.secrets), attempt, STOP_ATTEMPTS,
+                               "" if attempt < STOP_ATTEMPTS else "; its timeout will end it")
+                if attempt < STOP_ATTEMPTS:
+                    await asyncio.sleep(STOP_RETRY_S * attempt)
 
     async def session(self) -> dict[str, Any]:
         """The session as Browser Use reports it: costs once stopped, recording when enabled."""
@@ -155,12 +164,14 @@ class Screenshots:
     """After-action evidence for the judge, taken over the env's own CDP connection, never the agent's.
 
     The agent drives the browser directly, so the env cannot see its actions; it captures the active page every
-    ``interval`` seconds and keeps a frame only when it differs from the last one. Fail-open: errors are counted,
-    never raised into the task.
+    ``interval`` seconds, for at most ``seconds`` (the browser's own time limit), and keeps a frame only when it
+    differs from the last one, up to ``limit`` frames, the last of which is kept for the final one. Fail-open: errors
+    are counted, never raised into the task.
     """
 
-    def __init__(self, ws_url: str, directory: Path, interval: float = 2.0, limit: int = 400) -> None:
-        self.ws_url, self.directory, self.interval, self.limit = ws_url, directory, interval, limit
+    def __init__(self, ws_url: str, directory: Path, interval: float = 2.0, limit: int = 400,
+                 seconds: float = 70 * 60) -> None:
+        self.ws_url, self.directory, self.interval, self.limit, self.seconds = ws_url, directory, interval, limit, seconds
         self._secrets = secrets_of(ws_url)
         self.directory.mkdir(parents=True, exist_ok=True)
         self.saved: list[str] = []
@@ -185,16 +196,18 @@ class Screenshots:
             await asyncio.gather(self._loop, return_exceptions=True)
         await self.capture("final")
         await self._close()
-        self.status["errors"] = self.status["errors"][-20:]
         return self.status
 
     async def _run(self) -> None:
-        while True:
+        deadline = time.monotonic() + self.seconds
+        while time.monotonic() < deadline:
             await asyncio.sleep(self.interval)
             await self.capture(f"t{int(time.time())}")
+        await self._close()
 
     async def capture(self, label: str) -> None:
-        if len(self.saved) >= self.limit:
+        # The last of ``limit`` frames is the final one's, so the judge always sees the page the agent left.
+        if len(self.saved) >= self.limit - (label != "final"):
             return
         self.status["captures"] += 1
         try:
@@ -202,7 +215,9 @@ class Screenshots:
         except asyncio.CancelledError:
             raise
         except Exception as error:  # noqa: BLE001
-            self.status["errors"].append(f"{label}:{type(error).__name__}:{scrub(str(error), self._secrets)[:120]}")
+            errors = self.status["errors"]
+            errors.append(f"{label}:{type(error).__name__}:{scrub(str(error), self._secrets)[:120]}")
+            del errors[:-20]
             self._sessions.pop(self._active, None)
             await self._close()
 

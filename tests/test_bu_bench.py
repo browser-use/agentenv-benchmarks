@@ -1,4 +1,5 @@
 import asyncio
+import base64
 import importlib.util
 import json
 import re
@@ -127,8 +128,54 @@ def test_screenshot_errors_are_scrubbed(tmp_path):
         raise OSError(f"cannot reach {BROWSER_ID}.cdp.browser-use.com")
 
     shots._capture = boom
-    asyncio.run(shots.capture("t1"))
+
+    async def capture_often():
+        for n in range(50):
+            await shots.capture(f"t{n}")
+
+    asyncio.run(capture_often())
     assert shots.status["errors"] and BROWSER_ID not in shots.status["errors"][0]
+    assert shots.status["captures"] == 50 and len(shots.status["errors"]) == 20  # the last 20, however long it runs
+
+
+def test_the_final_frame_is_saved_after_the_capture_reached_its_limit(tmp_path):
+    """The judge reads the frames in order: the last must be the page the agent left, however long the task ran."""
+    shots = cloud.Screenshots(WS, tmp_path, limit=3)
+    frames = iter(range(1000))
+
+    async def send(method, params, session_id=None):
+        return {"data": base64.b64encode(f"frame {next(frames)}".encode()).decode()}
+
+    async def page():
+        return "page-1"
+
+    shots._ws, shots._sessions, shots._send, shots._page = object(), {"page-1": "s"}, send, page
+
+    async def run():
+        for n in range(5):
+            await shots.capture(f"t{n}")
+        return await shots.stop()
+
+    status = asyncio.run(run())
+    assert shots.saved == ["0001-t0.jpg", "0002-t1.jpg", "0003-final.jpg"] and status["saved"] == 3
+    assert (tmp_path / "0003-final.jpg").read_bytes() == b"frame 2"
+
+
+def test_the_capture_ends_at_the_browsers_time_limit(tmp_path):
+    shots = cloud.Screenshots(WS, tmp_path, interval=0.01, seconds=0.05)
+    taken = []
+
+    async def capture(label):
+        taken.append(label)
+
+    shots.capture = capture
+
+    async def run():
+        shots.start()
+        await asyncio.sleep(0.5)
+        return shots._loop.done()
+
+    assert asyncio.run(run()) and 0 < len(taken) < 10
 
 
 def codex_tools_agent(monkeypatch):
@@ -291,3 +338,111 @@ def test_bundle_tasks_are_what_make_bundle_writes(tmp_path, monkeypatch):
         written = {p.name: p.read_text() for p in (fake / kind).iterdir()}
         committed = {p.name: p.read_text() for p in (BUNDLE / kind).iterdir()}
         assert written == committed, kind
+
+
+class FakeBrowserUseApi:
+    """cloud.request as Browser Use answers it: every call recorded, the first ``failing_stops`` stops a 503."""
+
+    def __init__(self, failing_stops: int = 0) -> None:
+        self.calls: list[tuple[str, str]] = []
+        self.failing_stops = failing_stops
+
+    async def __call__(self, method, path, body=None):
+        self.calls.append((method, path))
+        if method == "PATCH" and self.failing_stops:
+            self.failing_stops -= 1
+            raise RuntimeError("Browser Use API PATCH /browsers returned 503")
+        return {}
+
+    @property
+    def stops(self) -> int:
+        return sum(method == "PATCH" for method, _ in self.calls)
+
+
+def verifying(monkeypatch, tmp_path, judgment, failing_stops=0, evidence_dir=None):
+    """A live browser as bu_cloud_browser leaves it, Browser Use's API faked, the judge answering ``judgment``, and the
+    verifier step with the context it runs in."""
+    from types import SimpleNamespace
+
+    api = FakeBrowserUseApi(failing_stops)
+    monkeypatch.setattr(cloud, "request", api)
+    real_sleep = asyncio.sleep
+    monkeypatch.setattr(asyncio, "sleep", lambda seconds: real_sleep(0))
+    if evidence_dir is None:
+        monkeypatch.delenv(steps.EVIDENCE_DIR_ENV, raising=False)
+    else:
+        monkeypatch.setenv(steps.EVIDENCE_DIR_ENV, str(evidence_dir))
+    judged = []
+
+    def judge(self, workspace):
+        judged.append(workspace)
+        return judgment
+
+    monkeypatch.setattr(steps.BuFindingsVerifierTaskStep, "_judge", judge)
+    browser = cloud.CloudBrowser(id=BROWSER_ID, ws_url=WS, cdp_url=f"https://{BROWSER_ID}.cdp.browser-use.com")
+    shots = cloud.Screenshots("ws://127.0.0.1:9/devtools/browser/x", tmp_path / "shots")  # nothing answers there
+    monkeypatch.setattr(steps, "_LIVE", {"h1": steps._Live(browser, shots, tmp_path / "shots", 0.0)})
+    context = SimpleNamespace(metadata={steps.STATE_KEY: {"handle": "h1", "browser": browser.label}},
+                              prompt_responses=[], deployed_agents=[], instance_id=None)
+    return steps.BuFindingsVerifierTaskStep("grade", 1, "bu2-140", "solve"), context, api, judged
+
+
+SCORED = {"status": "scored", "score": 0.75, "rubric": {"a": True, "b": False}, "reason": "ok"}
+
+
+def test_a_graded_task_stops_its_browser_once_and_drops_its_temporary_evidence(monkeypatch, tmp_path):
+    step, context, api, judged = verifying(monkeypatch, tmp_path, SCORED)
+
+    asyncio.run(step.execute(context))
+
+    verification = context.metadata["verifications"]["findings"]
+    assert verification["score"] == 0.75 and api.stops == 1 and steps._LIVE == {}
+    # The workspace held the decrypted task and its rubric.
+    assert not judged[0].exists() and verification["evidence_dir"] is None
+
+
+def test_a_judge_error_stops_the_browser_once_records_no_score_and_keeps_the_evidence(monkeypatch, tmp_path):
+    step, context, api, judged = verifying(monkeypatch, tmp_path, {"status": "error", "reason": "judge 500"})
+
+    with pytest.raises(RuntimeError, match="did not score"):
+        asyncio.run(step.execute(context))
+
+    assert "score" not in context.metadata["verifications"]["findings"] and api.stops == 1 and steps._LIVE == {}
+    assert (judged[0] / "result.json").exists()
+
+
+def test_an_evidence_folder_that_cant_be_written_still_stops_the_browser(monkeypatch, tmp_path):
+    (tmp_path / "not-a-folder").write_text("")
+    step, context, api, judged = verifying(monkeypatch, tmp_path, SCORED, evidence_dir=tmp_path / "not-a-folder")
+
+    with pytest.raises(OSError):
+        asyncio.run(step.execute(context))
+
+    assert api.stops == 1 and steps._LIVE == {} and judged == [] and "verifications" not in context.metadata
+
+
+@pytest.mark.parametrize("failing_stops, stops, left", [(1, 2, False), (3, 3, True)],
+                         ids=["one 503, then stopped", "every stop fails"])
+def test_a_failed_stop_is_retried_and_a_browser_never_stopped_is_left_to_the_exit_hook(
+        monkeypatch, tmp_path, failing_stops, stops, left):
+    step, context, api, _ = verifying(monkeypatch, tmp_path, SCORED, failing_stops=failing_stops)
+    patched = []
+    monkeypatch.setattr(steps.httpx, "patch", lambda url, **kwargs: patched.append((url, kwargs["json"])))
+    monkeypatch.setattr(cloud, "api_key", lambda: "k")
+
+    asyncio.run(step.execute(context))
+    steps._stop_leftovers()
+
+    assert api.stops == stops and bool(steps._LIVE) is left
+    assert patched == ([(f"{cloud.API}/browsers/{BROWSER_ID}", {"action": "stop"})] if left else [])
+
+
+def test_a_task_whose_browser_is_gone_is_not_judged(monkeypatch, tmp_path):
+    """Its screenshots went with it: a judgment would score the agent on no evidence."""
+    step, context, api, judged = verifying(monkeypatch, tmp_path, SCORED)
+    steps._LIVE.clear()
+
+    with pytest.raises(RuntimeError, match="no live browser"):
+        asyncio.run(step.execute(context))
+
+    assert judged == [] and api.calls == [] and "verifications" not in context.metadata

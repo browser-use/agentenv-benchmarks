@@ -41,9 +41,14 @@ STATE_KEY = "bu_cloud_browser"
 SEED_KEY = "bu_task"
 JUDGE_RUN = tasks.JUDGE_DIR / "run.py"
 JUDGE_TIMEOUT_S = 1800
-#: Where each task's judge inputs and outputs are kept after the run; a temporary folder otherwise.
+#: Where each task's judge inputs and outputs are kept after the run. Unset, they go to a temporary folder, deleted
+#: once the task is graded and kept when it isn't.
 EVIDENCE_DIR_ENV = "BU_BENCH_EVIDENCE_DIR"
 JUDGE_KEY_NAMES = ("BU_BENCH_JUDGE_API_KEY", "OPENAI_API_KEY")
+#: All the judge subprocess keeps of this process's environment: its paths, locale, proxy and CA settings.
+JUDGE_ENVIRONMENT = {"PATH", "HOME", "LANG", "TMPDIR", "OPENAI_BASE_URL", "SSL_CERT_FILE", "SSL_CERT_DIR",
+                     "REQUESTS_CA_BUNDLE", "HTTPS_PROXY", "HTTP_PROXY", "NO_PROXY", "https_proxy", "http_proxy",
+                     "no_proxy"}
 #: Not deliverables, as the browser-use eval adapter skipped them: browser-use's own REPL cells and logs, installs.
 SKIPPED_PARTS = {".browser-use", "node_modules", ".git", "screenshots"}
 
@@ -163,7 +168,8 @@ class BuCloudBrowserTaskStep(TaskStep):
                     "metadata": {"browser": "browser-use-cloud", "browser_label": browser.label}})
             added.raise_for_status()
             shots_dir = Path(tempfile.mkdtemp(prefix=f"bu-shots-{self.task_id}-"))
-            screenshots = cloud.Screenshots(browser.ws_url, shots_dir, interval=self.screenshot_interval_seconds)
+            screenshots = cloud.Screenshots(browser.ws_url, shots_dir, interval=self.screenshot_interval_seconds,
+                                            seconds=self.timeout_minutes * 60)
             screenshots.start()
             _LIVE[handle] = _Live(browser, screenshots, shots_dir, time.time())
         except BaseException:
@@ -212,8 +218,12 @@ class BuFindingsVerifierTaskStep(TaskStep):
 
     async def execute(self, context: TaskStepContext) -> TaskStepContext:
         state = context.metadata.get(STATE_KEY) or {}
-        live = _LIVE.pop(state.get("handle", ""), None)
-        workspace = self._workspace(context)
+        handle = state.get("handle", "")
+        live = _LIVE.get(handle)
+        if STATE_KEY in context.metadata and live is None:
+            # Its screenshots and browser are gone (an earlier attempt of this step stopped them, or another process
+            # started it): a judgment now would score the agent on no evidence.
+            raise RuntimeError(f"{self.task_id}: no live browser for this task's handle, so nothing to judge")
         report: dict[str, Any] = {"task_id": self.task_id, "browser": state.get("browser")}
         secrets = live.browser.secrets if live is not None else []
         session: dict[str, Any] = {}
@@ -222,12 +232,15 @@ class BuFindingsVerifierTaskStep(TaskStep):
             if live is not None:
                 report["screenshots"] = await live.screenshots.stop()
                 shot_names = list(live.screenshots.saved)
-                (workspace / "judge_screenshots").mkdir(exist_ok=True)
-                for name in shot_names:
-                    shutil.copy2(live.shots_dir / name, workspace / "judge_screenshots" / name)
+            workspace = self._workspace(context)
+            (workspace / "judge_screenshots").mkdir(exist_ok=True)
+            for name in shot_names:
+                shutil.copy2(live.shots_dir / name, workspace / "judge_screenshots" / name)
         finally:
             if live is not None:
                 await live.browser.stop()
+                if live.browser.stopped:  # else the exit hook tries again
+                    _LIVE.pop(handle, None)
                 report["browser_seconds"] = round(time.time() - live.started, 1)
                 try:
                     await asyncio.sleep(2)  # costs and the recording link appear once the session has stopped
@@ -270,11 +283,15 @@ class BuFindingsVerifierTaskStep(TaskStep):
             "reason": judgment.get("reason"), "failure_class": judgment.get("failure_class"),
             "report": report, "evidence_dir": str(workspace),
         }
-        if judgment.get("status") == "scored":
-            verification["score"] = float(judgment["score"])
-        context.metadata.setdefault("verifications", {})[self.verifier_id] = verification
         if judgment.get("status") != "scored":
-            raise RuntimeError(f"findings judge did not score {self.task_id}: {judgment.get('reason')}")
+            context.metadata.setdefault("verifications", {})[self.verifier_id] = verification
+            raise RuntimeError(f"findings judge did not score {self.task_id}: {judgment.get('reason')} "
+                               f"(its evidence is kept in {workspace})")
+        verification["score"] = float(judgment["score"])
+        if not os.environ.get(EVIDENCE_DIR_ENV):  # a temporary folder holding the decrypted task and its rubric
+            shutil.rmtree(workspace, ignore_errors=True)
+            verification["evidence_dir"] = None
+        context.metadata.setdefault("verifications", {})[self.verifier_id] = verification
         return context
 
     def _workspace(self, context: TaskStepContext) -> Path:
@@ -359,8 +376,7 @@ class BuFindingsVerifierTaskStep(TaskStep):
         key = _judge_key()
         if not key:
             return {"status": "error", "reason": "no judge key: set BU_BENCH_JUDGE_API_KEY or OPENAI_API_KEY"}
-        env = {name: value for name, value in os.environ.items()
-               if name in {"PATH", "HOME", "LANG", "SSL_CERT_FILE", "OPENAI_BASE_URL", "TMPDIR"}}
+        env = {name: value for name, value in os.environ.items() if name in JUDGE_ENVIRONMENT}
         env.update(EVAL_WORKSPACE=str(workspace), EVAL_JUDGMENT_PATH=str(workspace / "judgment.json"),
                    EVAL_TASK_PATH=str(workspace / "task.json"), EVAL_RESULT_PATH=str(workspace / "result.json"),
                    EVAL_JUDGE_MODEL=self.judge_model,
