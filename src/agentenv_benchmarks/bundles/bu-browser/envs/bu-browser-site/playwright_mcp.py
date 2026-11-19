@@ -231,7 +231,11 @@ class PlaywrightMcp:
                     await process.wait()
         finally:
             if stopping is not None:
-                await asyncio.shield(stopping)  # a cancelled close leaves the stop request running
+                try:
+                    await asyncio.shield(stopping)
+                except asyncio.CancelledError:  # the stop goes on: ``stop`` waits for it with the other orphans
+                    self._orphans.append(stopping)
+                    raise
                 logger.info("cloud browser %s stopped", browser.label)
 
 

@@ -335,6 +335,34 @@ def test_a_reset_while_the_browser_is_still_being_created_stops_it_once_created(
     assert browser_use.stopped == stopped_by_reset
 
 
+def test_closing_while_a_call_replaces_a_lost_browser_waits_for_the_old_browsers_stop(site, browser_use, monkeypatch):
+    """Playwright MCP died, so the next call stops its browser before starting a fresh one; that stop request hangs and
+    is retried as teardown's close cancels the call's start. close must not return before the stop has gone through:
+    the container goes next, and the browser with nothing left to stop it."""
+    monkeypatch.setattr(site_cloud, "STOP_REQUEST_S", 0.5)
+    monkeypatch.setattr(site_cloud, "STOP_RETRY_S", 0.1)
+    with TestClient(site.create_app()) as client:
+        mcp = _mcp(client)
+        _call(client, mcp, "browser_navigate", url="https://pypi.org/")
+        _call(client, mcp, "browser_crash")
+        time.sleep(2)  # it exits 0.2 s after it answers
+        browser_use.hanging_stops = 1
+        answers = []
+        calling = threading.Thread(target=lambda: answers.append(_call(client, mcp, "browser_navigate",
+                                                                       url="https://x/")))
+        calling.start()
+        while not browser_use.hung:
+            time.sleep(0.01)
+        time.sleep(0.2)  # the call's start is waiting on that stop
+        client.portal.call(site.playwright.close)
+        stopped_when_closed = list(browser_use.stopped)
+        calling.join(10)
+
+    [(first, _)] = browser_use.created
+    assert stopped_when_closed == [first] and not site.playwright.running
+    assert answers[0]["isError"] and "reset before browser_navigate" in answers[0]["content"][0]["text"]
+
+
 def test_teardown_closing_a_deployed_bu_browser_stops_its_sites_browser_for_good(site, browser_use, monkeypatch):
     """agent-env's teardown closes the env a run's record names (``teardown._close``), as every run's teardown does
     before it terminates sandboxes, here with the real site served on loopback behind the record's card. Only Docker
