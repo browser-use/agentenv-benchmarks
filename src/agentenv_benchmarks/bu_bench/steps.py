@@ -410,7 +410,13 @@ class BuFindingsVerifierTaskStep(TaskStep):
         try:
             # Streamed through a file both ways, never held whole in memory: a long task's MP4 is hundreds of MB.
             video = folder / "recording.mp4"
-            async with httpx.AsyncClient(timeout=120, follow_redirects=True) as client, \
+
+            async def scrubbed(request: httpx.Request) -> None:
+                """Each hop's host joins the log filter's before httpx logs it: a redirect's link is signed too."""
+                cloud.RECORDING_HOSTS.add(request.url.host)
+
+            async with httpx.AsyncClient(timeout=120, follow_redirects=True,
+                                         event_hooks={"request": [scrubbed]}) as client, \
                     client.stream("GET", urls[0]) as answer:
                 answer.raise_for_status()
                 with video.open("wb") as out:

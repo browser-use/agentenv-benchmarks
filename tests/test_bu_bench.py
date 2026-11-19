@@ -834,6 +834,33 @@ def test_httpx_request_logs_name_no_browser_and_no_signed_link(monkeypatch, capl
     assert BROWSER_ID not in caplog.text and "cdp.browser-use.com" not in caplog.text and "s3cr3t" not in caplog.text
 
 
+def test_a_recording_link_that_redirects_logs_neither_signature(monkeypatch, caplog):
+    """A recording link may redirect to another host, whose link is signed too: httpx logs every hop's URL."""
+    import logging
+    from types import SimpleNamespace
+
+    from agent_env.artifact.artifacts.file import FileArtifact
+
+    def reply(request):
+        if request.url.host == "recordings.example":
+            return httpx.Response(302, headers={"location": "https://cdn.elsewhere.example/r.mp4?X-Amz-Signature=hop2"})
+        return httpx.Response(200, content=b"mp4")
+
+    real = httpx.AsyncClient
+    monkeypatch.setattr(steps.httpx, "AsyncClient", lambda **kw: real(transport=httpx.MockTransport(reply), **kw))
+    monkeypatch.setattr(FileArtifact, "put", lambda artifact_id, file_path, description: SimpleNamespace(
+        id=artifact_id, version=1, content_type="video/mp4"))
+    monkeypatch.setattr(cloud, "RECORDING_HOSTS", set())
+    session = {"recordingUrl": "https://recordings.example/r.mp4?X-Amz-Signature=hop1"}
+
+    with caplog.at_level(logging.INFO, logger="httpx"):
+        kept = asyncio.run(steps.BuFindingsVerifierTaskStep("grade", 1, "bu2-140", "solve")._keep_recording(
+            session, SimpleNamespace(metadata={}, instance_id=None)))
+
+    assert kept["bytes"] == 3 and len([record for record in caplog.records if record.name == "httpx"]) == 2
+    assert "hop1" not in caplog.text and "hop2" not in caplog.text and "cdn.elsewhere.example" in caplog.text
+
+
 def test_logged_urls_hide_every_cdp_host_form():
     import logging
 
