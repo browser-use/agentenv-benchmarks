@@ -348,6 +348,29 @@ def test_a_reset_while_the_browser_is_still_being_created_stops_it_once_created(
     assert browser_use.stopped == stopped_by_reset
 
 
+def test_a_reset_cancelled_while_a_browser_is_being_created_still_leaves_close_to_stop_it(site, browser_use):
+    """The reset's wait for the browser being created is cut short (its caller gave up): that browser's stop must go
+    on, and close must wait for it, or Browser Use bills it until its timeout."""
+    browser_use.delay_s = 1.0
+
+    async def cut_short_reset():
+        with contextlib.suppress(TimeoutError):
+            await asyncio.wait_for(site.playwright.stop(), 0.3)
+
+    with TestClient(site.create_app()) as client:
+        mcp = _mcp(client)
+        calling = threading.Thread(target=_call, args=(client, mcp, "browser_navigate"), kwargs={"url": "https://x/"})
+        calling.start()
+        while not browser_use.asked:
+            time.sleep(0.01)
+        client.portal.call(cut_short_reset)
+        client.portal.call(site.playwright.close)
+        stopped_when_closed = list(browser_use.stopped)
+        calling.join(10)
+
+    assert [browser for browser, _ in browser_use.created] == stopped_when_closed and len(stopped_when_closed) == 1
+
+
 def test_closing_while_a_call_replaces_a_lost_browser_waits_for_the_old_browsers_stop(site, browser_use, monkeypatch):
     """Playwright MCP died, so the next call stops its browser before starting a fresh one; that stop request hangs and
     is retried as teardown's close cancels the call's start. close must not return before the stop has gone through:
@@ -457,9 +480,9 @@ class FakeBrowserUse:
             self.keys.add(request.headers.get("x-browser-use-api-key"))
             if self.refuse:
                 return JSONResponse({"detail": "too many concurrent browsers"}, 429)
-            await asyncio.sleep(self.delay_s)
             browser = f"b{len(self.created) + 1}-0123456789abcdef"
             self.created.append((browser, await request.json()))
+            await asyncio.sleep(self.delay_s)  # created, and answered late: a client that gave up never learns its id
             return JSONResponse({"id": browser, "cdpUrl": f"{self.url}/cdp/{browser}"})
 
         async def version(request):

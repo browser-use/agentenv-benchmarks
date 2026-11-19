@@ -131,10 +131,13 @@ class PlaywrightMcp:
             starting, self._starting = self._starting, None
             if starting is not None:
                 starting.cancel()
-                await asyncio.gather(starting, return_exceptions=True)
+                self._orphans.append(starting)
+                await asyncio.shield(asyncio.gather(starting, return_exceptions=True))
             await self._close()
-            orphans, self._orphans = self._orphans, []
-            await asyncio.gather(*orphans, return_exceptions=True)
+            # Shielded and listed until done: a stop cancelled here leaves them running, for close to wait on.
+            while pending := [task for task in self._orphans if not task.done()]:
+                await asyncio.shield(asyncio.gather(*pending, return_exceptions=True))
+            self._orphans = []
 
     async def close(self) -> None:
         """Stop everything for good, as the run tears the env down: a call that comes late starts no browser, which
