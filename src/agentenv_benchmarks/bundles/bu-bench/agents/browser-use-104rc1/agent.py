@@ -35,8 +35,10 @@ from pydantic import TypeAdapter
 from pydantic_ai import ModelRetry, Tool
 from pydantic_ai.messages import ModelMessagesTypeAdapter, ModelRequest
 from pydantic_ai.models.anthropic import AnthropicModel
+from pydantic_ai.models.openai import OpenAIResponsesModel
 from pydantic_ai.profiles.anthropic import anthropic_model_profile
 from pydantic_ai.providers.anthropic import AnthropicProvider
+from pydantic_ai.providers.openai import OpenAIProvider
 
 TOOL_NAME = re.compile(r"[^a-zA-Z0-9_-]")
 # The eval adapter's run started a cloud browser with its captcha solver on, so browser-use's prompt opened with these
@@ -61,6 +63,9 @@ def model(turn: dict):
     # is Agent(reasoning=...). The endpoint stands in for api.openai.com.
     os.environ["OPENAI_BASE_URL"] = base_url.rstrip("/") + "/openai/v1"
     os.environ["OPENAI_API_KEY"] = key
+    if headers:  # the model browser-use would resolve from that string, its client sending the endpoint's headers too
+        client = OpenAIProvider().client.with_options(default_headers=headers)
+        return OpenAIResponsesModel(name.removeprefix("openai/"), provider=OpenAIProvider(openai_client=client))
     return f"openai-responses:{name.removeprefix('openai/')}"
 
 
