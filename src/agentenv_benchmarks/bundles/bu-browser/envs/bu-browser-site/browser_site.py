@@ -4,7 +4,7 @@ The site starts a cloud browser, and Playwright MCP on it, at the first tool cal
 its ``timeout_minutes``, before the run has recorded the env it would have to stop; it is ready once its key is set.
 ``data/reset`` stops the browser and starts nothing: the next tool call starts a fresh one. Its ``close`` extension,
 which the run's teardown calls (``bu_browser``), stops it for good: no call starts one after it. The server's shutdown,
-SIGTERM included, stops it too, and the browser's own ``timeout_minutes`` ends it if nothing else does.
+SIGTERM included (once no tool call is in flight), stops it too, and the browser's own ``timeout_minutes`` ends it if nothing else does.
 
 ``api_key`` is a ``SecretStr`` setting, so its env.toml value is a ``secret:`` reference agentenv resolves only as it
 writes the site's container; it stays in this process, and Playwright MCP, as another user, never sees it.

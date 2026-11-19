@@ -71,7 +71,8 @@ One episode uses one browser. The browser is stopped when:
   a tool call that arrives after it starts none), which covers the final `end_turn`, an OpenEnv reset, an abandoned
   or timed-out episode, a closed session and server shutdown;
 - a `reset_env` step runs (`data/reset`: the next tool call starts a fresh browser);
-- the site's server gets SIGTERM.
+- the site's server gets SIGTERM while no tool call is in flight (uvicorn runs the shutdown that stops the browser
+  only after open requests finish, which a stop grace of a few seconds may not wait for).
 
 A failed stop request is retried twice. Each request waits at most 20 s, and the run's teardown waits up to 115 s for
 the stop. A browser whose three stop requests all failed is stopped again by the next reset or close. A browser still being created at teardown is waited for and then stopped; if its create and stop together
