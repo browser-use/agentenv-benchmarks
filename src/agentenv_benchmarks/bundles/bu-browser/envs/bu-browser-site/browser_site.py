@@ -48,7 +48,7 @@ class BuBrowser(WebsiteEnvironment):
         super().__init__()
         # cloud.py is BU Bench's, unchanged: it reads its API and key from these, here the site's settings.
         cloud.API = self.settings.api_url.rstrip("/")
-        cloud.api_key = self.settings.api_key.get_secret_value
+        cloud.api_key = lambda: self.settings.api_key.get_secret_value().strip()
         self.playwright = playwright_mcp.PlaywrightMcp(self._start_browser)
 
     async def _start_browser(self) -> cloud.CloudBrowser:
@@ -78,7 +78,7 @@ class BuBrowser(WebsiteEnvironment):
     @ready_check
     async def api_key_set(self) -> bool:
         """The key is set. It is first used at the first tool call, whose result says why if no browser starts."""
-        if not self.settings.api_key.get_secret_value():
+        if not self.settings.api_key.get_secret_value().strip():
             raise RuntimeError("the api_key setting is empty; set it to secret:BROWSER_USE_API_KEY")
         return True
 

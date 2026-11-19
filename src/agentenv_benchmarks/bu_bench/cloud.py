@@ -107,12 +107,17 @@ def scrub_json(value: Any, secrets: list[str]) -> Any:
 
 async def request(method: str, path: str, body: dict[str, Any] | None = None,
                   timeout: float | httpx.Timeout = 60) -> dict[str, Any]:
-    async with httpx.AsyncClient(timeout=timeout) as client:
-        response = await client.request(method, f"{API}{path}", json=body,
-                                        headers={"X-Browser-Use-API-Key": api_key()})
+    segment = path.strip('/').split('/')[0]
+    try:
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            response = await client.request(method, f"{API}{path}", json=body,
+                                            headers={"X-Browser-Use-API-Key": api_key().strip()})
+    except httpx.HTTPError as error:
+        # Its text can name the URL (the full browser id) or a header value it refused: the key itself.
+        raise RuntimeError(f"Browser Use API {method} /{segment} failed ({type(error).__name__})") from None
     if response.is_error:
         # httpx's own error names the URL, and /browsers/{id} carries the full browser id.
-        raise RuntimeError(f"Browser Use API {method} /{path.strip('/').split('/')[0]} returned {response.status_code}")
+        raise RuntimeError(f"Browser Use API {method} /{segment} returned {response.status_code}")
     return response.json() if response.content else {}
 
 

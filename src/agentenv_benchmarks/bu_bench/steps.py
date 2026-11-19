@@ -89,7 +89,7 @@ def _stop_leftovers() -> None:
 def _stop_at_exit(browser: cloud.CloudBrowser) -> None:
     try:
         httpx.patch(f"{cloud.API}/browsers/{browser.id}", json={"action": "stop"}, timeout=EXIT_STOP_S,
-                    headers={"X-Browser-Use-API-Key": cloud.api_key()})
+                    headers={"X-Browser-Use-API-Key": cloud.api_key().strip()})
     except Exception:  # noqa: BLE001, S110 - the browser's own timeout ends it
         pass
 
@@ -140,6 +140,9 @@ class BuCloudBrowserTaskStep(TaskStep):
         problems = []
         if not isinstance(self.timeout_minutes, int) or not 1 <= self.timeout_minutes <= 240:
             problems.append(f"step {self.id!r}: timeout_minutes must be 1..240")
+        interval = self.screenshot_interval_seconds
+        if isinstance(interval, bool) or not isinstance(interval, (int, float)) or interval < 0.5:
+            problems.append(f"step {self.id!r}: screenshot_interval_seconds must be a number >= 0.5")
         return problems
 
     def preflight(self) -> list[str]:

@@ -12,6 +12,10 @@ either.
 
 ## Run
 
+Install this repository as a plugin first (it is not on PyPI, so a bare `agent-env plugin add agentenv-benchmarks` can't
+work): `agent-env plugin add 'agentenv-benchmarks @ git+https://github.com/earakely-scale/agentenv-benchmarks'`, or
+`uv run` from a checkout.
+
 Needs a local Docker daemon (or an agent-env sandbox that builds Dockerfiles): the first run builds the agents'
 images, pulling `ghcr.io/scaleapi/agentenv-codex` and the npm and PyPI tools (top-level versions pinned). A run stops before any agent or
 browser starts when the Browser Use key or the judge key is missing. Keys are checked for presence only, not validity:

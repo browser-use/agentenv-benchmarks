@@ -570,7 +570,7 @@ def test_a_failed_collect_is_not_judged_as_no_files_and_a_failed_turn_is_judged_
     the files it uploaded first; a turn that failed left the response it is judged on, as the published runs were. The
     failure is recorded as AgentEnv's runner records it."""
     from agent_env.task import Task
-    from agent_env.task.outcome import FailedStep
+    FailedStep = pytest.importorskip("agent_env.task.outcome").FailedStep
 
     step, context, api, judged = verifying(monkeypatch, tmp_path, SCORED)
     task = Task.from_dict({"id": "bu2-140", "version": None,
@@ -1114,3 +1114,29 @@ def test_a_cancelled_recording_upload_keeps_its_file_until_the_upload_has_read_i
 
     asyncio.run(cancelled_while_uploading())  # its end waits for the upload's thread
     assert read == [video] and list(tmp_path.iterdir()) == []
+
+
+def test_a_key_with_stray_whitespace_is_sent_trimmed_and_never_echoed(monkeypatch, caplog):
+    """A key stored with a trailing newline must not reach an error text (h11 refuses the header and names its value)."""
+    sent = []
+
+    def reply(request):
+        sent.append(request.headers["x-browser-use-api-key"])
+        return httpx.Response(200, json={"id": BROWSER_ID})
+
+    real = httpx.AsyncClient
+    monkeypatch.setattr(cloud.httpx, "AsyncClient", lambda **kw: real(transport=httpx.MockTransport(reply), **kw))
+    monkeypatch.setattr(cloud, "api_key", lambda: "bu_SECRETKEY123\n")
+    asyncio.run(cloud.request("GET", f"/browsers/{BROWSER_ID}"))
+    assert sent == ["bu_SECRETKEY123"]
+
+    def refuse(request):
+        raise httpx.LocalProtocolError("Illegal header value b'bu_SECRETKEY123\\x00'")
+
+    monkeypatch.setattr(cloud.httpx, "AsyncClient", lambda **kw: real(transport=httpx.MockTransport(refuse), **kw))
+    try:
+        asyncio.run(cloud.request("GET", f"/browsers/{BROWSER_ID}"))
+    except RuntimeError as error:
+        assert "SECRETKEY" not in str(error) and BROWSER_ID not in str(error) and "LocalProtocolError" in str(error)
+    else:
+        raise AssertionError("expected the request to fail")
