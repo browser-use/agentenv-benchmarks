@@ -68,17 +68,30 @@ class _Live:
 
 #: Browsers this process started and has not stopped, by handle. Both steps run in the runner's process.
 _LIVE: dict[str, _Live] = {}
+#: How long the exit hook waits for all its stops, sent at once: httpx's timeout bounds each read, so an answer that
+#: trickles in would otherwise hold the exit, and the stops after it, without end.
+EXIT_STOP_S = 20.0
 
 
 @atexit.register
 def _stop_leftovers() -> None:
-    """A run that ends before its verifier (Ctrl-C, a crash) still stops its browsers."""
-    for browser in [live.browser for live in _LIVE.values()] + list(cloud.UNSTOPPED):
-        try:
-            httpx.patch(f"{cloud.API}/browsers/{browser.id}", json={"action": "stop"}, timeout=20,
-                        headers={"X-Browser-Use-API-Key": cloud.api_key()})
-        except Exception:  # noqa: BLE001, S110 - the browser's own timeout ends it
-            pass
+    """A run that ends before its verifier (Ctrl-C, a crash) still stops its browsers. Each stop runs on a thread of its
+    own (asyncio can't resolve a host once the interpreter is shutting down), waited for until EXIT_STOP_S has passed."""
+    browsers = [live.browser for live in _LIVE.values()] + list(cloud.UNSTOPPED)
+    threads = [threading.Thread(target=_stop_at_exit, args=(browser,), daemon=True) for browser in browsers]
+    for thread in threads:
+        thread.start()
+    deadline = time.monotonic() + EXIT_STOP_S
+    for thread in threads:
+        thread.join(max(0.0, deadline - time.monotonic()))
+
+
+def _stop_at_exit(browser: cloud.CloudBrowser) -> None:
+    try:
+        httpx.patch(f"{cloud.API}/browsers/{browser.id}", json={"action": "stop"}, timeout=EXIT_STOP_S,
+                    headers={"X-Browser-Use-API-Key": cloud.api_key()})
+    except Exception:  # noqa: BLE001, S110 - the browser's own timeout ends it
+        pass
 
 
 def _control_headers(agent) -> dict[str, str]:

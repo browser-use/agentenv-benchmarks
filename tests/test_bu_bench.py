@@ -967,6 +967,48 @@ def test_a_stop_whose_answer_trickles_in_still_ends_within_its_budget(monkeypatc
     assert time.monotonic() - started < cloud.STOP_ATTEMPTS * 0.3 + 1 and not browser.stopped
 
 
+def test_the_exit_hooks_stops_end_by_its_deadline_and_one_that_trickles_holds_back_no_other(monkeypatch):
+    """httpx's timeout bounds each read: a stop answer that keeps sending must neither hold the exit nor the stops of
+    the browsers after it. Here Browser Use answers the first browser's stop a byte at a time, on a real socket."""
+    import socketserver
+    import threading
+    import time
+
+    stopped, done = [], threading.Event()
+
+    class BrowserUse(socketserver.BaseRequestHandler):
+        def handle(self):
+            request = self.request.recv(65536).decode()
+            path = request.split(" ")[1]
+            if path.endswith("/browsers/trickling"):
+                self.request.sendall(b"HTTP/1.1 200 OK\r\nContent-Length: 1000\r\n\r\n")
+                while not done.wait(0.05):
+                    self.request.sendall(b" ")
+                return
+            stopped.append(path.rsplit("/", 1)[1])
+            self.request.sendall(b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\n{}")
+
+    server = socketserver.ThreadingTCPServer(("127.0.0.1", 0), BrowserUse)
+    server.daemon_threads = True
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    monkeypatch.setattr(cloud, "API", f"http://127.0.0.1:{server.server_address[1]}")
+    monkeypatch.setattr(cloud, "api_key", lambda: "k")
+    monkeypatch.setattr(steps, "EXIT_STOP_S", 0.5)
+    monkeypatch.setattr(steps, "_LIVE", {"h1": steps._Live(cloud.CloudBrowser(id="trickling", ws_url=WS), None,
+                                                           Path("."), 0.0)})
+    monkeypatch.setattr(cloud, "UNSTOPPED", [cloud.CloudBrowser(id="unstopped", ws_url=WS)])
+    try:
+        started = time.monotonic()
+        steps._stop_leftovers()
+        took = time.monotonic() - started
+    finally:
+        done.set()
+        server.shutdown()
+        server.server_close()
+
+    assert stopped == ["unstopped"] and took < 0.5 + 0.5
+
+
 def test_the_log_filter_leaves_requests_to_other_hosts_as_they_are():
     """It is process-wide: a bundle run beside BU Bench keeps its own log lines."""
     import logging
