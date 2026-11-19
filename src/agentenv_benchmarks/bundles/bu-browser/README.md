@@ -41,6 +41,28 @@ export BROWSER_USE_API_KEY=...   # the local secret store reads the environment;
 agent-env run bu-browser --eval example
 ```
 
+Each deploy logs `env_deploy_tools_probe ... status=missing ... missing=bu-browser-site` at WARNING: the site's card
+lists `browser_evaluate`, which the gateway hides until a task enables it. That is expected.
+
+## Serve for RL
+
+```bash
+pip install "agentenv-framework[openenv]" git+https://github.com/earakely-scale/agentenv-benchmarks
+export BROWSER_USE_API_KEY=... OPENENV_TOKEN=...
+```
+
+```python
+import os
+
+import uvicorn
+from agent_env.openenv import build_app
+
+uvicorn.run(build_app("bu-browser", token=os.environ["OPENENV_TOKEN"]), host="0.0.0.0", port=8000)
+```
+
+Clients send `Authorization: Bearer $OPENENV_TOKEN`. Without a token, anyone who reaches the server starts Browser
+Use browsers on your key.
+
 ## Cost and cleanup
 
 One episode uses one browser. The browser is stopped when:
