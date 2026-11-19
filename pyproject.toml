@@ -34,6 +34,7 @@ bu_findings_verifier = "agentenv_benchmarks.bu_bench.steps:BuFindingsVerifierTas
 Repository = "https://github.com/earakely-scale/agentenv-benchmarks"
 
 [dependency-groups]
+# tomli-w: the bu-bench Codex arms' tests import AgentEnv's Codex agent sources, whose codex_config.py imports tomli_w.
 dev = ["pytest>=8", "ruff>=0.6", "huggingface_hub>=0.30", "jinja2>=3.1", "tomli-w>=1.2"]
 
 [build-system]

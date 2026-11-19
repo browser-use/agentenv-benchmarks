@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 
 import httpx
+import pytest
 
 from agentenv_benchmarks.bu_bench import cloud, evidence, steps, tasks
 
@@ -131,16 +132,25 @@ def test_screenshot_errors_are_scrubbed(tmp_path):
 
 
 def codex_tools_agent(monkeypatch):
-    """The Codex arms' agent module, imported over AgentEnv's own Codex agent sources (the image's base)."""
+    """The Codex arms' agent module, imported over AgentEnv's own Codex agent sources (the image's base). Those are
+    AgentEnv's private layout, not its API: a version that moves or renames them skips these tests, saying so."""
     import sys
 
     import agent_env
 
     codex = Path(agent_env.__file__).parent / "agents" / "agents" / "codex"
+    if not (codex / "a2a_server.py").is_file():
+        pytest.skip(f"this AgentEnv has no Codex agent sources at {codex}, which the Codex arms' image builds on")
     monkeypatch.syspath_prepend(str(codex))
     monkeypatch.syspath_prepend(str(BUNDLE / "artifacts" / "codex-browser-tools"))
     monkeypatch.delitem(sys.modules, "codex_tools_agent", raising=False)
-    return importlib.import_module("codex_tools_agent")
+    try:
+        return importlib.import_module("codex_tools_agent")
+    except ImportError as error:
+        ours = {path.stem for path in codex.glob("*.py")}
+        if error.name in ours or str(error.name).startswith("agentenv_protocol"):
+            pytest.skip(f"this AgentEnv's Codex agent sources lack what the Codex arms' agent imports: {error}")
+        raise
 
 
 def test_every_codex_arm_has_an_agent_on_the_one_image(monkeypatch):
@@ -202,16 +212,24 @@ def test_repository_carries_no_decrypted_task_text():
         needles[task["canary"]] = f"{task['id']} canary"
         for field in ("task", "rubric", "summary", "title"):
             text = " ".join(str(task.get(field) or "").split())
-            if len(text) >= 40:
-                needles |= {text[i:i + 40]: f"{task['id']} {field}" for i in (0, len(text) // 2 - 20, len(text) - 40)}
+            if len(text) >= 20:  # every 40 characters, and the tail, so any 80 copied characters hold a whole needle
+                for needle in {text[i:i + 40] for i in range(0, len(text) - 39, 40)} | {text[-40:]}:
+                    needles[needle] = f"{task['id']} {field}"
+    long = {needle: where for needle, where in needles.items() if len(needle) == 40}
+    short = {needle: where for needle, where in needles.items() if len(needle) != 40}
     skip = {".git", ".venv", ".pytest_cache", ".ruff_cache", "__pycache__", "node_modules"}
+    # The judge's files are the public benchmark's own, checked byte for byte against it as it runs; its prompt shares
+    # the rubrics' template text.
+    public = {tasks.JUDGE_DIR / name for name in json.loads((tasks.JUDGE_DIR / "SOURCE.json").read_text())["files"]}
     leaks = []
     ours = [ROOT / "src" / "agentenv_benchmarks" / "bu_bench", BUNDLE, TOOLS, Path(__file__)]
     for path in (p for top in ours for p in ([top] if top.is_file() else top.rglob("*"))):
-        if path.is_dir() or skip & set(path.relative_to(ROOT).parts) or path.suffix == ".enc":
+        if path.is_dir() or skip & set(path.relative_to(ROOT).parts) or path in public:
             continue
         text = " ".join(path.read_bytes().decode("utf-8", "replace").split())
-        leaks += [f"{path.relative_to(ROOT)}: {where}" for needle, where in needles.items() if needle in text]
+        windows = {text[i:i + 40] for i in range(len(text) - 39)}
+        leaks += [f"{path.relative_to(ROOT)}: {long[needle]}" for needle in windows & long.keys()]
+        leaks += [f"{path.relative_to(ROOT)}: {where}" for needle, where in short.items() if needle in text]
     assert not leaks, leaks[:5]  # where, never the text itself: CI logs can be public
 
 
@@ -271,5 +289,5 @@ def test_bundle_tasks_are_what_make_bundle_writes(tmp_path, monkeypatch):
     make_bundle.main()
     for kind in ("tasks", "evals"):
         written = {p.name: p.read_text() for p in (fake / kind).iterdir()}
-        committed = {p.name: p.read_text() for p in (BUNDLE / kind).iterdir() if not p.name.startswith("ci-")}
+        committed = {p.name: p.read_text() for p in (BUNDLE / kind).iterdir()}
         assert written == committed, kind
