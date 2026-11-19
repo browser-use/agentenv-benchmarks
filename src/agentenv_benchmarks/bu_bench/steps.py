@@ -21,7 +21,6 @@ import json
 import logging
 import os
 import shutil
-import subprocess
 import sys
 import tempfile
 import time
@@ -293,7 +292,7 @@ class BuFindingsVerifierTaskStep(TaskStep):
             "final_output": final_output,
             "metadata": {"steps": steps, "judge_screenshots": [f"judge_screenshots/{n}" for n in shot_names],
                          "output_files": files}}))
-        judgment = await asyncio.to_thread(self._judge, workspace)
+        judgment = await self._judge(workspace)
         report["judgment"] = {k: judgment.get(k) for k in ("status", "score", "reason", "failure_class", "model")}
         (workspace / "report.json").write_text(json.dumps(report, indent=1, default=str))
 
@@ -425,9 +424,10 @@ class BuFindingsVerifierTaskStep(TaskStep):
             logger.warning("keeping the recording of %s failed (%s)", self.task_id, type(error).__name__)
             return {"available": True, "artifact_id": None, "error": type(error).__name__}
 
-    def _judge(self, workspace: Path) -> dict[str, Any]:
+    async def _judge(self, workspace: Path) -> dict[str, Any]:
         """The judge's judgment, asked up to JUDGE_ATTEMPTS times while it errs: one failed judge request must not
-        lose the task, and its evidence is still on disk."""
+        lose the task, and its evidence is still on disk. Cancelled, it kills the judge it runs: no judge goes on
+        asking the model for a task nobody waits on."""
         key = _judge_key()
         if not key:
             return {"status": "error", "reason": "no judge key: set BU_BENCH_JUDGE_API_KEY or OPENAI_API_KEY"}
@@ -442,14 +442,19 @@ class BuFindingsVerifierTaskStep(TaskStep):
             if attempt > 1:
                 logger.warning("judging %s failed (%s), attempt %d of %d", self.task_id, judgment.get("reason"),
                                attempt - 1, JUDGE_ATTEMPTS)
-                time.sleep(JUDGE_RETRY_S * (attempt - 1))
+                await asyncio.sleep(JUDGE_RETRY_S * (attempt - 1))
             (workspace / "judgment.json").unlink(missing_ok=True)
             with (workspace / "judge.log").open("a") as log:
+                judge = await asyncio.create_subprocess_exec(sys.executable, str(JUDGE_RUN), env=env, stdout=log,
+                                                             stderr=asyncio.subprocess.STDOUT)
                 try:
-                    subprocess.run([sys.executable, str(JUDGE_RUN)], env=env, stdout=log, stderr=subprocess.STDOUT,
-                                   timeout=JUDGE_TIMEOUT_S, check=False)
-                except subprocess.TimeoutExpired:
+                    await asyncio.wait_for(judge.wait(), JUDGE_TIMEOUT_S)
+                except TimeoutError:
                     return {"status": "error", "reason": f"judge timed out after {JUDGE_TIMEOUT_S}s"}
+                finally:
+                    if judge.returncode is None:
+                        judge.kill()
+                        await asyncio.shield(judge.wait())
             try:
                 judgment = json.loads((workspace / "judgment.json").read_text())
             except (OSError, ValueError) as error:

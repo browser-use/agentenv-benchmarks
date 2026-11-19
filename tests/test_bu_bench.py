@@ -4,7 +4,9 @@ import dataclasses
 import importlib.util
 import io
 import json
+import os
 import re
+import textwrap
 from pathlib import Path
 
 import httpx
@@ -412,8 +414,8 @@ def verifying(monkeypatch, tmp_path, judgment, failing_stops=0, evidence_dir=Non
               trajectory=TRAJECTORY):
     """A live browser as bu_cloud_browser leaves it, the agent's answered turn, its delivered files (``artifacts``,
     name: bytes, or None for one whose download fails) in a faked object store, Browser Use's API faked, the judge
-    answering ``judgment``, and the verifier step with the context it runs in. The stored ``trajectory`` is None
-    for one whose read fails."""
+    answering ``judgment`` (None: the real judge runs), and the verifier step with the context it runs in. The stored
+    ``trajectory`` is None for one whose read fails."""
     from types import SimpleNamespace
 
     import agent_env.config
@@ -442,11 +444,12 @@ def verifying(monkeypatch, tmp_path, judgment, failing_stops=0, evidence_dir=Non
         monkeypatch.setenv(steps.EVIDENCE_DIR_ENV, str(evidence_dir))
     judged = []
 
-    def judge(self, workspace):
+    async def judge(self, workspace):
         judged.append(workspace)
         return judgment
 
-    monkeypatch.setattr(steps.BuFindingsVerifierTaskStep, "_judge", judge)
+    if judgment is not None:
+        monkeypatch.setattr(steps.BuFindingsVerifierTaskStep, "_judge", judge)
     browser = cloud.CloudBrowser(id=BROWSER_ID, ws_url=WS, cdp_url=f"https://{BROWSER_ID}.cdp.browser-use.com")
     shots = cloud.Screenshots("ws://127.0.0.1:9/devtools/browser/x", tmp_path / "shots")  # nothing answers there
     monkeypatch.setattr(steps, "_LIVE", {handle: steps._Live(browser, shots, tmp_path / "shots", 0.0)})
@@ -626,25 +629,55 @@ def test_two_runs_of_a_task_in_one_run_group_keep_their_own_evidence(monkeypatch
     assert all((folder / "result.json").exists() for folder in (tmp_path / "evidence").iterdir())
 
 
+def fake_judge(monkeypatch, tmp_path, code: str) -> None:
+    """The judge replaced by ``code``, a Python script run as the real one is, its paths in EVAL_*."""
+    script = tmp_path / "fake_judge.py"
+    script.write_text("import json, os, time\nfrom pathlib import Path\n" + textwrap.dedent(code))
+    monkeypatch.setattr(steps, "JUDGE_RUN", script)
+    monkeypatch.setenv("BU_BENCH_JUDGE_API_KEY", "k")
+
+
 @pytest.mark.parametrize("answers, runs, status", [(["error", "scored"], 2, "scored"),
                                                    (["error", "error", "error", "scored"], 3, "error")],
                          ids=["one transient error", "errs every time"])
 def test_a_judge_error_is_asked_again_before_the_task_is_given_up(monkeypatch, tmp_path, answers, runs, status):
-    import subprocess
-
-    ran = []
-
-    def judge_run(args, *, env, **kwargs):
-        ran.append(args)
-        Path(env["EVAL_JUDGMENT_PATH"]).write_text(json.dumps({"status": answers[len(ran) - 1], "score": 0.5}))
-        return subprocess.CompletedProcess(args, 0)
-
-    monkeypatch.setattr(steps.subprocess, "run", judge_run)
+    fake_judge(monkeypatch, tmp_path, f"""
+        runs = Path(os.environ["EVAL_WORKSPACE"]) / "runs"
+        runs.write_text((runs.read_text() if runs.exists() else "") + "x")
+        answer = {answers!r}[len(runs.read_text()) - 1]
+        Path(os.environ["EVAL_JUDGMENT_PATH"]).write_text(json.dumps({{"status": answer, "score": 0.5}}))
+    """)
     monkeypatch.setattr(steps, "JUDGE_RETRY_S", 0)
-    monkeypatch.setenv("BU_BENCH_JUDGE_API_KEY", "k")
     step = steps.BuFindingsVerifierTaskStep("grade", 1, "bu2-140", "solve")
 
-    assert step._judge(tmp_path)["status"] == status and len(ran) == runs
+    assert asyncio.run(step._judge(tmp_path))["status"] == status and len((tmp_path / "runs").read_text()) == runs
+
+
+def test_grading_cancelled_kills_the_judge_it_runs(monkeypatch, tmp_path):
+    """The run gave up on the task (its timeout, Ctrl-C): a judge left running would go on asking the model, billed."""
+    step, context, _, _ = verifying(monkeypatch, tmp_path, None)
+    fake_judge(monkeypatch, tmp_path, """
+        (Path(os.environ["EVAL_WORKSPACE"]) / "pid").write_text(str(os.getpid()))
+        time.sleep(60)
+    """)
+    monkeypatch.setenv(steps.EVIDENCE_DIR_ENV, str(tmp_path / "evidence"))
+
+    async def grade_then_cancel() -> bool:
+        grading = asyncio.ensure_future(step.execute(context))
+        while not (pid := next((p.read_text() for p in (tmp_path / "evidence").glob("*/pid")), "")):
+            await asyncio.sleep(0.05)
+        grading.cancel()
+        await asyncio.gather(grading, return_exceptions=True)
+        try:
+            os.kill(int(pid), 0)
+        except ProcessLookupError:
+            return True  # killed and reaped
+        os.kill(int(pid), 9)
+        return False
+
+    assert asyncio.run(grade_then_cancel())
+
+
 @pytest.mark.parametrize("answer, failing_stops, left", [(401, 0, False), (500, 0, False), (500, 3, True)],
                          ids=["handoff 401", "handoff 500", "handoff 500, every stop fails"])
 def test_a_failed_browser_handoff_stops_the_browser_or_leaves_it_to_the_exit_hook(monkeypatch, answer, failing_stops,
