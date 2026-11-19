@@ -1,5 +1,6 @@
 import asyncio
 import base64
+import dataclasses
 import importlib.util
 import io
 import json
@@ -265,6 +266,30 @@ def test_codex_turn_keeps_mcp_config_and_scrubs_the_browser(monkeypatch):
     assert BROWSER_ID not in json.dumps(events) and seen["prompt"].endswith("Task:\ntask\n")
     assert 'web_search="disabled"' in seen["overrides"]
     assert any(o.startswith("mcp_servers.playwright.args=") and BROWSER_ID in o for o in seen["overrides"])
+
+
+def test_codex_turn_result_and_bridge_logs_never_carry_the_browser(monkeypatch, caplog):
+    """The framework sends the result's warnings in the turn's data and its error as the failure, and Codex's bridge logs
+    both before run_codex returns them; a tool's error text can carry the address."""
+    import logging
+
+    agent = codex_tools_agent(monkeypatch)
+    import codex_bridge
+
+    async def fake_codex(**kwargs):
+        logging.getLogger("codex_bridge").info("codex CLI emitted %d non-fatal notice(s): %s", 1, f"cannot reach {WS}")
+        return codex_bridge.CodexResult(response=f"FINAL ANSWER: {WS}", tool_call_count=1, session_id="s",
+                                        error=f"turn failed at {WS}", error_detail=WS,
+                                        warnings=[f'{{"message": "connect {BROWSER_ID}.cdp.browser-use.com refused"}}'],
+                                        trajectory=[{"type": "error", "message": WS}])
+
+    monkeypatch.setattr(agent, "_run_codex", fake_codex)
+    monkeypatch.setattr(agent, "_cdp_url", WS)
+    with caplog.at_level(logging.INFO, logger="codex_bridge"):
+        result = asyncio.run(agent.run_codex(prompt="task"))
+
+    assert BROWSER_ID not in json.dumps(dataclasses.asdict(result)) and caplog.records
+    assert BROWSER_ID not in caplog.text and result.response == "FINAL ANSWER: <cdp>" and result.tool_call_count == 1
 
 
 def test_repository_carries_no_decrypted_task_text():

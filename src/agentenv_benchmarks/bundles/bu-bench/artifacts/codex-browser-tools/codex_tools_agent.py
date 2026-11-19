@@ -10,8 +10,9 @@ Changes to the agent this image is built on, and nothing else:
   started as the bake-off started it. With no browser the turn fails rather than start one of its own.
 - Each turn's message is the bake-off prompt for the tool: its rules, then the task the step sends.
 - Each turn's Codex runs as the bake-off's did: no web search tool and no repository instructions.
-- The browser's CDP address, which alone reaches it, is scrubbed from the events the trajectory keeps and from the
-  turn's reply and errors, in case a command or a tool prints it.
+- The browser's CDP address, which alone reaches it, is scrubbed from the events the trajectory keeps, from every text
+  the turn's result carries (its reply, errors and warnings) and from what Codex's bridge logs, in case a command or a
+  tool prints it.
 """
 
 from __future__ import annotations
@@ -19,6 +20,7 @@ from __future__ import annotations
 import dataclasses
 import hashlib
 import json
+import logging
 import os
 import socket
 import subprocess
@@ -274,10 +276,22 @@ async def run_codex(*, prompt: str, config_overrides=(), event_callback=None, **
                                   event_callback=record if event_callback else None, **kwargs)
     except Exception as error:  # noqa: BLE001 - re-raised with the browser address scrubbed
         raise RuntimeError(scrub(str(error))) from None
-    if dataclasses.is_dataclass(result):
-        result = dataclasses.replace(result, **{name: scrub(value) for name in ("response", "error")
-                                                if isinstance(value := getattr(result, name, None), str)})
+    if dataclasses.is_dataclass(result):  # its texts: the reply, errors, warnings (sent in the turn's data) and events
+        result = dataclasses.replace(result, **{
+            field.name: json.loads(scrub(json.dumps(value))) for field in dataclasses.fields(result)
+            if field.init and isinstance(value := getattr(result, field.name), (str, list))})
     return result
+
+
+class _ScrubbedLog(logging.Filter):
+    """Codex's bridge logs the turn's errors and warnings before run_codex returns them."""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        record.msg, record.args = scrub(record.getMessage()), None
+        return True
+
+
+logging.getLogger("codex_bridge").addFilter(_ScrubbedLog())  # the module a2a_server imports run_codex from
 
 
 a2a_server.run_codex = run_codex
