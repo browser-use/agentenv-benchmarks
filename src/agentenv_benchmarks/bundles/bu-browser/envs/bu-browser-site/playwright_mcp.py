@@ -57,6 +57,8 @@ STOP_S = 10.0
 POLL_S = 0.1
 #: How long a check that Browser Use still runs the browser waits for its CDP discovery.
 PROBE_S = 10.0
+#: The wait before a check whose connection was refused asks once more.
+PROBE_RETRY_S = 1.0
 #: What a call's result starts with when its browser replaced one that ended without a reset.
 REPLACED = ("The browser ended and this call ran on a fresh one: the pages, tabs and anything signed in before it are "
             "gone.")
@@ -86,7 +88,7 @@ class PlaywrightMcp:
     """The browser ``start_browser`` starts (a ``cloud.CloudBrowser``), Playwright MCP on it and one session there.
     ``start`` brings all three up once, shared by every caller, and again after ``stop`` or once one has ended, which
     the first result on the new browser says (REPLACED); ``stop`` ends them, a start under way included, and starts
-    nothing, so a reset leaves no browser running."""
+    nothing, so a reset leaves no browser running; ``close`` stops them for good: no call starts a browser after it."""
 
     def __init__(self, start_browser: Callable[[], Awaitable[Any]]) -> None:
         self._start_browser = start_browser
@@ -96,6 +98,7 @@ class PlaywrightMcp:
         self._process: asyncio.subprocess.Process | None = None
         self._session: _Session | None = None
         self._orphans: list[asyncio.Task] = []
+        self.closed = False
 
     def tools(self) -> list[ForwardedTool]:
         return [ForwardedTool.listed(t, functools.partial(self.call, t["name"]),
@@ -108,6 +111,8 @@ class PlaywrightMcp:
 
     async def start(self) -> _Session:
         async with self._lock:
+            if self.closed:
+                raise RuntimeError("the env has closed, so no browser starts")
             if self._starting is None or self._starting.done() and not self._up():
                 ended = self._starting is not None and _succeeded(self._starting)  # a browser this one replaces
                 self._starting = asyncio.create_task(self._start(REPLACED if ended else None))
@@ -126,6 +131,12 @@ class PlaywrightMcp:
             await self._close()
             orphans, self._orphans = self._orphans, []
             await asyncio.gather(*orphans, return_exceptions=True)
+
+    async def close(self) -> None:
+        """Stop everything for good, as the run tears the env down: a call that comes late starts no browser, which
+        nothing would stop once the container is removed."""
+        self.closed = True
+        await self.stop()
 
     async def call(self, tool: str, /, **arguments: Any) -> CallToolResult:
         """``tool`` called on Playwright MCP, its text scrubbed of the browser's CDP address, or refused saying why.
@@ -229,12 +240,28 @@ def _succeeded(task: asyncio.Task) -> bool:
 
 
 async def _ended(browser: Any) -> bool:
-    """Whether Browser Use no longer runs ``browser``: its CDP discovery, which needs no key, doesn't answer."""
-    try:
-        async with httpx.AsyncClient(timeout=PROBE_S) as client:
-            return (await client.get(f"{browser.cdp_url}/json/version")).is_error
-    except httpx.HTTPError:
-        return True
+    """Whether Browser Use no longer runs ``browser``: its CDP discovery, which needs no key, answers 404 or 410, or
+    refuses the connection twice. Anything else (a timeout, a 5xx) is no answer: the browser is left running."""
+    for attempt in range(2):
+        if attempt:
+            await asyncio.sleep(PROBE_RETRY_S)
+        try:
+            async with httpx.AsyncClient(timeout=PROBE_S) as client:
+                return (await client.get(f"{browser.cdp_url}/json/version")).status_code in (404, 410)
+        except httpx.ConnectError as error:
+            if not _refused_connection(error):
+                return False
+        except httpx.HTTPError:
+            return False
+    return True
+
+
+def _refused_connection(error: BaseException) -> bool:
+    while error is not None:
+        if isinstance(error, ConnectionRefusedError):
+            return True
+        error = error.__cause__ or error.__context__
+    return False
 
 
 async def _stop_once_started(browser_start: asyncio.Future) -> None:

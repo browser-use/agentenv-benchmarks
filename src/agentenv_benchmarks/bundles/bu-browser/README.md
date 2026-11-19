@@ -15,7 +15,9 @@ browser of the run's own:
   gateway serves them to the agent like any MCP env's tools. The site is ready once its key is set; a bad key or an
   account at its concurrency limit shows up as the first tool call's error.
 - If Browser Use ends the browser mid-episode (its `timeout_minutes`, a crash), the next failing call says so and the
-  call after it starts a fresh browser. If Playwright MCP dies, the next call starts a fresh browser and its result
+  call after it starts a fresh browser. A call fails that way only when the browser's CDP discovery answers 404 or 410
+  or refuses the connection twice; any other failed check (a timeout, a 5xx) leaves the browser, and the call returns
+  the tool's own error. If Playwright MCP dies, the next call starts a fresh browser and its result
   says the earlier pages are gone.
 - `browser_evaluate` is hidden until a task's tool access enables it. `browser_run_code_unsafe` is never served,
   because it would run the agent's code in the site's container, and neither is `browser_close`, which can end the
@@ -40,13 +42,18 @@ agent-env run bu-browser --eval example
 
 One episode uses one browser. The browser is stopped when:
 
-- the run tears down (`bu_browser` closes by sending `data/reset` to the site), which covers the final `end_turn`, an
-  OpenEnv reset, an abandoned or timed-out episode, a closed session and server shutdown;
-- a `reset_env` step runs;
+- the run tears down (`bu_browser` closes by calling the site's `close` extension, which stops the browser for good:
+  a tool call that arrives after it starts none), which covers the final `end_turn`, an OpenEnv reset, an abandoned
+  or timed-out episode, a closed session and server shutdown;
+- a `reset_env` step runs (`data/reset`: the next tool call starts a fresh browser);
 - the site's server gets SIGTERM.
 
-If none of these happens, for example because the server process is killed outright, Browser Use ends the browser
-after `timeout_minutes` (30 by default), counted from the first tool call. Keep it at or above the task's turn
+A failed stop request is retried twice. If none of these happens, Browser Use ends the browser after `timeout_minutes`
+(30 by default), counted from the first tool call. That is the case when:
+
+- the server process or its container is killed outright;
+- the run's teardown skips `close()`: a retried `deploy_env` span's earlier deployment, and an env on a provider that
+  is not one of agent-env's built-in env providers, are not closed by it. Keep it at or above the task's turn
 timeouts.
 `build_app` serves up to 8 episodes at once by default (`max_concurrent_envs`), so that is up to 8 browsers. Check
 your Browser Use account's concurrency limit before you scale.

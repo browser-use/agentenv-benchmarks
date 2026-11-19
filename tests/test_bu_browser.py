@@ -12,6 +12,7 @@ import sys
 import threading
 import time
 import tomllib
+from collections.abc import Awaitable
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -120,30 +121,30 @@ def test_the_sites_cloud_client_is_bu_benchs_byte_for_byte():
     assert (SITE / "cloud.py").read_bytes() == Path(bu_bench_cloud.__file__).read_bytes()
 
 
-@pytest.mark.parametrize("reset_fails", [False, True], ids=["reset", "reset fails"])
-def test_closing_resets_the_site_then_closes_the_env(monkeypatch, reset_fails):
-    calls = _closing(monkeypatch, reset=RuntimeError("gateway gone") if reset_fails else None)
+@pytest.mark.parametrize("stop_fails", [False, True], ids=["stopped", "stop fails"])
+def test_closing_stops_the_sites_browser_for_good_then_closes_the_env(monkeypatch, stop_fails):
+    calls, deployed = _closing(monkeypatch, answer=RuntimeError("gateway gone") if stop_fails else None)
     env = _env()
-    env._deployed = "deployment"
+    env._deployed = deployed
 
     asyncio.run(env.close())
 
-    assert calls == [("reset", "deployment"), ("close",)]
+    assert calls == [("invoke", browser_site.CLOSE_URI, "close", "bu-browser-site"), ("close",)]
 
 
-def test_closing_gives_up_on_a_reset_that_hangs_and_still_closes(monkeypatch):
-    calls = _closing(monkeypatch, reset=asyncio.sleep(60))
+def test_closing_gives_up_on_a_stop_that_hangs_and_still_closes(monkeypatch):
+    calls, deployed = _closing(monkeypatch, answer=asyncio.sleep(60))
     monkeypatch.setattr(bu_env, "STOP_TIMEOUT_S", 0.05)
     env = _env()
-    env._deployed = "deployment"
+    env._deployed = deployed
 
     asyncio.run(env.close())
 
-    assert calls == [("reset", "deployment"), ("close",)]
+    assert calls == [("invoke", browser_site.CLOSE_URI, "close", "bu-browser-site"), ("close",)]
 
 
 def test_closing_an_env_never_deployed_only_closes(monkeypatch):
-    calls = _closing(monkeypatch)
+    calls, _ = _closing(monkeypatch)
 
     asyncio.run(_env().close())
 
@@ -201,6 +202,33 @@ def test_a_browser_browser_use_ended_is_said_to_have_ended_and_the_next_call_get
     assert failed_once_ended["isError"] and "the browser ended during browser_click" in failed_once_ended["content"][0]["text"]
     assert stopped_once_ended == [first]
     assert again.startswith("navigated to https://pypi.org/ over <cdp>") and second != first
+
+
+@pytest.mark.parametrize("answer", [503, "hang"], ids=["CDP discovery 503", "CDP discovery timeout"])
+def test_a_browser_whose_check_says_nothing_stays_and_the_call_gets_its_own_error(site, browser_use, monkeypatch,
+                                                                                  answer):
+    monkeypatch.setattr(playwright_mcp, "PROBE_S", 0.5)
+    with TestClient(site.create_app()) as client:
+        mcp = _mcp(client)
+        _call(client, mcp, "browser_navigate", url="https://pypi.org/")
+        browser_use.probe = answer
+        failed = _call(client, mcp, "browser_click", ref="e1")
+        stopped = list(browser_use.stopped)
+        again = _text(_call(client, mcp, "browser_navigate", url="https://pypi.org/"))
+
+    # Neither a 5xx nor a probe that times out says Browser Use ended the browser: it stays, and the agent gets the
+    # tool's own error.
+    assert failed["isError"] and "has been closed (clicking e1)" in failed["content"][0]["text"]
+    assert stopped == [] and len(browser_use.created) == 1 and again.startswith("navigated to https://pypi.org/")
+
+
+def test_a_browser_whose_cdp_discovery_refuses_connections_has_ended(monkeypatch):
+    from types import SimpleNamespace
+
+    monkeypatch.setattr(playwright_mcp, "PROBE_RETRY_S", 0.0)
+    gone = SimpleNamespace(cdp_url=f"http://127.0.0.1:{_free_port()}")  # nothing listens there
+
+    assert asyncio.run(playwright_mcp._ended(gone)) is True
 
 
 def test_the_first_result_on_the_browser_that_replaced_one_playwright_mcp_lost_says_the_pages_are_gone(site, browser_use):
@@ -276,7 +304,7 @@ def test_a_reset_while_the_browser_is_still_being_created_stops_it_once_created(
     assert browser_use.stopped == stopped_by_reset
 
 
-def test_teardown_closing_a_deployed_bu_browser_resets_its_site_which_stops_the_browser(site, browser_use, monkeypatch):
+def test_teardown_closing_a_deployed_bu_browser_stops_its_sites_browser_for_good(site, browser_use, monkeypatch):
     """agent-env's teardown closes the env a run's record names (``teardown._close``), as every run's teardown does
     before it terminates sandboxes, here with the real site served on loopback behind the record's card. Only Docker
     is stood in for: the record's sandbox, which the env reattaches and terminates last."""
@@ -316,9 +344,13 @@ def test_teardown_closing_a_deployed_bu_browser_resets_its_site_which_stops_the_
         running = list(browser_use.stopped)
 
         asyncio.run(teardown._close(record, teardown.TERMINATE_TIMEOUT_SECONDS))
+        # A call that comes after teardown's stop, before the container is removed, starts no browser that nothing
+        # would stop; a reset_env's data/reset, by contrast, leaves the next call free to start one.
+        late = _call(client, _mcp(client), "browser_navigate", url="https://pypi.org/")
 
         assert running == [] and browser_use.stopped == [browser] and not site.playwright.running
-        assert terminated == ["sandbox-1"]
+        assert late["isError"] and "the env has closed" in late["content"][0]["text"]
+        assert len(browser_use.created) == 1 and terminated == ["sandbox-1"]
 
 
 class FakeBrowserUse:
@@ -334,6 +366,8 @@ class FakeBrowserUse:
         self.ended: set[str] = set()
         self.refuse = False
         self.delay_s = 0.0
+        #: What CDP discovery answers, once set: that status, or with "hang" nothing in time.
+        self.probe: int | str | None = None
 
     def app(self) -> Starlette:
         async def create(request):
@@ -349,6 +383,10 @@ class FakeBrowserUse:
         async def version(request):
             if request.path_params["id"] in self.ended:
                 return JSONResponse({"detail": "not found"}, 404)
+            if self.probe == "hang":
+                await asyncio.sleep(5)
+            elif self.probe:
+                return JSONResponse({"detail": "unavailable"}, self.probe)
             return JSONResponse({"webSocketDebuggerUrl": f"ws://cdp.test/devtools/{request.path_params['id']}"})
 
         async def stop(request):
@@ -402,26 +440,29 @@ def site(browser_use, tmp_path, monkeypatch):
     playwright_mcp.manifest.cache_clear()
 
 
-def _closing(monkeypatch, reset: BaseException | asyncio.Future | None = None) -> list[tuple]:
+def _closing(monkeypatch, answer: BaseException | Awaitable | None = None) -> tuple[list[tuple], object]:
+    """What closing does, recorded, and a deployment whose extension calls answer ``answer``."""
     calls: list[tuple] = []
 
-    async def resetting(self, deployed):
-        calls.append(("reset", deployed))
-        if isinstance(reset, BaseException):
-            raise reset
-        if reset is not None:
-            await reset
+    class Deployed:
+        async def invoke(self, uri, method, *, environment_name):
+            calls.append(("invoke", uri, method, environment_name))
+            if isinstance(answer, BaseException):
+                raise answer
+            if answer is not None:
+                await answer
 
     async def closing(self):
         calls.append(("close",))
 
-    monkeypatch.setattr(bu_env.BuBrowserEnv, "reset", resetting)
     monkeypatch.setattr(MultiEnv, "close", closing)
-    return calls
+    return calls, Deployed()
 
 
 def _env() -> bu_env.BuBrowserEnv:
-    return bu_env.BuBrowserEnv(id="bu-browser", version=1, mcp_server_envs=[], website_envs=[], browser_envs=[])
+    site = WebsiteEnv(id="bu-browser-site", version=1, server_docker_image_artifact=MagicMock(),
+                      environment_name="bu-browser-site", domains=["bu-browser.localhost"])
+    return bu_env.BuBrowserEnv(id="bu-browser", version=1, mcp_server_envs=[], website_envs=[site], browser_envs=[])
 
 
 def _reward_of():

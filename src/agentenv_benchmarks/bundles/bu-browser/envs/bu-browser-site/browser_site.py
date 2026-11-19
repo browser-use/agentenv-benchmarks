@@ -2,7 +2,8 @@
 
 The site starts a cloud browser, and Playwright MCP on it, at the first tool call, so no browser runs, or counts down
 its ``timeout_minutes``, before the run has recorded the env it would have to stop; it is ready once its key is set.
-``data/reset`` stops the browser and starts nothing: the next tool call starts a fresh one. The server's shutdown,
+``data/reset`` stops the browser and starts nothing: the next tool call starts a fresh one. Its ``close`` extension,
+which the run's teardown calls (``bu_browser``), stops it for good: no call starts one after it. The server's shutdown,
 SIGTERM included, stops it too, and the browser's own ``timeout_minutes`` ends it if nothing else does.
 
 ``api_key`` is a ``SecretStr`` setting, so its env.toml value is a ``secret:`` reference agentenv resolves only as it
@@ -14,7 +15,7 @@ import contextlib
 
 import cloud
 import playwright_mcp
-from agentenv_protocol import add_data, get_data, reset_data
+from agentenv_protocol import add_data, extension, get_data, reset_data
 from agentenv_protocol.website import WebsiteEnvironment, ready_check, website
 from pydantic import BaseModel, SecretStr
 from starlette.applications import Starlette
@@ -22,6 +23,8 @@ from starlette.responses import HTMLResponse
 from starlette.routing import Route
 
 API_URL = "https://api.browser-use.com/api/v3"
+#: The extension the run's teardown stops the browser for good with (agentenv_benchmarks.bu_browser.env).
+CLOSE_URI = "urn:agentenv-benchmarks:bu-browser-close/v1"
 
 
 async def _page(request) -> HTMLResponse:
@@ -83,6 +86,10 @@ class BuBrowser(WebsiteEnvironment):
     async def stop_browser(self) -> None:
         """Stop the browser and Playwright MCP, starting nothing; the next tool call starts a fresh browser."""
         await self.playwright.stop()
+
+    @extension(CLOSE_URI, description="Stop the browser for good: tool calls after it start none.")
+    async def close(self) -> None:
+        await self.playwright.close()
 
     @get_data
     def export(self) -> list:

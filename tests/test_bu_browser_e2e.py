@@ -62,7 +62,9 @@ def test_each_episode_starts_its_browser_at_its_first_call_and_teardown_stops_it
     assert seen["episode 1 reset"]["created"] == []  # no browser before the first call
     first = seen["episode 1 ended"]
     assert first["saw_page"] and first["done"] and first["reward"] == 1.0
-    assert "browser_close" not in first["tools"] and "browser_run_code_unsafe" not in first["tools"]
+    assert "browser_navigate" in first["tools"]
+    # browser_evaluate is hidden until a task's tool access names it, which the example task's doesn't.
+    assert {"browser_close", "browser_run_code_unsafe", "browser_evaluate"}.isdisjoint(first["tools"])
     assert first["created"] == first["stopped"] == ["e2e1-0123456789abcdef"]
     assert seen["episode 2 running"]["stopped"] == ["e2e1-0123456789abcdef"]
     both = ["e2e1-0123456789abcdef", "e2e2-0123456789abcdef"]
