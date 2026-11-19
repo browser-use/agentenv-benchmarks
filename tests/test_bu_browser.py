@@ -147,6 +147,11 @@ def test_closing_gives_up_on_a_stop_that_hangs_and_still_closes(monkeypatch):
     assert calls == [("invoke", browser_site.CLOSE_URI, "close", "bu-browser-site"), ("close",)]
 
 
+def test_playwright_mcp_runs_as_pw_with_no_groups():
+    """Not as the site's root, which holds the Browser Use key in its settings."""
+    assert playwright_mcp.command("ws://browser", 9000)[:4] == ["setpriv", "--reuid=pw", "--regid=pw", "--clear-groups"]
+
+
 def test_closing_an_env_never_deployed_only_closes(monkeypatch):
     calls, _ = _closing(monkeypatch)
 

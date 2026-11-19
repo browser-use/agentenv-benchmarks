@@ -66,7 +66,11 @@ def test_each_episode_starts_its_browser_at_its_first_call_and_teardown_stops_it
     # browser_evaluate is hidden until a task's tool access names it, which the example task's doesn't.
     assert {"browser_close", "browser_run_code_unsafe", "browser_evaluate"}.isdisjoint(first["tools"])
     assert first["created"] == first["stopped"] == ["e2e1-0123456789abcdef"]
-    assert seen["episode 2 running"]["stopped"] == ["e2e1-0123456789abcdef"]
+    running = seen["episode 2 running"]
+    assert running["stopped"] == ["e2e1-0123456789abcdef"]
+    # Playwright MCP runs as pw, not as the site's PID 1 (root), which holds the key.
+    assert running["mcp_uids"] and running["pid1_uid"] is not None
+    assert running["pid1_uid"] not in running["mcp_uids"]
     both = ["e2e1-0123456789abcdef", "e2e2-0123456789abcdef"]
     assert seen["episode 2 abandoned"]["created"] == seen["episode 2 abandoned"]["stopped"] == both
     assert seen["session closed"]["created"] == seen["session closed"]["stopped"] == both

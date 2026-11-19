@@ -6,6 +6,7 @@ created and stopped so far.
     python bu_browser_episode.py <bundle> <calls>
 """
 import json
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -21,6 +22,20 @@ def checkpoint(label: str, **seen) -> None:
     entries = [json.loads(line) for line in calls.read_text().splitlines()] if calls.exists() else []
     print(json.dumps({"at": label, "created": [e["id"] for e in entries if e["call"] == "create"],
                       "stopped": [e["id"] for e in entries if e["call"] == "stop"], **seen}), flush=True)
+
+
+def playwright_mcp_users() -> dict:
+    """The uid Playwright MCP runs as, and that of PID 1 of its container (the site's), as the host's ps sees them."""
+    def docker(*args: str) -> str:
+        return subprocess.run(["docker", *args], capture_output=True, text=True, check=True).stdout
+
+    for container in docker("ps", "-q").split():
+        rows = [row.split(None, 2) for row in docker("top", container, "-o", "pid,uid,args").splitlines()[1:]]
+        mcp = [uid for _, uid, args in rows if "@playwright/mcp" in args]
+        if mcp:
+            init = docker("inspect", "-f", "{{.State.Pid}}", container).strip()
+            return {"mcp_uids": mcp, "pid1_uid": next((uid for pid, uid, _ in rows if pid == init), None)}
+    return {"mcp_uids": [], "pid1_uid": None}
 
 
 def step(ws, data: dict) -> dict:
@@ -46,7 +61,7 @@ with TestClient(build_app(root)) as client, client.websocket_connect("/ws") as w
                done=ended["data"].get("done"), reward=ended["data"].get("reward"))
     reset(ws)
     step(ws, {"type": "call_tool", "tool_name": "browser_navigate", "arguments": {"url": "data:text/html,x"}})
-    checkpoint("episode 2 running")
+    checkpoint("episode 2 running", **playwright_mcp_users())
     reset(ws)  # abandons episode 2 mid-turn; episode 3 calls no tool
     time.sleep(2)
     checkpoint("episode 2 abandoned")
