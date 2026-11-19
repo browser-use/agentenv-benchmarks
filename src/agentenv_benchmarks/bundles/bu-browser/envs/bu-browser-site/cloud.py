@@ -135,10 +135,18 @@ class CloudBrowser:
     @classmethod
     async def start(cls, *, proxy_country_code: str | None = "us", timeout_minutes: int = 70,
                     enable_recording: bool = True) -> CloudBrowser:
-        created = await request("POST", "/browsers", {"proxyCountryCode": proxy_country_code,
-                                                      "timeout": timeout_minutes,
-                                                      "enableRecording": enable_recording},
-                                timeout=CREATE_TIMEOUT)
+        creating = asyncio.ensure_future(request("POST", "/browsers", {"proxyCountryCode": proxy_country_code,
+                                                                       "timeout": timeout_minutes,
+                                                                       "enableRecording": enable_recording},
+                                                 timeout=CREATE_TIMEOUT))
+        try:
+            created = await asyncio.shield(creating)
+        except asyncio.CancelledError:
+            # Browser Use may already have made it: the answer is still read, and that browser stopped.
+            abandoned = asyncio.ensure_future(_stop_created(creating))
+            _ABANDONED.add(abandoned)
+            abandoned.add_done_callback(_ABANDONED.discard)
+            raise
         cdp_url = str(created.get("cdpUrl") or "").rstrip("/")
         browser = cls(id=str(created["id"]), ws_url="", cdp_url=cdp_url)
         try:
@@ -154,10 +162,7 @@ class CloudBrowser:
             if not browser.ws_url:
                 raise RuntimeError(f"cloud browser {browser.label} did not expose webSocketDebuggerUrl")
         except BaseException:
-            UNSTOPPED.append(browser)  # listed first: a stop cancelled midway leaves it to the exit hook
-            await browser.stop()
-            if browser.stopped and browser in UNSTOPPED:  # else whoever stopped it meanwhile dropped it
-                UNSTOPPED.remove(browser)
+            await _stop_listed(browser)
             raise
         return browser
 
@@ -182,6 +187,25 @@ class CloudBrowser:
     async def session(self) -> dict[str, Any]:
         """The session as Browser Use reports it: costs once stopped, recording when enabled."""
         return await request("GET", f"/browsers/{self.id}")
+
+
+#: Creates whose caller was cancelled before Browser Use answered, each waiting to stop the browser it made.
+_ABANDONED: set[asyncio.Task] = set()
+
+
+async def _stop_created(creating: asyncio.Future) -> None:
+    try:
+        browser = CloudBrowser(id=str((await creating)["id"]), ws_url="")
+    except Exception:  # noqa: BLE001 - no answer, no browser to stop
+        return
+    await _stop_listed(browser)
+
+
+async def _stop_listed(browser: CloudBrowser) -> None:
+    UNSTOPPED.append(browser)  # listed first: a stop cancelled midway leaves it to the exit hook
+    await browser.stop()
+    if browser.stopped and browser in UNSTOPPED:  # else whoever stopped it meanwhile dropped it
+        UNSTOPPED.remove(browser)
 
 
 def costs(session: dict[str, Any]) -> dict[str, float]:

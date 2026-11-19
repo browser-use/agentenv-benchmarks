@@ -921,6 +921,58 @@ def test_a_browser_whose_start_failed_and_whose_stop_was_cancelled_is_left_to_th
     assert [browser.id for browser in cloud.UNSTOPPED] == [BROWSER_ID]
 
 
+@pytest.mark.parametrize("failing_stops, left", [(0, False), (3, True)], ids=["stopped", "every stop fails"])
+def test_a_browser_step_cancelled_before_browser_use_answered_stops_the_browser_it_made(monkeypatch, failing_stops,
+                                                                                      left):
+    """Cancelled (a task timeout) while the create is in flight, the step still learns the browser's id once Browser
+    Use answers, and stops it or leaves it to the exit hook, rather than letting it bill for its 70 minutes."""
+    from types import SimpleNamespace
+
+    from agent_env.a2a_agent.a2a_agent import A2AAgent
+
+    api = FakeBrowserUseApi(failing_stops)
+    answered = None
+
+    async def late_api(method, path, body=None, timeout=60):
+        if method == "POST":
+            api.calls.append((method, path))
+            await answered.wait()
+            return {"id": BROWSER_ID, "cdpUrl": f"https://{BROWSER_ID}.cdp.browser-use.com"}
+        return await api(method, path, body, timeout)
+
+    monkeypatch.setattr(cloud, "request", late_api)
+    monkeypatch.setattr(cloud, "STOP_RETRY_S", 0.0)
+    monkeypatch.setattr(cloud, "UNSTOPPED", [])
+    monkeypatch.setattr(steps, "_LIVE", {})
+    monkeypatch.setattr(cloud, "api_key", lambda: "k")
+    patched = []
+    monkeypatch.setattr(steps.httpx, "patch", lambda url, **kw: patched.append(url))
+    card = {"capabilities": {"extensions": [{"uri": A2AAgent.EXT_CDP_CONFIG, "params": {"endpoint": "/ext/cdp"}}]}}
+    step = steps.BuCloudBrowserTaskStep("b", 1, "bu2-140")
+    agent = SimpleNamespace(agent_name=step.agent_name, a2a_url="http://agent", a2a_card=card, control_headers={})
+
+    async def cancelled_then_answered():
+        nonlocal answered
+        answered = asyncio.Event()
+        running = asyncio.ensure_future(step.execute(SimpleNamespace(metadata={}, deployed_agents=[agent])))
+        while not api.calls:
+            await asyncio.sleep(0)
+        running.cancel()
+        await asyncio.gather(running, return_exceptions=True)
+        answered.set()
+        for _ in range(1000):  # until whatever the cancel left running has ended
+            if asyncio.all_tasks() == {asyncio.current_task()}:
+                break
+            await asyncio.sleep(0)
+        return running
+
+    assert asyncio.run(cancelled_then_answered()).cancelled()
+    steps._stop_leftovers()
+    assert api.stops == (cloud.STOP_ATTEMPTS if left else 1)
+    assert [b.id for b in cloud.UNSTOPPED] == ([BROWSER_ID] if left else [])
+    assert patched == ([f"{cloud.API}/browsers/{BROWSER_ID}"] if left else [])
+
+
 def test_a_browser_create_waits_minutes_for_its_answer_and_a_stop_does_not(monkeypatch):
     """A create answered after the client gave up makes a browser whose id nobody has, billing until its timeout."""
     read_timeouts = {}
