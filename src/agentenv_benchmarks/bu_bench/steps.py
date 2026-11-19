@@ -403,26 +403,34 @@ class BuFindingsVerifierTaskStep(TaskStep):
         urls = cloud.recording_urls(session)
         if not urls:
             return {"available": bool(session.get("recordingAvailable")), "artifact_id": None}
+        folder = Path(tempfile.mkdtemp(prefix=f"bu-recording-{self.task_id}-"))
         try:
-            async with httpx.AsyncClient(timeout=120, follow_redirects=True) as client:
-                video = (await client.get(urls[0])).raise_for_status().content
+            # Streamed through a file both ways, never held whole in memory: a long task's MP4 is hundreds of MB.
+            video = folder / "recording.mp4"
+            async with httpx.AsyncClient(timeout=120, follow_redirects=True) as client, \
+                    client.stream("GET", urls[0]) as answer:
+                answer.raise_for_status()
+                with video.open("wb") as out:
+                    async for chunk in answer.aiter_bytes(1 << 20):
+                        out.write(chunk)
             from agent_env.artifact.artifacts.file import FileArtifact
 
             # Under the run's instance id, so a local run keeps it in the local store, as collect_artifacts does.
             artifact_id = f"{context.instance_id}-recording" if context.instance_id else \
                 f"bu-bench-recording-{self.task_id}-{uuid.uuid4().hex[:8]}"
-            artifact = await asyncio.to_thread(
-                FileArtifact.put_bytes, artifact_id,
-                description=f"Browser Use Cloud recording of {self.task_id}", filename="recording.mp4",
-                content=video, content_type="video/mp4")
+            artifact = await asyncio.to_thread(FileArtifact.put, artifact_id, file_path=str(video),
+                                               description=f"Browser Use Cloud recording of {self.task_id}")
+            size = video.stat().st_size
             context.metadata.setdefault("recordings", {})[self.id] = [
                 {"name": "recording.mp4", "artifact_id": artifact.id, "version": artifact.version,
-                 "bytes": len(video), "content_type": "video/mp4"}]
-            return {"available": True, "artifact_id": artifact.id, "bytes": len(video)}
+                 "bytes": size, "content_type": artifact.content_type}]
+            return {"available": True, "artifact_id": artifact.id, "bytes": size}
         except Exception as error:  # noqa: BLE001 - the recording never fails the task
             # Not logger.exception: httpx's error text names the signed recording link.
             logger.warning("keeping the recording of %s failed (%s)", self.task_id, type(error).__name__)
             return {"available": True, "artifact_id": None, "error": type(error).__name__}
+        finally:
+            shutil.rmtree(folder, ignore_errors=True)
 
     async def _judge(self, workspace: Path) -> dict[str, Any]:
         """The judge's judgment, asked up to JUDGE_ATTEMPTS times while it errs: one failed judge request must not

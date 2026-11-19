@@ -754,6 +754,36 @@ def test_the_delivered_files_are_those_the_verifiers_own_collect_recorded(monkey
         assert context.metadata["verifications"]["findings"]["report"]["delivered_files"] == delivered
 
 
+def test_the_recording_is_kept_as_a_file_artifact(monkeypatch, tmp_path):
+    from types import SimpleNamespace
+
+    from agent_env.artifact.artifacts.file import FileArtifact
+    from agent_env.artifact.store import reset_artifact_store
+    from agent_env.config import configure, reset_config
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("XDG_STATE_HOME", str(tmp_path / "state"))
+    monkeypatch.setenv("AGENT_ENV_OBJECT_STORE", "local")
+    monkeypatch.setenv("AGENT_ENV_DOCUMENT_STORE", "local")
+    video = os.urandom(3 << 20)
+    real = httpx.AsyncClient
+    monkeypatch.setattr(steps.httpx, "AsyncClient", lambda **kw: real(
+        transport=httpx.MockTransport(lambda request: httpx.Response(200, content=video)), **kw))
+    configure()
+    reset_artifact_store()
+    try:
+        context = SimpleNamespace(metadata={}, instance_id=None)
+        kept = asyncio.run(steps.BuFindingsVerifierTaskStep("grade", 1, "bu2-140", "solve")._keep_recording(
+            {"recordingUrl": "https://recordings.example/r.mp4?X-Amz-Signature=s"}, context))
+        artifact = FileArtifact.get(kept["artifact_id"])
+
+        assert artifact.load() == video and kept["bytes"] == len(video) and artifact.content_type == "video/mp4"
+        assert context.metadata["recordings"]["grade"][0]["bytes"] == len(video)
+    finally:
+        reset_config()
+        reset_artifact_store()
+
+
 def test_httpx_request_logs_name_no_browser_and_no_signed_link(monkeypatch, caplog):
     """httpx logs each request's URL at INFO, which agent-env up logs at: a browser's id or CDP host there reaches it."""
     import logging
