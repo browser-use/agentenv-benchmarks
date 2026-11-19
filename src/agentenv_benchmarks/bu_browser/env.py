@@ -1,0 +1,35 @@
+"""The ``bu_browser`` env type: a multi env (the bu-browser bundle's ``bu-browser``) that stops its site's Browser Use
+Cloud browser when it closes.
+
+A run's teardown closes each env it deployed before it terminates any sandbox, so ``close`` reaches the site through
+the gateway with ``data/reset``, which stops the browser, whatever provider the sandbox is on: a local container's
+teardown is ``docker rm -f``, which gives the site no SIGTERM to stop it on. It tries once, for at most STOP_TIMEOUT_S,
+and never raises: the browser's own timeout ends one it couldn't stop.
+"""
+from __future__ import annotations
+
+import asyncio
+import logging
+from typing import ClassVar
+
+from agent_env.env.envs.multi_env import MultiEnv
+
+logger = logging.getLogger(__name__)
+
+STOP_TIMEOUT_S = 20.0
+
+
+class BuBrowserEnv(MultiEnv):
+    type: ClassVar[str] = "bu_browser"
+    description = ("A multi env whose website serves Playwright MCP's tools on a Browser Use Cloud browser, which it "
+                   "stops as it closes")
+
+    async def close(self) -> None:
+        if self._deployed is not None:
+            try:
+                async with asyncio.timeout(STOP_TIMEOUT_S):
+                    await self.reset(self._deployed)
+            except Exception as error:  # noqa: BLE001 - the browser's own timeout is the backstop
+                logger.warning("env %s: stopping its cloud browser failed (%s: %s); its timeout will end it",
+                               self.id, type(error).__name__, error)
+        await super().close()

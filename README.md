@@ -8,6 +8,10 @@ with `agent-env run <name>`, on agent-env's own environments, against the agents
 | [Online-Mind2Web](src/agentenv_benchmarks/bundles/online-mind2web/README.md) | `online-mind2web` | 300 live-web tasks on 147 sites | Browser Use over CDP; Claude Code with Playwright MCP | [`osunlp/Online-Mind2Web`](https://huggingface.co/datasets/osunlp/Online-Mind2Web) @ `eacad896` |
 | [BU Bench V2.1](src/agentenv_benchmarks/bundles/bu-bench/README.md) | `bu-bench` | 200 live-web tasks, encrypted | 8 harnesses: browser-use 1.0.4rc1; Codex with 7 browser tools, each on a Browser Use Cloud browser | [`browser-use/benchmark`](https://github.com/browser-use/benchmark) @ `1e0e2f1e` |
 
+[`bu-browser`](src/agentenv_benchmarks/bundles/bu-browser/README.md) is not a benchmark: it is a Browser Use Cloud
+browser as an env whose Playwright MCP tools a trainer's model drives in an OpenEnv episode (RL), with one example
+task. Keep BU Bench's tasks out of training.
+
 ## Install and run
 
 ```bash
@@ -34,6 +38,7 @@ src/agentenv_benchmarks/
   bundles/<name>/          a benchmark's bundle: envs, agents, artifacts, tasks/ and evals/, as agent-env reads them
   <name with underscores>/ the code that generates its tasks from its source dataset, when they're generated, and
                            any task steps or graders the bundle registers (bu_bench: its two steps and frozen judge)
+                           or env types (bu_browser: the multi env that stops its cloud browser as it closes)
 tools/<name>/              scripts a benchmark keeps out of the package, such as its task generator
 tests/                     checks every bundle parses and its tasks are what its generator makes
 ```

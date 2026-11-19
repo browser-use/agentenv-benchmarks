@@ -70,3 +70,14 @@ contributed by Browser Use, Inc., is licensed under the Apache License, Version 
   https://github.com/scaleapi/agentenv-framework (Apache-2.0); its NOTICE lists the changes.
 - src/agentenv_benchmarks/bundles/bu-bench/artifacts/codex-browser-tools/: built on Scale's published
   agentenv-codex image (Apache-2.0), whose agent it imports at run time.
+
+bu-browser (src/agentenv_benchmarks/bu_browser/, src/agentenv_benchmarks/bundles/bu-browser/), contributed by
+Browser Use, Inc., is licensed under the Apache License, Version 2.0, except:
+- src/agentenv_benchmarks/bundles/bu-browser/envs/bu-browser-site/playwright_mcp.py: adapted from
+  src/agent_env/drivers/envs/page/playwright_mcp.py in https://github.com/scaleapi/agentenv-framework 0.9.1573
+  (Apache-2.0, Copyright 2026 Scale AI): its process start and stop, session and environment allowlist, cut down to
+  one session that also owns the Browser Use Cloud browser.
+- src/agentenv_benchmarks/bundles/bu-browser/envs/bu-browser-site/cloud.py: a copy of
+  src/agentenv_benchmarks/bu_bench/cloud.py, kept byte-identical by a test.
+- The bu-browser-site image installs Playwright MCP 0.0.85 (https://github.com/microsoft/playwright-mcp, Apache-2.0,
+  Copyright (c) Microsoft Corporation) from npm; this repository carries none of its code.
