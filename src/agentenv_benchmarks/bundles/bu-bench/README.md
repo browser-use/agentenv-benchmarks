@@ -69,21 +69,25 @@ All 8 arms on all 200 tasks, run by `agent-env run` (agentenv-framework 0.9.1536
 GPT-6.1 Terra at medium effort, the findings judge on gpt-5.6-luna xhigh, one run per arm, **1600/1600 scored**. Infra
 failures (a model rate limit inside the stream, a stalled turn) were rerun by task id; judge errors were rejudged on the
 run's saved evidence, never scored 0. The verifier still scores a turn that ended in an agent error, as these runs were
-scored: a task whose `report.agent_error` is set was an infra failure in our runs and was rerun by task id. The reference is the same 200 tasks on Browser Use's own eval platform; the diff is paired by task with a bootstrap 95% CI.
+scored: a task whose `report.agent_error` is set was an infra failure in our runs and was rerun by task id. 29 runs
+(14 of them Stagehand) reached the 400-screenshot cap, which then dropped the final frame; this branch fixes that, and
+those 29 were rerun with the fix on Nov 19 (scores below include them; no arm moved more than 0.4 points). The
+reference is the same 200 tasks on Browser Use's own eval platform; the diff is paired by task with a bootstrap 95% CI.
+Cost and time columns are from the Nov 17-18 runs.
 
 | harness | score [95% CI] | reference | paired diff [95% CI] | model $/task | cloud $/task | min/task |
 |---|---|---|---|---|---|---|
 | browser-use 1.0.4rc1 agent | 78.0 [74.8, 81.0] | 76.1 | +1.8 [-1.0, +4.7] | 0.24 | 0.29 | 6.2 |
-| Codex + Browser Use MCP | 74.0 [70.5, 77.2] | 71.7 | +2.2 [-1.1, +5.7] | 0.43 | 0.26 | 7.5 |
-| Codex + Playwright MCP | 71.8 [68.3, 75.2] | 73.5 | -1.7 [-4.8, +1.5] | 0.49 | 0.38 | 7.5 |
-| Codex + Chrome DevTools MCP | 71.5 [68.0, 74.9] | 70.3 | +1.2 [-1.9, +4.2] | 0.52 | 0.29 | 7.8 |
-| Codex + Browser Use CLI | 70.0 [66.1, 73.8] | 70.5 | -0.4 [-3.7, +2.8] | 0.55 | 0.32 | 8.5 |
-| Codex + agent-browser | 69.9 [66.3, 73.3] | 69.6 | +0.3 [-3.1, +3.9] | 0.68 | 0.29 | 7.5 |
-| Codex + OpenCode browse | 66.7 [63.0, 70.4] | 62.4 | +4.2 [+1.0, +7.5] | 0.44 | 0.20 | 6.6 |
-| Codex + Stagehand | 61.8 [58.0, 65.4] | 62.8 | -1.1 [-4.7, +2.7] | 1.26 | 0.36 | 16.6 |
+| Codex + Browser Use MCP | 73.9 [70.4, 77.2] | 71.7 | +2.2 [-1.2, +5.6] | 0.43 | 0.26 | 7.5 |
+| Codex + Playwright MCP | 71.7 [68.2, 75.1] | 73.5 | -1.8 [-5.0, +1.3] | 0.49 | 0.38 | 7.5 |
+| Codex + Chrome DevTools MCP | 71.4 [67.8, 74.7] | 70.3 | +1.0 [-2.0, +4.0] | 0.52 | 0.29 | 7.8 |
+| Codex + Browser Use CLI | 69.7 [65.8, 73.6] | 70.5 | -0.7 [-3.9, +2.5] | 0.55 | 0.32 | 8.5 |
+| Codex + agent-browser | 69.5 [65.9, 73.0] | 69.6 | 0.0 [-3.4, +3.5] | 0.68 | 0.29 | 7.5 |
+| Codex + OpenCode browse | 66.7 [63.0, 70.5] | 62.4 | +4.3 [+1.1, +7.6] | 0.44 | 0.20 | 6.6 |
+| Codex + Stagehand | 62.0 [58.3, 65.7] | 62.8 | -0.8 [-4.5, +2.9] | 1.26 | 0.36 | 16.6 |
 
 For 7 of 8 harnesses there is no statistically detectable difference between agent-env and Browser Use's platform
-(paired 95% CI contains 0). Codex + OpenCode browse scored 4.2 points higher here [+1.0, +7.5]; not yet explained. A smoke of 2 tasks on
+(paired 95% CI contains 0). Codex + OpenCode browse scored 4.3 points higher here [+1.1, +7.6]; not yet explained. A smoke of 2 tasks on
 agentenv-framework 0.9.1573, the version this repository's lock pins, scored 100 on both for `browser-use-104rc1`
 and `codex-playwright-mcp`.
 
