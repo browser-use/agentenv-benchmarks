@@ -11,7 +11,7 @@ A context's turns continue one conversation through the turn's history file.
 
 BU Bench (agentenv-benchmarks bu-bench): an OpenAI model goes through the endpoint's Responses route,
 ``openai-responses:<model>`` at ``<base>/openai/v1``, with the turn's effort as browser-use's ``reasoning``, and the
-system-prompt additions of the BU Bench eval adapter (new-eval-platform, browser-use 1.0 ``eval/run.py``), which ran
+system-prompt additions of the BU Bench eval adapter (Browser Use's eval platform, browser-use 1.0 ``eval/run.py``), which ran
 browser-use on a Browser Use Cloud browser it started itself. Here the task hands it one over CDP, so browser-use
 does not add its cloud-browser lines on its own: they are added back, as that run's system prompt had them."""
 

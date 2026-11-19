@@ -1,6 +1,6 @@
 """Browser Use Cloud browsers: create, connect, screenshot, stop.
 
-The request is the one the harness bake-off sent for every arm (new-eval-platform harnesses/codex-browser-tools):
+The request is the one the harness bake-off sent for every arm (Browser Use's eval platform, harness codex-browser-tools):
 POST /api/v3/browsers {proxyCountryCode, timeout, enableRecording}, then the CDP WebSocket from cdpUrl/json/version,
 PATCH {action: stop} when done, and the billed cost from GET /browsers/{id}.
 

@@ -1,5 +1,5 @@
 """AgentEnv's Codex agent with one browser tool, set up as the harness bake-off's arm for that tool was
-(new-eval-platform harnesses/codex-browser-tools @503ac321: setup.sh pins, run.py tool setup and compose_prompt).
+(Browser Use's eval platform, harness codex-browser-tools: setup.sh pins, run.py tool setup and compose_prompt).
 
 ``BU_BENCH_TOOL`` (from the agent's agent.toml) picks the tool: browser-harness (the Browser Use CLI), agent-browser,
 playwright-mcp, chrome-devtools-mcp, browser-use (browser-use's own MCP server), stagehand or opencode-browse.

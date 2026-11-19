@@ -77,6 +77,19 @@ def _control_headers(agent) -> dict[str, str]:
     return dict(getattr(agent, "control_headers", None) or {})
 
 
+def _judge_key() -> str:
+    """The judge's OpenAI key: BU_BENCH_JUDGE_API_KEY, else OPENAI_API_KEY, else agent-env's secret store."""
+    key = next((os.environ[name] for name in JUDGE_KEY_NAMES if os.environ.get(name)), "")
+    if not key:
+        try:
+            from agent_env.config import get_config
+
+            key = get_config().get_secret_store().get("OPENAI_API_KEY") or ""
+        except Exception:  # noqa: BLE001 - no framework or no secret: the caller says what to set
+            key = ""
+    return key
+
+
 def _agent(context: TaskStepContext, agent_name: str):
     agent = next((a for a in context.deployed_agents if a.agent_name == agent_name), None)
     if agent is None:
@@ -110,6 +123,10 @@ class BuCloudBrowserTaskStep(TaskStep):
         try:
             tasks.instruction(self.task_id)
         except Exception as error:  # noqa: BLE001
+            return [f"step {self.id!r}: {error}"]
+        try:
+            cloud.api_key()
+        except Exception as error:  # noqa: BLE001 - says what to set, before any agent or browser starts
             return [f"step {self.id!r}: {error}"]
         return []
 
@@ -173,6 +190,12 @@ class BuFindingsVerifierTaskStep(TaskStep):
         self.judge_model = judge_model
         self.reasoning_effort = reasoning_effort
         self.keep_recording = keep_recording
+
+    def preflight(self) -> list[str]:
+        if _judge_key():
+            return []
+        return [(f"step {self.id!r}: no judge key: set BU_BENCH_JUDGE_API_KEY or OPENAI_API_KEY (or OPENAI_API_KEY in "
+                 "agent-env's secret store)")]
 
     def to_dict(self) -> dict:
         return {**super().to_dict(), "task_id": self.task_id, "prompt_id": self.prompt_id,
@@ -333,14 +356,7 @@ class BuFindingsVerifierTaskStep(TaskStep):
             return {"available": True, "artifact_id": None, "error": type(error).__name__}
 
     def _judge(self, workspace: Path) -> dict[str, Any]:
-        key = next((os.environ[name] for name in JUDGE_KEY_NAMES if os.environ.get(name)), "")
-        if not key:
-            try:
-                from agent_env.config import get_config
-
-                key = get_config().get_secret_store().get("OPENAI_API_KEY") or ""
-            except Exception:  # noqa: BLE001
-                key = ""
+        key = _judge_key()
         if not key:
             return {"status": "error", "reason": "no judge key: set BU_BENCH_JUDGE_API_KEY or OPENAI_API_KEY"}
         env = {name: value for name, value in os.environ.items()

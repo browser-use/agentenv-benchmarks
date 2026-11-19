@@ -1,9 +1,9 @@
 {
- "source": "Write reference/bakeoff-full.json: every bake-off entry's per-task result on all 200 tasks, from our eval platform.\n\nThe 7 Codex arms come from the harness bake-off r2 (full/pertask.csv; Nov 12-13); browser-use 1.0.4rc1 from its\nNov 13 run (eval a1487b98, two judge crashes rejudged in e089dc24). Numbers only: score x100, minutes, model $ at the\nbake-off basis ($1 / $0.10 cached / $5 out per 1M; Stagehand includes its own model calls), cloud $ (Codex arms).",
+ "source": "Every bake-off entry's per-task result on all 200 tasks, from Browser Use's own eval platform. The 7 Codex arms come from the harness bake-off (Nov 12-13 2026); browser-use 1.0.4rc1 from its Nov 13 run (two judge crashes rejudged). Numbers only: score x100, minutes, model $ at the bake-off basis ($1 / $0.10 cached / $5 out per 1M; Stagehand includes its own model calls), cloud $ (Codex arms).",
  "runs": {
   "browser-use-104rc1": [
-   "43498031169 (eval a1487b98)",
-   "43502449663 (rejudge e089dc24)"
+   "43498031169",
+   "43502449663"
   ],
   "codex-agent-browser": [
    "43347037828"

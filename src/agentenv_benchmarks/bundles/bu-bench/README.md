@@ -10,6 +10,10 @@ any file of this bundle holds task, rubric or canary text.
 
 ## Run
 
+Needs a local Docker daemon (or an agent-env sandbox that builds Dockerfiles): the first run builds the agents'
+images, pulling `ghcr.io/scaleapi/agentenv-codex` and the pinned npm and PyPI tools. A run stops before any agent or
+browser starts when the Browser Use key or the judge key is missing.
+
 ```bash
 export BROWSER_USE_API_KEY=...       # cloud.browser-use.com: one fresh cloud browser per task
 export LITELLM_BASE_URL=... LITELLM_API_KEY=...       # the agents' model endpoint
@@ -77,10 +81,21 @@ run's saved evidence, never scored 0. The reference is the same 200 tasks on Bro
 
 7 of 8 paired CIs contain 0: the same harness, adapter and judge score the same on agent-env as on Browser Use's
 platform. Codex + OpenCode browse scored 4.2 points higher here; not yet explained. A smoke of 2 tasks on
-agentenv-framework 0.9.1573 scored 100 on both for `browser-use-104rc1` and `codex-playwright-mcp`.
+agentenv-framework 0.9.1573, the version this repository's lock pins, scored 100 on both for `browser-use-104rc1`
+and `codex-playwright-mcp`.
 
 ## Tools
 
-`tools/bu_bench/run_eval.py` runs `agent-env run` with a cap on tasks at once (agent-env fixes it at 4) and keeps each
-task's judge evidence; `summarize.py` builds the table above from runs; `rejudge.py` regrades saved evidence;
-`make_bundle.py` writes the task files and evals from the benchmark.
+From a checkout of this repository (they aren't in the installed package), in `tools/bu_bench/`:
+
+- `model_proxy.py`: a model endpoint without LiteLLM. It forwards `<base>/v1/*` (and paths without `/v1`) to OpenAI
+  with a per-run token and spend cap, retries upstream rate limits before the agent sees them, and logs usage to
+  `model-usage.jsonl`, which `summarize.py` reads for cost. The full run above went through it.
+- `run_eval.py BUNDLE_FOLDER --eval NAME --agent NAME --model MODEL --out DIR`: `agent-env run` with a cap on tasks at
+  once (agent-env fixes it at 4), keeping each task's judge evidence. `BUNDLE_FOLDER` is the folder,
+  `src/agentenv_benchmarks/bundles/bu-bench`, since `--tasks` writes an eval into it.
+- `summarize.py OUT...`: the results table and per-task CSV from runs, paired against `reference/bakeoff-full.json`.
+- `rejudge.py EVIDENCE...`: regrades saved evidence, for a judge error.
+- `make_bundle.py`: writes the task files and evals from the benchmark (a test checks they match).
+- `release.py RESULTS_CSV OUT --pass NAME`: the Hugging Face dataset card and `runs.jsonl`: scores only, never task
+  text, answers or trajectories.

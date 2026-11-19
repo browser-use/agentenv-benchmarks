@@ -7,8 +7,8 @@ license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]
 requires-python = ">=3.11.4"
 dependencies = [
-    "agentenv-framework>=0.9.1536", "jsonschema>=4.18", "backoff>=2.2", "openai>=1.68", "Pillow>=11",
-    # BU Bench V2.1: decrypting its tasks, its Browser Use Cloud browser, and its frozen judge's own imports.
+    "agentenv-framework>=0.9.1536", "jsonschema>=4.18", "backoff>=2.2", "openai>=1.99", "Pillow>=11",
+    # BU Bench V2.1 (its frozen judge imports openai's 1.99+ tool-call types): decrypting its tasks, its Browser Use Cloud browser, and its frozen judge's own imports.
     "cryptography>=44", "httpx>=0.27", "websockets>=13", "google-genai>=1.20", "pydantic>=2.11",
 ]
 

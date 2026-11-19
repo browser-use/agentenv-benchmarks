@@ -32,7 +32,9 @@ configuration, sandboxes and stores.
 ```
 src/agentenv_benchmarks/
   bundles/<name>/          a benchmark's bundle: envs, agents, artifacts, tasks/ and evals/, as agent-env reads them
-  <name with underscores>/ the code that generates its tasks from its source dataset, when they're generated
+  <name with underscores>/ the code that generates its tasks from its source dataset, when they're generated, and
+                           any task steps or graders the bundle registers (bu_bench: its two steps and frozen judge)
+tools/<name>/              scripts that run, summarize and publish a benchmark from a checkout
 tests/                     checks every bundle parses and its tasks are what its generator makes
 ```
 
@@ -43,7 +45,8 @@ tests/                     checks every bundle parses and its tasks are what its
 2. If its tasks come from a dataset, add `src/agentenv_benchmarks/<name>/` with the dataset pinned to a revision and a
    `__main__` that writes the tasks, as `online_mind2web` does, and commit what it writes.
 3. Register it in `pyproject.toml` under `[project.entry-points."agent_env.bundles"]`:
-   `<name> = "agentenv_benchmarks.bundles"`.
+   `<name> = "agentenv_benchmarks.bundles"`. Task steps a bundle needs beyond agent-env's go under
+   `[project.entry-points."agent_env.task_steps"]`, as `bu-bench`'s two do.
 4. Add it to the table above and its tests to `tests/`.
 
 ## Develop

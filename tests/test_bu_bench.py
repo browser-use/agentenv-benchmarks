@@ -94,6 +94,46 @@ BROWSER_ID = "0f6c1a52-9d0e-4b8a-a1f7-3c2d5e6f7a8b"
 WS = f"wss://{BROWSER_ID}.cdp.browser-use.com/devtools/browser/11111111-2222-3333-4444-555555555555"
 
 
+def test_proxy_reads_responses_and_chat_usage():
+    proxy = load_script("model_proxy")
+    completed = {"type": "response.completed", "response": {"model": "m", "usage": {
+        "input_tokens": 100, "input_tokens_details": {"cached_tokens": 40}, "output_tokens": 3}}}
+    assert proxy.usage_of(completed)["cached_tokens"] == 40
+    assert proxy.usage_of({"usage": {"prompt_tokens": 9, "completion_tokens": 1}})["output_tokens"] == 1
+    assert proxy.usage_of({"type": "response.created"}) is None
+
+
+def test_proxy_retries_upstream_rate_limits_before_the_agent_sees_them(monkeypatch, tmp_path):
+    from starlette.testclient import TestClient
+
+    class Body(httpx.AsyncByteStream):
+        def __init__(self, payload):
+            self.data = json.dumps(payload).encode()
+
+        async def __aiter__(self):
+            yield self.data
+
+    proxy = load_script("model_proxy")
+    ok = {"model": "m", "usage": {"prompt_tokens": 10, "completion_tokens": 2}}
+    replies = iter([httpx.Response(429, headers={"retry-after": "1"}, stream=Body({"error": "rate"})),
+                    httpx.Response(200, headers={"content-type": "application/json"}, stream=Body(ok))])
+    proxy.client = httpx.AsyncClient(transport=httpx.MockTransport(lambda request: next(replies)))
+    waits = []
+
+    async def no_sleep(seconds):
+        waits.append(seconds)
+
+    monkeypatch.setattr(proxy.asyncio, "sleep", no_sleep)
+    log = tmp_path / "usage.jsonl"
+    monkeypatch.setenv("PROXY_TOKEN", "t")
+    monkeypatch.setenv("OPENAI_API_KEY", "k")
+    monkeypatch.setenv("PROXY_USAGE_LOG", str(log))
+    reply = TestClient(proxy.app).post("/v1/chat/completions", json={}, headers={"authorization": "Bearer t"})
+    assert reply.status_code == 200 and waits == [2.0]
+    statuses = [json.loads(line)["status"] for line in log.read_text().splitlines()]
+    assert statuses == [429, 200] and proxy.state["rate_limited"] == 1
+
+
 def test_scrub_removes_every_form_of_the_cdp_address():
     browser = cloud.CloudBrowser(id=BROWSER_ID, ws_url=WS, cdp_url=f"https://{BROWSER_ID}.cdp.browser-use.com")
     leaked = {"out": f"BU_CDP_WS={WS}", "nested": [f"connect to {BROWSER_ID}.cdp.browser-use.com failed",
@@ -245,3 +285,30 @@ def test_browser_handoff_sends_the_agents_control_token(monkeypatch):
         assert seen[-1].url.path == "/ext/cdp"
         assert seen[-1].headers.get("agentenv-control-token") == token
         steps._LIVE.clear()
+
+
+def test_preflight_names_a_missing_key_before_any_agent_or_browser_starts(monkeypatch):
+    """A run with no Browser Use or judge key stops at preflight, not after an agent turn and a cloud browser."""
+    for name in (cloud.KEY_NAME, *steps.JUDGE_KEY_NAMES):
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setattr(steps, "_judge_key", lambda: "")
+    monkeypatch.setattr(cloud, "api_key", lambda: (_ for _ in ()).throw(RuntimeError("set BROWSER_USE_API_KEY")))
+    browser = steps.BuCloudBrowserTaskStep("browser", 1, "bu2-140")
+    verifier = steps.BuFindingsVerifierTaskStep("grade", 1, "bu2-140", "solve")
+    assert "BROWSER_USE_API_KEY" in " ".join(browser.preflight())
+    assert "BU_BENCH_JUDGE_API_KEY" in " ".join(verifier.preflight())
+    monkeypatch.setattr(steps, "_judge_key", lambda: "k")
+    monkeypatch.setattr(cloud, "api_key", lambda: "k")
+    assert browser.preflight() == [] and verifier.preflight() == []
+
+
+def test_bundle_tasks_are_what_make_bundle_writes(tmp_path, monkeypatch):
+    """The committed task files and evals are make_bundle.py's output, byte for byte."""
+    make_bundle = load_script("make_bundle")
+    fake = tmp_path / "bu-bench"
+    monkeypatch.setattr(make_bundle, "BUNDLE", fake)
+    make_bundle.main()
+    for kind in ("tasks", "evals"):
+        written = {p.name: p.read_text() for p in (fake / kind).iterdir()}
+        committed = {p.name: p.read_text() for p in (BUNDLE / kind).iterdir() if not p.name.startswith("ci-")}
+        assert written == committed, kind

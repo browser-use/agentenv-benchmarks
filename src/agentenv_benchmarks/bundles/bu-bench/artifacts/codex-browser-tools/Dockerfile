@@ -1,6 +1,6 @@
 # Codex + one browser tool: AgentEnv's published Codex agent (agentenv-framework 0.9.1536) with the harness bake-off's
-# Codex CLI and every browser tool it compared, at the versions its setup.sh pinned (new-eval-platform
-# harnesses/codex-browser-tools @503ac321). One image; each agent in agents/codex-* picks its tool with BU_BENCH_TOOL.
+# Codex CLI and every browser tool it compared, at the versions its setup.sh pinned (Browser Use's eval
+# platform, harness codex-browser-tools). One image; each agent in agents/codex-* picks its tool with BU_BENCH_TOOL.
 FROM ghcr.io/scaleapi/agentenv-codex@sha256:e3703ce5c2c292fc7dbe0a3b14121c1122d55aaf18d23d98ea2dbda21e23a828
 USER root
 ARG CODEX_VERSION=0.166.0
