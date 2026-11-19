@@ -311,7 +311,7 @@ class BuFindingsVerifierTaskStep(TaskStep):
             raise RuntimeError(f"findings judge did not score {self.task_id}: {judgment.get('reason')} "
                                f"(its evidence is kept in {workspace})")
         verification["score"] = float(judgment["score"])
-        if not os.environ.get(EVIDENCE_DIR_ENV):  # a temporary folder holding the decrypted task and its rubric
+        if not os.environ.get(EVIDENCE_DIR_ENV):  # a temporary folder holding the decrypted task, rubric and canary
             shutil.rmtree(workspace, ignore_errors=True)
             verification["evidence_dir"] = None
         context.metadata.setdefault("verifications", {})[self.verifier_id] = verification

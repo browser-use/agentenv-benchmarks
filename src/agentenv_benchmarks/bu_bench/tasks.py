@@ -3,7 +3,8 @@
 github.com/browser-use/benchmark ships the 200 tasks and rubrics as BU_Bench_V2.enc, keyed by sha256("BU_Bench_V2")
 to keep the text away from crawlers, and asks that decrypted tasks never be published. So the bundle's task files
 name only a task id: the setup step decrypts the instruction in memory and hands it to the prompt as the seed value
-``bu_task``. Rubrics never leave the judge process.
+``bu_task``. Rubrics are never sent to the agent or put in task files; the judge writes them, with the canary, into
+the run's evidence folder, which stays private.
 """
 
 from __future__ import annotations
